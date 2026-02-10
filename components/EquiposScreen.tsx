@@ -107,29 +107,30 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
     };
 
     const [isPrintingBatch, setIsPrintingBatch] = useState(false);
+    const [isPrintingGrid, setIsPrintingGrid] = useState(false);
 
-    const handlePrintAll = () => {
+    const handlePrintGrid = () => {
         if (!selectedClient || assets.length === 0) return;
-        setIsPrintingBatch(true);
+        setIsPrintingGrid(true);
 
         // Wait for React to render the batch container
         setTimeout(() => {
             const container = document.getElementById('batch-qr-container');
             if (container) {
-                const printWindow = window.open('', '', 'width=800,height=600');
+                const printWindow = window.open('', '', 'width=1000,height=800');
                 if (printWindow) {
                     let labelsHtml = '';
                     assets.forEach(asset => {
                         const qrElem = document.getElementById(`batch-qr-${asset.id}`)?.querySelector('svg');
                         if (qrElem) {
                             labelsHtml += `
-                                <div class="label">
-                                    ${qrElem.outerHTML}
-                                    <div class="info">
-                                        <span class="id-text">${asset.id}</span>
-                                        <span style="display:block; margin-bottom: 4px;">${selectedClient.name.substring(0, 20)}</span>
-                                        <span style="font-size: 8px; color: #666;">TIPO: ${asset.type}</span><br/>
-                                        <span style="font-size: 8px; color: #666; font-weight: normal;">EXTINTORUY EMPRESA</span>
+                                <div class="qr-item">
+                                    <div class="qr-svg">${qrElem.outerHTML}</div>
+                                    <div class="qr-info">
+                                        <div class="qr-id">${asset.id}</div>
+                                        <div class="qr-client">${selectedClient.name.substring(0, 15)}</div>
+                                        <div class="qr-type">${asset.type}</div>
+                                        <div class="qr-footer">EXTINTORUY EMPRESA</div>
                                     </div>
                                 </div>
                             `;
@@ -140,41 +141,83 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                         <!DOCTYPE html>
                         <html>
                             <head>
-                                <title>Códigos QR - ${selectedClient.name}</title>
+                                <title>Lote QR - ${selectedClient.name}</title>
                                 <style>
-                                    @page { size: auto; margin: 0; }
+                                    @page { size: A4; margin: 10mm; }
                                     body { 
                                         margin: 0; 
-                                        padding: 0;
-                                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                                        display: flex; 
-                                        flex-direction: column; 
-                                        align-items: center;
+                                        font-family: 'Segoe UI', system-ui, sans-serif;
                                         background: white;
+                                        padding: 0;
                                     }
-                                    .label {
-                                        width: 250px;
-                                        height: 120px;
-                                        border-bottom: 1px dashed #eee;
+                                    .grid-container {
+                                        display: grid;
+                                        grid-template-columns: repeat(3, 1fr);
+                                        gap: 8px;
+                                    }
+                                    .qr-item {
+                                        border: 1px solid #eee;
                                         padding: 10px;
                                         display: flex;
                                         align-items: center;
+                                        gap: 12px;
+                                        height: 90px;
                                         box-sizing: border-box;
-                                        page-break-after: always;
+                                        page-break-inside: avoid;
+                                        background: #fff;
+                                        border-radius: 4px;
                                     }
-                                    .info { margin-left: 15px; font-size: 10px; font-weight: bold; overflow: hidden; flex: 1; }
-                                    .id-text { font-size: 14px; display: block; margin-bottom: 4px; color: #000; font-weight: 900; }
-                                    svg { flex-shrink: 0; width: 80px !important; height: 80px !important; }
+                                    .qr-svg svg {
+                                        width: 60px !important;
+                                        height: 60px !important;
+                                        flex-shrink: 0;
+                                    }
+                                    .qr-info {
+                                        flex: 1;
+                                        display: flex;
+                                        flex-direction: column;
+                                        justify-content: center;
+                                        min-width: 0;
+                                    }
+                                    .qr-id { 
+                                        font-weight: 900; 
+                                        font-size: 11px; 
+                                        color: black; 
+                                        margin-bottom: 2px;
+                                        font-family: monospace;
+                                    }
+                                    .qr-client { 
+                                        font-size: 9px; 
+                                        color: #111; 
+                                        font-weight: 700;
+                                        white-space: nowrap;
+                                        overflow: hidden;
+                                        text-overflow: ellipsis;
+                                    }
+                                    .qr-type { 
+                                        font-size: 8px; 
+                                        color: #555;
+                                        margin-top: 2px;
+                                    }
+                                    .qr-footer {
+                                        font-size: 7px;
+                                        color: #999;
+                                        margin-top: 4px;
+                                        font-weight: bold;
+                                        letter-spacing: 0.5px;
+                                    }
                                 </style>
                             </head>
                             <body>
-                                ${labelsHtml}
+                                <div class="grid-container">
+                                    ${labelsHtml}
+                                </div>
                                 <script>
                                     window.onload = function() {
                                         setTimeout(() => {
                                             window.print();
                                             window.close();
-                                        }, 800);
+                                        }, 1000);
                                     }
                                 </script>
                             </body>
@@ -183,8 +226,8 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                     printWindow.document.close();
                 }
             }
-            setIsPrintingBatch(false);
-        }, 1000);
+            setIsPrintingGrid(false);
+        }, 1200);
     };
 
     // Modified approach for HandlePrintQR:
@@ -354,7 +397,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             )}
 
             {/* Hidden Batch QR Container */}
-            {isPrintingBatch && (
+            {(isPrintingBatch || isPrintingGrid) && (
                 <div id="batch-qr-container" style={{ position: 'absolute', top: -9999, left: -9999 }}>
                     {assets.map(asset => (
                         <div key={`batch-${asset.id}`} id={`batch-qr-${asset.id}`}>
@@ -521,7 +564,83 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
                                         <div className="mt-6 flex flex-wrap justify-end pt-4 border-t border-white/10 gap-3">
                                             <button
-                                                onClick={handlePrintAll}
+                                                onClick={handlePrintGrid}
+                                                disabled={isPrintingGrid}
+                                                className={`flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white font-bold px-4 py-2 rounded-xl transition-all text-sm border border-white/10 ${isPrintingGrid ? 'opacity-50 cursor-wait' : ''}`}
+                                            >
+                                                <span className="material-symbols-outlined !text-lg text-primary">
+                                                    {isPrintingGrid ? 'sync' : 'grid_view'}
+                                                </span>
+                                                {isPrintingGrid ? 'Generando lote...' : 'Imprimir por Lote (A4)'}
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    if (!selectedClient || assets.length === 0) return;
+                                                    setIsPrintingBatch(true);
+                                                    // Re-implementing handlePrintAll inside because I replaced it
+                                                    setTimeout(() => {
+                                                        const container = document.getElementById('batch-qr-container');
+                                                        if (container) {
+                                                            const printWindow = window.open('', '', 'width=800,height=600');
+                                                            if (printWindow) {
+                                                                let labelsHtml = '';
+                                                                assets.forEach(asset => {
+                                                                    const qrElem = document.getElementById(`batch-qr-${asset.id}`)?.querySelector('svg');
+                                                                    if (qrElem) {
+                                                                        labelsHtml += `
+                                                                            <div class="label">
+                                                                                ${qrElem.outerHTML}
+                                                                                <div class="info">
+                                                                                    <span class="id-text">${asset.id}</span>
+                                                                                    <span style="display:block; margin-bottom: 4px;">${selectedClient.name.substring(0, 20)}</span>
+                                                                                    <span style="font-size: 8px; color: #666;">TIPO: ${asset.type}</span><br/>
+                                                                                    <span style="font-size: 8px; color: #666; font-weight: normal;">EXTINTORUY EMPRESA</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        `;
+                                                                    }
+                                                                });
+
+                                                                printWindow.document.write(`
+                                                                    <!DOCTYPE html>
+                                                                    <html>
+                                                                        <head>
+                                                                            <title>Códigos QR - ${selectedClient.name}</title>
+                                                                            <style>
+                                                                                @page { size: auto; margin: 0; }
+                                                                                body { 
+                                                                                    margin: 0; padding: 0;
+                                                                                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                                                                                    display: flex; flex-direction: column; align-items: center;
+                                                                                    background: white;
+                                                                                }
+                                                                                .label {
+                                                                                    width: 250px; height: 120px;
+                                                                                    border-bottom: 1px dashed #eee;
+                                                                                    padding: 10px; display: flex; align-items: center;
+                                                                                    box-sizing: border-box; page-break-after: always;
+                                                                                }
+                                                                                .info { margin-left: 15px; font-size: 10px; font-weight: bold; overflow: hidden; flex: 1; }
+                                                                                .id-text { font-size: 14px; display: block; margin-bottom: 4px; color: #000; font-weight: 900; }
+                                                                                svg { flex-shrink: 0; width: 80px !important; height: 80px !important; }
+                                                                            </style>
+                                                                        </head>
+                                                                        <body>
+                                                                            ${labelsHtml}
+                                                                            <script>
+                                                                                window.onload = function() {
+                                                                                    setTimeout(() => { window.print(); window.close(); }, 800);
+                                                                                }
+                                                                            </script>
+                                                                        </body>
+                                                                    </html>
+                                                                `);
+                                                                printWindow.document.close();
+                                                            }
+                                                        }
+                                                        setIsPrintingBatch(false);
+                                                    }, 1000);
+                                                }}
                                                 disabled={isPrintingBatch}
                                                 className={`flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white font-bold px-4 py-2 rounded-xl transition-all text-sm border border-white/10 ${isPrintingBatch ? 'opacity-50 cursor-wait' : ''}`}
                                             >

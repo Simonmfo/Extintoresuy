@@ -85,7 +85,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 </div>
 
                 <div className="text-xs text-slate-600 font-medium">
-                    © 2026 Extintoruy Plataforma Empresa. Todos los derechos reservados.
+                    © 2026 ExtintorUY Plataforma Empresa. Todos los derechos reservados.
                 </div>
             </div>
 
@@ -94,7 +94,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 <div className="w-full max-w-md bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl shadow-black/50">
                     <div className="text-center mb-10 lg:hidden">
                         <span className="material-symbols-outlined text-6xl text-primary mb-4">local_fire_department</span>
-                        <h1 className="text-3xl font-bold text-white">Extintoruy</h1>
+                        <h1 className="text-3xl font-bold text-white">ExtintorUY</h1>
                     </div>
 
                     <div className="mb-8">

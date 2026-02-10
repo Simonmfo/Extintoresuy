@@ -13,6 +13,7 @@ import AlertasScreen from './components/AlertasScreen';
 import TechnicianDashboard from './components/TechnicianDashboard';
 import InspeccionesScreen from './components/InspeccionesScreen';
 import TecnicosScreen from './components/TecnicosScreen';
+import AjustesScreen from './components/AjustesScreen';
 import { supabase } from './services/supabase';
 import { db } from './services/db';
 import { UserProfile } from './types';
@@ -26,20 +27,20 @@ const App: React.FC = () => {
   const [alertType, setAlertType] = useState<'expired' | 'pending'>('pending');
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
-  React.useEffect(() => {
-    const fetchProfile = async (userId: string) => {
-      const data = await db.getProfile(userId);
-      if (data) {
-        setProfile({
-          id: data.id,
-          email: data.email,
-          full_name: data.full_name,
-          role: data.role as any,
-          company_id: (data as any).company_id
-        });
-      }
-    };
+  const fetchProfile = async (userId: string) => {
+    const data = await db.getProfile(userId);
+    if (data) {
+      setProfile({
+        id: data.id,
+        email: data.email,
+        full_name: data.full_name,
+        role: data.role as any,
+        company_id: (data as any).company_id
+      });
+    }
+  };
 
+  React.useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       if (session?.user) fetchProfile(session.user.id);
@@ -115,6 +116,8 @@ const App: React.FC = () => {
         return <MapScreen onStartInspection={() => handleStartInspection('#UY-9921-24')} />;
       case 'inspeccion':
         return <InspectionScreen onBack={() => setCurrentScreen('home')} assetId={selectedAssetId} />;
+      case 'ajustes':
+        return <AjustesScreen profile={profile} onLogout={handleLogout} onRefreshProfile={() => profile && fetchProfile(profile.id)} />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[70vh] text-slate-500">

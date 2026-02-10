@@ -26,6 +26,21 @@ export const db = {
     return data;
   },
 
+  updateProfile: async (id: string, updates: any): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      return false;
+    }
+  },
+
   getTechniciansWithStats: async (companyId: string): Promise<any[]> => {
     // Fetch profiles with role 'tecnico' and related to this company
     const { data: profiles, error: profileError } = await supabase
