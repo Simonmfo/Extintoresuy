@@ -32,7 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, 
             <div className="p-4 lg:p-6 border-b border-white/5 overflow-hidden">
                 <div className="flex items-center gap-4">
                     <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0 shadow-inner">
-                        <span className="material-symbols-outlined !text-2xl">shield_with_heart</span>
+                        <span className="material-symbols-outlined !text-2xl">fire_extinguisher</span>
                     </div>
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                         <h1 className="text-lg font-bold text-white tracking-tight">Extintoruy</h1>

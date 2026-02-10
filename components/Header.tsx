@@ -10,7 +10,7 @@ const Header: React.FC<HeaderProps> = ({ role }) => {
     <header className="flex items-center justify-between p-4 pb-2 sticky top-0 bg-background-dark/80 backdrop-blur-md z-50">
       <div className="flex items-center gap-3">
         <div className="text-primary flex size-10 shrink-0 items-center justify-center bg-primary/10 rounded-lg">
-          <span className="material-symbols-outlined !text-[28px]">shield_with_heart</span>
+          <span className="material-symbols-outlined !text-[28px]">fire_extinguisher</span>
         </div>
         <div>
           <h1 className="text-lg font-bold leading-tight tracking-tight">Extintoruy</h1>

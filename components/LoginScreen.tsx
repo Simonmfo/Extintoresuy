@@ -56,7 +56,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 <div>
                     <div className="flex items-center gap-3 mb-8">
                         <div className="size-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary border border-primary/20">
-                            <span className="material-symbols-outlined !text-3xl">shield_with_heart</span>
+                            <span className="material-symbols-outlined !text-3xl">fire_extinguisher</span>
                         </div>
                         <span className="text-xl font-bold tracking-tight text-white">Extintoruy Plataforma Empresa</span>
                     </div>
