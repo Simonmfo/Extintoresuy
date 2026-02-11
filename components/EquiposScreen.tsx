@@ -468,13 +468,42 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
                             <div className="flex items-center gap-4">
                                 {selectedClient?.id === client.id && (
-                                    <div
-                                        onClick={openAddModal}
-                                        className="hidden sm:flex items-center gap-2 bg-primary/10 hover:bg-primary text-primary hover:text-background-dark px-3 py-1.5 rounded-lg border border-primary/20 hover:border-primary transition-all text-xs font-bold uppercase tracking-wider cursor-pointer"
-                                    >
-                                        <span className="material-symbols-outlined !text-base">add_circle</span>
-                                        Agregar Extintor
-                                    </div>
+                                    <>
+                                        {/* Estadísticas rápidas del cliente */}
+                                        <div className="hidden lg:flex items-center gap-6 mr-4 py-1.5 px-4 bg-white/5 rounded-xl border border-white/10 shadow-inner">
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Equipos</span>
+                                                <span className="text-xs text-white font-black">{assets.length}</span>
+                                            </div>
+                                            <div className="w-px h-6 bg-white/10" />
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tight">En Actividad</span>
+                                                <span className="text-xs text-blue-400 font-black">
+                                                    {assets.filter(a => a.lifecycleStatus === 'active' || !a.lifecycleStatus).length}
+                                                </span>
+                                            </div>
+                                            <div className="w-px h-6 bg-white/10" />
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-[9px] text-slate-500 font-bold uppercase tracking-tight">Vencen &lt; 30d</span>
+                                                <span className="text-xs text-status-red font-black">
+                                                    {assets.filter(a => {
+                                                        if (!a.expirationDate) return false;
+                                                        const diff = new Date(a.expirationDate).getTime() - Date.now();
+                                                        const days = diff / (1000 * 60 * 60 * 24);
+                                                        return days >= 0 && days <= 30;
+                                                    }).length}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            onClick={openAddModal}
+                                            className="hidden sm:flex items-center gap-2 bg-primary/10 hover:bg-primary text-primary hover:text-background-dark px-3 py-1.5 rounded-lg border border-primary/20 hover:border-primary transition-all text-xs font-bold uppercase tracking-wider cursor-pointer"
+                                        >
+                                            <span className="material-symbols-outlined !text-base">add_circle</span>
+                                            Agregar Extintor
+                                        </div>
+                                    </>
                                 )}
                                 <span className={`material-symbols-outlined text-slate-500 transition-transform duration-300 ${selectedClient?.id === client.id ? 'rotate-180 text-primary' : ''}`}>
                                     expand_more
@@ -485,8 +514,31 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                         {/* Expanded Assets List */}
                         {selectedClient?.id === client.id && (
                             <div className="border-t border-white/10 bg-black/20 p-4 animate-fadeIn">
-                                {/* Mobile Add Button */}
-                                <div className="sm:hidden mb-4">
+                                {/* Mobile Statistics and Add Button */}
+                                <div className="sm:hidden space-y-4 mb-4">
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div className="bg-white/5 border border-white/10 rounded-xl p-2 text-center">
+                                            <span className="block text-[8px] text-slate-500 font-bold uppercase tracking-tight">Equipos</span>
+                                            <span className="text-xs text-white font-black">{assets.length}</span>
+                                        </div>
+                                        <div className="bg-white/5 border border-white/10 rounded-xl p-2 text-center">
+                                            <span className="block text-[8px] text-slate-500 font-bold uppercase tracking-tight">Activos</span>
+                                            <span className="text-xs text-blue-400 font-black">
+                                                {assets.filter(a => a.lifecycleStatus === 'active' || !a.lifecycleStatus).length}
+                                            </span>
+                                        </div>
+                                        <div className="bg-white/5 border border-white/10 rounded-xl p-2 text-center">
+                                            <span className="block text-[8px] text-slate-500 font-bold uppercase tracking-tight">Vencen &lt; 30d</span>
+                                            <span className="text-xs text-status-red font-black">
+                                                {assets.filter(a => {
+                                                    if (!a.expirationDate) return false;
+                                                    const diff = new Date(a.expirationDate).getTime() - Date.now();
+                                                    const days = diff / (1000 * 60 * 60 * 24);
+                                                    return days >= 0 && days <= 30;
+                                                }).length}
+                                            </span>
+                                        </div>
+                                    </div>
                                     <button
                                         onClick={openAddModal}
                                         className="w-full flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary text-primary hover:text-background-dark px-3 py-3 rounded-lg border border-primary/20 hover:border-primary transition-all text-xs font-bold uppercase tracking-wider"

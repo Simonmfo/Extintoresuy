@@ -11,6 +11,28 @@ export interface InspectionRecord {
   details: any;
 }
 
+const mapAsset = (asset: any): InspectionAsset => ({
+  id: asset.id,
+  name: asset.name,
+  type: asset.type,
+  description: asset.description,
+  lastInspection: asset.last_inspection,
+  lat: asset.location_lat,
+  lng: asset.location_lng,
+  status: asset.status,
+  imageUrl: asset.image_url,
+  clientId: asset.client_id,
+  agent: asset.agent,
+  fireClass: asset.fire_class,
+  expirationDate: asset.expiration_date,
+  lifecycleStatus: asset.location_status,
+  nextInspection: asset.next_inspection_date,
+  lastRecharge: asset.last_recharge_date,
+  lastHydrotest: asset.last_hydrotest_date,
+  nextHydrotest: asset.next_hydrotest_date,
+  assignedTechnicianId: asset.assigned_technician_id
+});
+
 export const db = {
   getProfile: async (id: string): Promise<any> => {
     const { data, error } = await supabase
@@ -143,37 +165,36 @@ export const db = {
   },
 
   getAssetsByClient: async (clientId: string): Promise<InspectionAsset[]> => {
-    const { data, error } = await supabase
-      .from('assets')
-      .select('*')
-      .eq('client_id', clientId);
+    let allAssets: any[] = [];
+    let from = 0;
+    const limit = 1000;
+    let done = false;
 
-    if (error) {
-      console.error('Error fetching client assets:', error);
-      return [];
+    while (!done) {
+      const { data, error } = await supabase
+        .from('assets')
+        .select('*')
+        .eq('client_id', clientId)
+        .range(from, from + limit - 1);
+
+      if (error) {
+        console.error('Error fetching client assets:', error);
+        return allAssets.map(mapAsset);
+      }
+
+      if (data && data.length > 0) {
+        allAssets = [...allAssets, ...data];
+        if (data.length < limit) {
+          done = true;
+        } else {
+          from += limit;
+        }
+      } else {
+        done = true;
+      }
     }
 
-    return data.map((asset: any) => ({
-      id: asset.id,
-      name: asset.name,
-      type: asset.type,
-      description: asset.description,
-      lastInspection: asset.last_inspection,
-      lat: asset.location_lat,
-      lng: asset.location_lng,
-      status: asset.status,
-      imageUrl: asset.image_url,
-      clientId: asset.client_id,
-      agent: asset.agent,
-      fireClass: asset.fire_class,
-      expirationDate: asset.expiration_date,
-      lifecycleStatus: asset.location_status,
-      nextInspection: asset.next_inspection_date,
-      lastRecharge: (asset as any).last_recharge_date,
-      lastHydrotest: (asset as any).last_hydrotest_date,
-      nextHydrotest: (asset as any).next_hydrotest_date,
-      assignedTechnicianId: (asset as any).assigned_technician_id
-    }));
+    return allAssets.map(mapAsset);
   },
 
   getAsset: async (id: string): Promise<InspectionAsset | null> => {
@@ -188,58 +209,39 @@ export const db = {
       return null;
     }
 
-    return {
-      id: data.id,
-      name: data.name,
-      type: data.type,
-      description: data.description,
-      lastInspection: data.last_inspection,
-      lat: data.location_lat,
-      lng: data.location_lng,
-      status: data.status,
-      imageUrl: data.image_url,
-      clientId: data.client_id,
-      agent: (data as any).agent,
-      fireClass: (data as any).fire_class,
-      expirationDate: (data as any).expiration_date,
-      lifecycleStatus: (data as any).location_status,
-      nextInspection: (data as any).next_inspection_date,
-      lastRecharge: (data as any).last_recharge_date,
-      lastHydrotest: (data as any).last_hydrotest_date,
-      nextHydrotest: (data as any).next_hydrotest_date,
-      assignedTechnicianId: (data as any).assigned_technician_id
-    } as InspectionAsset;
+    return mapAsset(data);
   },
 
   getAssets: async (): Promise<InspectionAsset[]> => {
-    const { data, error } = await supabase.from('assets').select('*');
+    let allAssets: any[] = [];
+    let from = 0;
+    const limit = 1000;
+    let done = false;
 
-    if (error) {
-      console.error('Error fetching assets:', error);
-      return [];
+    while (!done) {
+      const { data, error } = await supabase
+        .from('assets')
+        .select('*')
+        .range(from, from + limit - 1);
+
+      if (error) {
+        console.error('Error fetching assets:', error);
+        return allAssets.map(mapAsset);
+      }
+
+      if (data && data.length > 0) {
+        allAssets = [...allAssets, ...data];
+        if (data.length < limit) {
+          done = true;
+        } else {
+          from += limit;
+        }
+      } else {
+        done = true;
+      }
     }
 
-    return data.map((asset: any) => ({
-      id: asset.id,
-      name: asset.name,
-      type: asset.type,
-      description: asset.description,
-      lastInspection: asset.last_inspection,
-      lat: asset.location_lat,
-      lng: asset.location_lng,
-      status: asset.status,
-      imageUrl: asset.image_url,
-      clientId: asset.client_id,
-      agent: asset.agent,
-      fireClass: asset.fire_class,
-      expirationDate: asset.expiration_date,
-      lifecycleStatus: asset.location_status,
-      nextInspection: asset.next_inspection_date,
-      lastRecharge: asset.last_recharge_date,
-      lastHydrotest: asset.last_hydrotest_date,
-      nextHydrotest: asset.next_hydrotest_date,
-      assignedTechnicianId: asset.assigned_technician_id
-    }));
+    return allAssets.map(mapAsset);
   },
 
   addInspection: async (record: InspectionRecord): Promise<{ success: boolean; message?: string }> => {
