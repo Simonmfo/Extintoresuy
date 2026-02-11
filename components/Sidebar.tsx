@@ -14,6 +14,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, 
         ? [
             { id: 'home', label: 'Admin Panel', icon: 'admin_panel_settings' },
             { id: 'usuarios', label: 'Usuarios', icon: 'manage_accounts' },
+            { id: 'clientes', label: 'Empresas/Cli', icon: 'corporate_fare' },
             { id: 'facturacion', label: 'Facturación', icon: 'payments' },
             { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
             { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
@@ -30,6 +31,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, 
             ]
             : [
                 { id: 'home', label: 'Inicio', icon: 'dashboard' },
+                { id: 'clientes', label: 'Mis Clientes', icon: 'corporate_fare' },
                 { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
                 { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
                 { id: 'mapa', label: 'Mapa', icon: 'location_on' },

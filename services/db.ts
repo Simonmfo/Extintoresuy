@@ -208,6 +208,45 @@ export const db = {
     return data;
   },
 
+  addClient: async (clientData: { name: string; address: string; contact_email: string }) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user found');
+
+      const { data, error } = await supabase
+        .from('clients')
+        .insert({
+          ...clientData,
+          company_id: user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      await db.logActivity('create', 'client', data.id, data.name, clientData);
+      return data;
+    } catch (error) {
+      console.error('Error adding client:', error);
+      return null;
+    }
+  },
+
+  updateClient: async (id: string, updates: any) => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+      await db.logActivity('update', 'client', id, updates.name || id, updates);
+      return true;
+    } catch (error) {
+      console.error('Error updating client:', error);
+      return false;
+    }
+  },
+
   getAssetsByClient: async (clientId: string): Promise<InspectionAsset[]> => {
     let allAssets: any[] = [];
     let from = 0;

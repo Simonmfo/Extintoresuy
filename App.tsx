@@ -18,6 +18,7 @@ import ReportesScreen from './components/ReportesScreen';
 import AdminDashboard from './components/AdminDashboard';
 import FacturacionScreen from './components/FacturacionScreen';
 import UsuariosScreen from './components/UsuariosScreen';
+import ClientesScreen from './components/ClientesScreen';
 import { supabase } from './services/supabase';
 import { db } from './services/db';
 import { UserProfile } from './types';
@@ -107,6 +108,8 @@ const App: React.FC = () => {
         return <FacturacionScreen />;
       case 'usuarios':
         return <UsuariosScreen />;
+      case 'clientes':
+        return <ClientesScreen />;
       case 'equipos':
         return <EquiposScreen initialAssetId={viewAssetId} onClearInitialId={() => setViewAssetId(null)} />;
       case 'alertas':

@@ -1,5 +1,5 @@
 
-export type Screen = 'home' | 'equipos' | 'mapa' | 'reportes' | 'ajustes' | 'inspeccion' | 'alertas' | 'inspecciones' | 'tecnicos' | 'facturacion' | 'usuarios';
+export type Screen = 'home' | 'equipos' | 'mapa' | 'reportes' | 'ajustes' | 'inspeccion' | 'alertas' | 'inspecciones' | 'tecnicos' | 'facturacion' | 'usuarios' | 'clientes';
 
 export interface LocationItem {
   id: string;

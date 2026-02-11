@@ -1,0 +1,199 @@
+
+import React, { useEffect, useState } from 'react';
+import { db } from '../services/db';
+import { Client } from '../types';
+
+const ClientesScreen: React.FC = () => {
+    const [clients, setClients] = useState<Client[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editClient, setEditClient] = useState<Client | null>(null);
+    const [formData, setFormData] = useState({ name: '', address: '', contact_email: '' });
+
+    useEffect(() => {
+        loadClients();
+    }, []);
+
+    const loadClients = async () => {
+        setLoading(true);
+        const data = await db.getClients();
+        setClients(data);
+        setLoading(false);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (editClient) {
+            const ok = await db.updateClient(editClient.id, formData);
+            if (ok) setIsModalOpen(false);
+        } else {
+            const res = await db.addClient(formData);
+            if (res) setIsModalOpen(false);
+        }
+        loadClients();
+    };
+
+    const openModal = (client: Client | null = null) => {
+        setEditClient(client);
+        setFormData(client ? {
+            name: client.name,
+            address: client.address || '',
+            contact_email: client.contact_email || ''
+        } : { name: '', address: '', contact_email: '' });
+        setIsModalOpen(true);
+    };
+
+    return (
+        <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col animate-fadeIn">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                        <span className="material-symbols-outlined text-primary !text-4xl">corporate_fare</span>
+                        Gestión de Empresas
+                    </h1>
+                    <p className="text-slate-400 text-sm mt-1">Controle su cartera de clientes y puntos de servicio.</p>
+                </div>
+                <button
+                    onClick={() => openModal()}
+                    className="bg-primary text-background-dark font-black px-6 py-3 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 uppercase text-xs tracking-wider"
+                >
+                    <span className="material-symbols-outlined !text-lg">add_business</span>
+                    Nueva Empresa
+                </button>
+            </div>
+
+            <div className="flex-1 bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                <div className="overflow-auto h-full custom-scrollbar">
+                    {loading && clients.length === 0 ? (
+                        <div className="flex items-center justify-center p-20">
+                            <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+                        </div>
+                    ) : (
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="text-[10px] uppercase tracking-widest text-slate-500 border-b border-white/5 bg-white/[0.02]">
+                                    <th className="p-6">Razón Social</th>
+                                    <th className="p-6">Dirección Principal</th>
+                                    <th className="p-6">Contacto / Correo</th>
+                                    <th className="p-6 text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {clients.map(client => (
+                                    <tr key={client.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors group">
+                                        <td className="p-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="size-10 rounded-xl bg-slate-800 flex items-center justify-center text-primary font-bold shrink-0">
+                                                    {client.name.substring(0, 1).toUpperCase()}
+                                                </div>
+                                                <p className="font-bold text-white text-lg">{client.name}</p>
+                                            </div>
+                                        </td>
+                                        <td className="p-6">
+                                            <p className="text-sm text-slate-400 font-medium">
+                                                <span className="material-symbols-outlined !text-sm align-middle mr-1">location_on</span>
+                                                {client.address || 'Sin dirección registrada'}
+                                            </p>
+                                        </td>
+                                        <td className="p-6">
+                                            <p className="text-sm text-slate-400 font-medium">
+                                                <span className="material-symbols-outlined !text-sm align-middle mr-1">mail</span>
+                                                {client.contact_email || 'N/A'}
+                                            </p>
+                                        </td>
+                                        <td className="p-6 text-right">
+                                            <button
+                                                onClick={() => openModal(client)}
+                                                className="size-10 rounded-xl bg-white/5 text-slate-500 border border-white/10 hover:bg-primary/20 hover:text-primary hover:border-primary/20 transition-all"
+                                            >
+                                                <span className="material-symbols-outlined !text-lg">edit</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {clients.length === 0 && (
+                                    <tr>
+                                        <td colSpan={4} className="p-20 text-center text-slate-500 italic">
+                                            No tienes empresas registradas aún.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+            </div>
+
+            {/* Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+                    <div className="bg-[#1a1c1e] border border-white/10 rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl">
+                        <form onSubmit={handleSubmit}>
+                            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                                <h3 className="text-xl font-black text-white flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-primary">{editClient ? 'edit_note' : 'business_center'}</span>
+                                    {editClient ? 'Editar Empresa' : 'Registrar Nueva Empresa'}
+                                </h3>
+                                <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-white">
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Nombre de la Empresa / Razón Social</label>
+                                        <input
+                                            required
+                                            type="text"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none transition-colors"
+                                            placeholder="Ej: Industrias Uruguay S.A."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Dirección Principal</label>
+                                        <input
+                                            type="text"
+                                            value={formData.address}
+                                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none transition-colors"
+                                            placeholder="Calle, Número, Localidad"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Correo de Contacto</label>
+                                        <input
+                                            type="email"
+                                            value={formData.contact_email}
+                                            onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none transition-colors"
+                                            placeholder="contacto@empresa.com"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-6 bg-white/[0.02] flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="flex-1 bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-2xl transition-all"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 bg-primary text-background-dark font-black py-4 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
+                                >
+                                    {editClient ? 'Guardar Cambios' : 'Registrar Empresa'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default ClientesScreen;

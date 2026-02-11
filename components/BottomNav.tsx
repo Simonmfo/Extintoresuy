@@ -25,10 +25,9 @@ const BottomNav: React.FC<BottomNavProps> = ({ currentScreen, onNavigate, role }
       ]
       : [
         { id: 'home', label: 'Inicio', icon: 'dashboard' },
+        { id: 'clientes', label: 'Clientes', icon: 'corporate_fare' },
         { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
-        { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
         { id: 'mapa', label: 'Mapa', icon: 'location_on' },
-        { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
         { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
       ];
 
