@@ -130,7 +130,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                         <div class="qr-id">${asset.id}</div>
                                         <div class="qr-client">${selectedClient.name.substring(0, 15)}</div>
                                         <div class="qr-type">${asset.type}</div>
-                                        <div class="qr-footer">EXTINTORUY EMPRESA</div>
+                                        <div class="qr-footer">EXTINTORUY</div>
                                     </div>
                                 </div>
                             `;
@@ -156,7 +156,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                         gap: 8px;
                                     }
                                     .qr-item {
-                                        border: 1px solid #eee;
+                                        border: 1px solid black;
                                         padding: 10px;
                                         display: flex;
                                         align-items: center;
@@ -646,7 +646,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                                                     <span class="id-text">${asset.id}</span>
                                                                                     <span style="display:block; margin-bottom: 4px;">${selectedClient.name.substring(0, 20)}</span>
                                                                                     <span style="font-size: 8px; color: #666;">TIPO: ${asset.type}</span><br/>
-                                                                                    <span style="font-size: 8px; color: #666; font-weight: normal;">EXTINTORUY EMPRESA</span>
+                                                                                    <span style="font-size: 8px; color: #666; font-weight: normal;">EXTINTORUY</span>
                                                                                 </div>
                                                                             </div>
                                                                         `;
@@ -668,7 +668,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                                                 }
                                                                                 .label {
                                                                                     width: 250px; height: 120px;
-                                                                                    border-bottom: 1px dashed #eee;
+                                                                                    border: 1px solid black;
                                                                                     padding: 10px; display: flex; align-items: center;
                                                                                     box-sizing: border-box; page-break-after: always;
                                                                                 }
