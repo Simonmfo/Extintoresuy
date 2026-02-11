@@ -19,6 +19,7 @@ import AdminDashboard from './components/AdminDashboard';
 import FacturacionScreen from './components/FacturacionScreen';
 import UsuariosScreen from './components/UsuariosScreen';
 import ClientesScreen from './components/ClientesScreen';
+import UserMenu from './components/UserMenu';
 import { supabase } from './services/supabase';
 import { db } from './services/db';
 import { UserProfile } from './types';
@@ -184,7 +185,11 @@ const App: React.FC = () => {
         {/* Header - Show only on mobile/tablet or customize for desktop */}
         <div className="lg:hidden">
           {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
-            <Header role={profile?.role || 'empresa'} />
+            <Header
+              role={profile?.role || 'empresa'}
+              onNavigate={handleNavigate}
+              onLogout={handleLogout}
+            />
           )}
         </div>
 
@@ -204,7 +209,7 @@ const App: React.FC = () => {
             <button className="size-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
               <span className="material-symbols-outlined text-slate-300">notifications</span>
             </button>
-            <div className="size-10 rounded-full bg-gradient-to-tr from-primary to-emerald-600 border-2 border-background-dark shadow-lg"></div>
+            <UserMenu onNavigate={handleNavigate} onLogout={handleLogout} role={profile?.role} />
           </div>
         </header>
 
