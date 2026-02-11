@@ -20,6 +20,7 @@ import FacturacionScreen from './components/FacturacionScreen';
 import UsuariosScreen from './components/UsuariosScreen';
 import ClientesScreen from './components/ClientesScreen';
 import UserMenu from './components/UserMenu';
+import SplashScreen from './components/SplashScreen';
 import { supabase } from './services/supabase';
 import { db } from './services/db';
 import { UserProfile } from './types';
@@ -30,6 +31,7 @@ const App: React.FC = () => {
   const [viewAssetId, setViewAssetId] = useState<string | null>(null);
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
   const [alertType, setAlertType] = useState<'expired' | 'pending'>('pending');
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
@@ -150,6 +152,10 @@ const App: React.FC = () => {
         );
     }
   };
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
 
   if (loading) {
     return (

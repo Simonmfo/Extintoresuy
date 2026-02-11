@@ -31,73 +31,80 @@ const UserMenu: React.FC<UserMenuProps> = ({ onNavigate, onLogout, role }) => {
     ];
 
     return (
-        <div className="relative" ref={menuRef}>
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="size-10 rounded-full bg-gradient-to-tr from-primary to-emerald-600 border-2 border-background-dark shadow-xl hover:scale-105 transition-transform active:scale-95 flex items-center justify-center overflow-hidden"
-            >
-                <div className="size-full bg-black/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-white text-xl">person</span>
-                </div>
-            </button>
-
-            {isOpen && (
-                <div className="absolute right-0 mt-3 w-64 bg-[#1a1c1e] border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-[1000] animate-fadeIn">
-                    <div className="p-4 border-b border-white/5 bg-white/[0.02]">
-                        <p className="text-[10px] font-black text-primary uppercase tracking-widest">Usuario Conectado</p>
-                        <p className="text-sm font-bold text-white truncate capitalize">{role || 'Empresa'}</p>
+        <>
+            <div className="relative" ref={menuRef}>
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="size-10 rounded-full bg-gradient-to-tr from-primary to-emerald-600 border-2 border-background-dark shadow-xl hover:scale-105 transition-transform active:scale-95 flex items-center justify-center overflow-hidden"
+                >
+                    <div className="size-full bg-black/10 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-white text-xl">person</span>
                     </div>
-                    <div className="p-2">
-                        {menuItems.map(item => (
-                            <button
-                                key={item.id}
-                                onClick={() => {
-                                    item.action();
-                                    if (item.id !== 'acerca') setIsOpen(false);
-                                }}
-                                className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all text-sm font-bold ${item.danger
+                </button>
+
+                {isOpen && (
+                    <div className="absolute right-0 mt-3 w-64 bg-[#1a1c1e] border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-[1000] animate-fadeIn">
+                        <div className="p-4 border-b border-white/5 bg-white/[0.02]">
+                            <p className="text-[10px] font-black text-primary uppercase tracking-widest">Usuario Conectado</p>
+                            <p className="text-sm font-bold text-white truncate capitalize">{role || 'Empresa'}</p>
+                        </div>
+                        <div className="p-2">
+                            {menuItems.map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => {
+                                        item.action();
+                                        if (item.id !== 'acerca') setIsOpen(false);
+                                    }}
+                                    className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-all text-sm font-bold ${item.danger
                                         ? 'text-red-400 hover:bg-red-500/10'
                                         : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                                    }`}
-                            >
-                                <span className="material-symbols-outlined !text-xl">{item.icon}</span>
-                                {item.label}
-                            </button>
-                        ))}
+                                        }`}
+                                >
+                                    <span className="material-symbols-outlined !text-xl">{item.icon}</span>
+                                    {item.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
-            {/* About Modal */}
+            {/* DEFINITIVE MODAL FIX: Fixed at root with extreme Z-index */}
             {showAbout && (
-                <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fadeIn">
-                    <div className="bg-[#1a1c1e] border border-white/10 rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl">
-                        <div className="p-8 space-y-6">
-                            <div className="flex items-center gap-4">
-                                <div className="size-16 bg-primary/10 rounded-3xl flex items-center justify-center">
-                                    <span className="material-symbols-outlined !text-4xl text-primary">shield</span>
+                <div
+                    className="fixed inset-0 bg-black/95 backdrop-blur-2xl animate-fadeIn p-4 flex items-center justify-center"
+                    style={{ zIndex: 999999 }}
+                >
+                    <div className="bg-[#1a1c1e] border border-white/10 rounded-[40px] w-full max-w-md shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden animate-scaleIn">
+                        <div className="p-8 space-y-8">
+                            <div className="flex flex-col items-center text-center space-y-4">
+                                <div className="size-20 bg-primary/10 rounded-[32px] flex items-center justify-center text-primary shadow-inner">
+                                    <span className="material-symbols-outlined !text-5xl">verified_user</span>
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-black text-white">Extintoruy v1.2.0</h3>
-                                    <p className="text-slate-500 text-sm font-medium uppercase tracking-widest">Compliance Hub & Logistics</p>
+                                    <h3 className="text-3xl font-black text-white tracking-tight">Extintoruy</h3>
+                                    <p className="text-primary text-xs font-black uppercase tracking-[0.2em]">Versión 1.2.0 stable</p>
                                 </div>
                             </div>
 
                             <div className="space-y-4">
-                                <div className="bg-white/5 p-6 rounded-[24px] border border-white/5">
-                                    <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Términos y Privacidad</h4>
-                                    <div className="text-xs text-slate-400 space-y-3 font-medium h-48 overflow-y-auto custom-scrollbar pr-2">
-                                        <p>Esta plataforma ha sido desarrollada para el control estricto de cumplimiento normativo en equipos contra incendios según las regulaciones vigentes en Uruguay.</p>
-                                        <p><strong>Privacidad:</strong> Todos los datos de inventario y trazabilidad son propiedad de la empresa contratante. Extintoruy actúa exclusivamente como procesador de datos bajo estándares de seguridad ISO.</p>
-                                        <p><strong>Uso:</strong> Queda prohibida la reproducción parcial o total de la interfaz y la logística de procesos sin autorización expresa.</p>
-                                        <p>Software diseñado por Antigravity AI para optimización logística avanzada.</p>
+                                <div className="bg-white/5 p-6 rounded-[32px] border border-white/5 space-y-4">
+                                    <div className="flex items-center gap-2 text-slate-300">
+                                        <span className="material-symbols-outlined text-sm">gavel</span>
+                                        <p className="text-[10px] font-black uppercase tracking-widest">Políticas & Privacidad</p>
+                                    </div>
+                                    <div className="text-xs text-slate-400 leading-relaxed space-y-4 max-h-[25vh] overflow-y-auto custom-scrollbar pr-2 font-medium">
+                                        <p>Esta plataforma gestiona el cumplimiento normativo de equipos contra incendios bajo las ordenanzas de la Dirección Nacional de Bomberos de Uruguay.</p>
+                                        <p><strong>Seguridad:</strong> La integridad de la trazabilidad y los registros de inspección están garantizados mediante tecnologías de cifrado y auditoría persistente.</p>
+                                        <p>Software optimizado para operaciones de alta logística.</p>
                                     </div>
                                 </div>
                             </div>
 
                             <button
                                 onClick={() => setShowAbout(false)}
-                                className="w-full bg-white/5 hover:bg-white/10 text-white font-black py-4 rounded-2xl transition-all uppercase text-xs tracking-widest"
+                                className="w-full bg-primary text-background-dark font-black py-5 rounded-[24px] text-sm uppercase tracking-widest shadow-xl shadow-primary/20 hover:brightness-110 active:scale-95 transition-all"
                             >
                                 Entendido
                             </button>
@@ -105,7 +112,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onNavigate, onLogout, role }) => {
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 };
 
