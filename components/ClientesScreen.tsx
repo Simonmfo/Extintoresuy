@@ -8,7 +8,7 @@ const ClientesScreen: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editClient, setEditClient] = useState<Client | null>(null);
-    const [formData, setFormData] = useState({ name: '', address: '', contact_email: '' });
+    const [formData, setFormData] = useState({ name: '', address: '', contact_email: '', rut: '' });
 
     useEffect(() => {
         loadClients();
@@ -38,8 +38,9 @@ const ClientesScreen: React.FC = () => {
         setFormData(client ? {
             name: client.name,
             address: client.address || '',
-            contact_email: client.contact_email || ''
-        } : { name: '', address: '', contact_email: '' });
+            contact_email: client.contact_email || '',
+            rut: client.rut || ''
+        } : { name: '', address: '', contact_email: '', rut: '' });
         setIsModalOpen(true);
     };
 
@@ -72,7 +73,7 @@ const ClientesScreen: React.FC = () => {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="text-[10px] uppercase tracking-widest text-slate-500 border-b border-white/5 bg-white/[0.02]">
-                                    <th className="p-6">Razón Social</th>
+                                    <th className="p-6">Razón Social / RUT</th>
                                     <th className="p-6">Dirección Principal</th>
                                     <th className="p-6">Contacto / Correo</th>
                                     <th className="p-6 text-right">Acciones</th>
@@ -86,7 +87,10 @@ const ClientesScreen: React.FC = () => {
                                                 <div className="size-10 rounded-xl bg-slate-800 flex items-center justify-center text-primary font-bold shrink-0">
                                                     {client.name.substring(0, 1).toUpperCase()}
                                                 </div>
-                                                <p className="font-bold text-white text-lg">{client.name}</p>
+                                                <div>
+                                                    <p className="font-bold text-white text-lg">{client.name}</p>
+                                                    {client.rut && <p className="text-[10px] font-mono text-primary font-black uppercase tracking-widest">RUT: {client.rut}</p>}
+                                                </div>
                                             </div>
                                         </td>
                                         <td className="p-6">
@@ -149,6 +153,16 @@ const ClientesScreen: React.FC = () => {
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none transition-colors"
                                             placeholder="Ej: Industrias Uruguay S.A."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">RUT de la Empresa</label>
+                                        <input
+                                            type="text"
+                                            value={formData.rut}
+                                            onChange={(e) => setFormData({ ...formData, rut: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none transition-colors"
+                                            placeholder="Ej: 21XXXXXXX001"
                                         />
                                     </div>
                                     <div>

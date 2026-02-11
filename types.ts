@@ -36,6 +36,7 @@ export interface Client {
   name: string;
   address: string;
   contact_email: string;
+  rut?: string;
   created_at: string;
 }
 

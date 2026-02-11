@@ -208,7 +208,7 @@ export const db = {
     return data;
   },
 
-  addClient: async (clientData: { name: string; address: string; contact_email: string }) => {
+  addClient: async (clientData: { name: string; address: string; contact_email: string; rut?: string }) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
