@@ -13,22 +13,43 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ onStartInspection, onNavigate, onViewAsset, onNavigateAlerts }) => {
   const [stats, setStats] = useState({ total: 0, expired: 0, pending: 0, compliance: 0 });
-  const [recentAssets, setRecentAssets] = useState<any[]>([]);
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
+  const [selectedLog, setSelectedLog] = useState<any>(null);
 
   useEffect(() => {
     const loadData = async () => {
       const statsData = await db.getStats();
       setStats(statsData);
 
-      const assets = await db.getAssets();
-      setRecentAssets(assets.slice(0, 2));
+      const logs = await db.getActivityLogs(6);
+      setActivityLogs(logs);
     };
 
     loadData();
   }, []);
 
+  const getActionIcon = (action: string) => {
+    switch (action) {
+      case 'create': return 'add_circle';
+      case 'update': return 'edit';
+      case 'delete': return 'delete';
+      case 'inspection': return 'fact_check';
+      default: return 'history';
+    }
+  };
+
+  const getActionColor = (action: string) => {
+    switch (action) {
+      case 'create': return 'text-blue-400';
+      case 'update': return 'text-amber-400';
+      case 'delete': return 'text-red-400';
+      case 'inspection': return 'text-primary';
+      default: return 'text-slate-400';
+    }
+  };
+
   return (
-    <div className="p-4 lg:p-0 space-y-6 max-w-7xl mx-auto">
+    <div className="p-4 lg:p-0 space-y-6 max-w-7xl mx-auto h-full">
       {/* Top Section Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Risk Metric Card */}
@@ -49,7 +70,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartInspection, onNavigate, on
               </div>
             </div>
 
-            <div className="shrink-0 scale-110 lg:scale-125">
+            <div className="shrink-0">
               <ComplianceGauge percentage={stats.compliance} />
             </div>
           </div>
@@ -99,36 +120,35 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartInspection, onNavigate, on
               <span className="material-symbols-outlined text-primary">history</span>
               Actividad Reciente
             </h3>
-            <button className="text-xs font-bold text-primary hover:text-white transition-colors bg-primary/10 px-3 py-1.5 rounded-lg">Ver Logs Completos</button>
+            <button className="text-xs font-bold text-slate-500 hover:text-white transition-colors">Ver Logs Completos</button>
           </div>
 
           <div className="space-y-3">
-            {recentAssets.length > 0 ? recentAssets.map((asset) => (
+            {activityLogs.length > 0 ? activityLogs.map((log) => (
               <div
-                key={asset.id}
+                key={log.id}
                 className="flex items-center gap-4 p-4 bg-black/20 hover:bg-black/40 rounded-2xl border border-white/5 transition-colors group cursor-pointer"
-                onClick={() => onViewAsset(asset.id)}
+                onClick={() => setSelectedLog(log)}
               >
-                <div className="size-12 rounded-xl bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 border border-white/10 group-hover:border-primary/50 transition-colors">
-                  <span className="material-symbols-outlined text-slate-400 group-hover:text-primary">database</span>
+                <div className={`size-12 rounded-xl bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 border border-white/10 group-hover:border-primary/50 transition-colors`}>
+                  <span className={`material-symbols-outlined ${getActionColor(log.action)}`}>{getActionIcon(log.action)}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <h4 className="text-sm font-bold text-white truncate">Actualización: {asset.name || asset.id}</h4>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${asset.status === 'ok' ? 'bg-primary/20 text-primary' : 'bg-status-red/20 text-status-red'}`}>
-                      {asset.status === 'ok' ? 'Conforme' : 'Alerta'}
-                    </span>
+                    <h4 className="text-sm font-bold text-white truncate capitalize">{log.action === 'inspection' ? 'Nueva Inspección' : log.action}: {log.entity_name}</h4>
                   </div>
-                  <p className="text-xs text-slate-500 font-medium flex items-center gap-1">
-                    <span className="material-symbols-outlined !text-[10px]">calendar_month</span>
-                    Sincronizado: {asset.lastInspection || 'N/A'}
+                  <p className="text-xs text-slate-500 font-medium flex items-center gap-3">
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined !text-[12px]">person</span>
+                      {log.profiles?.full_name || log.profiles?.email || 'Sistema'}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined !text-[12px]">schedule</span>
+                      {new Date(log.created_at).toLocaleString()}
+                    </span>
                   </p>
                 </div>
-                <div className="hidden sm:block text-right">
-                  <span className="text-xs font-bold text-slate-400 block">ID: {asset.id}</span>
-                  <span className="text-[10px] text-slate-600 uppercase tracking-wider">{asset.type}</span>
-                </div>
-                <span className="material-symbols-outlined text-slate-600 !text-lg">chevron_right</span>
+                <span className="material-symbols-outlined text-slate-600 !text-lg">info</span>
               </div>
             )) : (
               <div className="p-8 text-center text-slate-500 text-sm italic">No hay actividad reciente registrada.</div>
@@ -140,8 +160,63 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartInspection, onNavigate, on
         <div className="lg:col-span-1 h-full">
           <ComplianceAI />
         </div>
-      </div >
-    </div >
+      </div>
+
+      {/* Log Detail Modal */}
+      {selectedLog && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-[#1a1c1e] border border-white/10 rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className={`material-symbols-outlined ${getActionColor(selectedLog.action)}`}>{getActionIcon(selectedLog.action)}</span>
+                <h3 className="text-xl font-black text-white">Detalles del Log</h3>
+              </div>
+              <button
+                onClick={() => setSelectedLog(null)}
+                className="size-10 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-8 space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Entidad</p>
+                  <p className="text-sm font-bold text-white uppercase">{selectedLog.entity_type}: {selectedLog.entity_id}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Usuario</p>
+                  <p className="text-sm font-bold text-white">{selectedLog.profiles?.full_name || selectedLog.profiles?.email}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Acción</p>
+                  <p className={`text-sm font-bold uppercase ${getActionColor(selectedLog.action)}`}>{selectedLog.action}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Fecha</p>
+                  <p className="text-sm font-bold text-white">{new Date(selectedLog.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Datos Técnicos / Cambios</p>
+                <pre className="bg-black/40 rounded-2xl p-4 text-[11px] font-mono text-primary border border-white/5 overflow-x-auto">
+                  {JSON.stringify(selectedLog.details, null, 2)}
+                </pre>
+              </div>
+            </div>
+            <div className="p-6 bg-white/[0.02] flex justify-end">
+              <button
+                onClick={() => setSelectedLog(null)}
+                className="bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-3 rounded-2xl transition-all"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

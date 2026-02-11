@@ -166,6 +166,47 @@ export type Database = {
                 }
                 Relationships: []
             }
+            activity_logs: {
+                Row: {
+                    id: string
+                    user_id: string | null
+                    action: string
+                    entity_type: string
+                    entity_id: string | null
+                    entity_name: string | null
+                    details: Json | null
+                    created_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    user_id?: string | null
+                    action: string
+                    entity_type: string
+                    entity_id?: string | null
+                    entity_name?: string | null
+                    details?: Json | null
+                    created_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    user_id?: string | null
+                    action?: string
+                    entity_type?: string
+                    entity_id?: string | null
+                    entity_name?: string | null
+                    details?: Json | null
+                    created_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "activity_logs_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
         }
         Views: {
             [_ in never]: never

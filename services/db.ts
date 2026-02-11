@@ -34,6 +34,38 @@ const mapAsset = (asset: any): InspectionAsset => ({
 });
 
 export const db = {
+  logActivity: async (action: string, entityType: string, entityId?: string, entityName?: string, details?: any) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.from('activity_logs').insert({
+        user_id: user.id,
+        action,
+        entity_type: entityType,
+        entity_id: entityId,
+        entity_name: entityName,
+        details
+      });
+    } catch (error) {
+      console.error('Error logging activity:', error);
+    }
+  },
+
+  getActivityLogs: async (limit: number = 10): Promise<any[]> => {
+    const { data, error } = await supabase
+      .from('activity_logs')
+      .select('*, profiles(full_name, email)')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Error fetching activity logs:', error);
+      return [];
+    }
+    return data;
+  },
+
   getProfile: async (id: string): Promise<any> => {
     const { data, error } = await supabase
       .from('profiles')
@@ -284,6 +316,9 @@ export const db = {
         return { success: false, message: "No se pudo actualizar el activo. Posible error de permisos o ID incorrecto." };
       }
 
+      // Log the inspection
+      await db.logActivity('inspection', 'asset', record.assetId, `Inspección ${record.status === 'passed' ? 'Aprobada' : 'Fallida'}`, { result: record.status, details: record.details });
+
       return { success: true };
     } catch (error: any) {
       console.error('Error adding inspection:', error);
@@ -343,6 +378,10 @@ export const db = {
         .single();
 
       if (error) throw error;
+
+      // Log the creation
+      await db.logActivity('create', 'asset', data.id, data.name || data.id, assetData);
+
       return data;
     } catch (error) {
       console.error('Error adding asset:', error);
@@ -372,6 +411,10 @@ export const db = {
         .eq('id', id);
 
       if (error) throw error;
+
+      // Log the update
+      await db.logActivity('update', 'asset', id, updates.name || id, updates);
+
       return true;
     } catch (error) {
       console.error('Error updating asset:', error);
@@ -383,6 +426,10 @@ export const db = {
     try {
       const { error } = await supabase.from('assets').delete().eq('id', id);
       if (error) throw error;
+
+      // Log the deletion
+      await db.logActivity('delete', 'asset', id, id);
+
       return true;
     } catch (error) {
       console.error('Error deleting asset:', error);
