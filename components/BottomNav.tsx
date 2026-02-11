@@ -9,21 +9,28 @@ interface BottomNavProps {
 }
 
 const BottomNav: React.FC<BottomNavProps> = ({ currentScreen, onNavigate, role }) => {
-  const navItems = role === 'tecnico'
+  const navItems = role === 'admin'
     ? [
-      { id: 'home', label: 'Inicio', icon: 'dashboard' },
-      { id: 'inspecciones', label: 'Historial', icon: 'history' },
-      { id: 'mapa', label: 'Mapa', icon: 'location_on' },
+      { id: 'home', label: 'Admin', icon: 'admin_panel_settings' },
+      { id: 'facturacion', label: 'Invoices', icon: 'payments' },
+      { id: 'usuarios', label: 'Users', icon: 'manage_accounts' },
       { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
     ]
-    : [
-      { id: 'home', label: 'Inicio', icon: 'dashboard' },
-      { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
-      { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
-      { id: 'mapa', label: 'Mapa', icon: 'location_on' },
-      { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
-      { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
-    ];
+    : role === 'tecnico'
+      ? [
+        { id: 'home', label: 'Inicio', icon: 'dashboard' },
+        { id: 'inspecciones', label: 'Historial', icon: 'history' },
+        { id: 'mapa', label: 'Mapa', icon: 'location_on' },
+        { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
+      ]
+      : [
+        { id: 'home', label: 'Inicio', icon: 'dashboard' },
+        { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
+        { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
+        { id: 'mapa', label: 'Mapa', icon: 'location_on' },
+        { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
+        { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
+      ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background-dark/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around p-3 pb-8 z-[100] shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">

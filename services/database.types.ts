@@ -207,6 +207,47 @@ export type Database = {
                     }
                 ]
             }
+            invoices: {
+                Row: {
+                    id: string
+                    client_id: string
+                    amount: number
+                    status: string
+                    invoice_date: string
+                    due_date: string
+                    items: Json
+                    created_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    client_id: string
+                    amount: number
+                    status: string
+                    invoice_date?: string
+                    due_date: string
+                    items?: Json
+                    created_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    client_id?: string
+                    amount?: number
+                    status?: string
+                    invoice_date?: string
+                    due_date?: string
+                    items?: Json
+                    created_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "invoices_client_id_fkey"
+                        columns: ["client_id"]
+                        isOneToOne: false
+                        referencedRelation: "clients"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
         }
         Views: {
             [_ in never]: never

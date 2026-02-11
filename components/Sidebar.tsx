@@ -10,21 +10,32 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, role }) => {
-    const navItems = role === 'tecnico'
+    const navItems = role === 'admin'
         ? [
-            { id: 'home', label: 'Inicio', icon: 'dashboard' },
-            { id: 'inspecciones', label: 'Inspecciones', icon: 'assignment' },
-            { id: 'mapa', label: 'Mapa', icon: 'location_on' },
-            { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
-        ]
-        : [
-            { id: 'home', label: 'Inicio', icon: 'dashboard' },
+            { id: 'home', label: 'Admin Panel', icon: 'admin_panel_settings' },
+            { id: 'usuarios', label: 'Usuarios', icon: 'manage_accounts' },
+            { id: 'facturacion', label: 'Facturación', icon: 'payments' },
+            { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
             { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
             { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
             { id: 'mapa', label: 'Mapa', icon: 'location_on' },
-            { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
             { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
-        ];
+        ]
+        : role === 'tecnico'
+            ? [
+                { id: 'home', label: 'Inicio', icon: 'dashboard' },
+                { id: 'inspecciones', label: 'Inspecciones', icon: 'assignment' },
+                { id: 'mapa', label: 'Mapa', icon: 'location_on' },
+                { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
+            ]
+            : [
+                { id: 'home', label: 'Inicio', icon: 'dashboard' },
+                { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
+                { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
+                { id: 'mapa', label: 'Mapa', icon: 'location_on' },
+                { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
+                { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
+            ];
 
     return (
         <aside className="w-20 lg:w-20 hover:w-64 h-screen bg-black/40 backdrop-blur-2xl border-r border-white/5 flex flex-col fixed left-0 top-0 transition-all duration-300 ease-in-out z-[100] group overflow-hidden shadow-2xl">
@@ -32,12 +43,14 @@ const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, 
             <div className="p-4 lg:p-6 border-b border-white/5 overflow-hidden">
                 <div className="flex items-center gap-4">
                     <div className="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0 shadow-inner">
-                        <span className="material-symbols-outlined !text-2xl">fire_extinguisher</span>
+                        <span className="material-symbols-outlined !text-2xl">
+                            {role === 'admin' ? 'shield_person' : 'fire_extinguisher'}
+                        </span>
                     </div>
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
                         <h1 className="text-lg font-bold text-white tracking-tight">Extintoruy</h1>
                         <p className="text-[10px] uppercase font-bold text-primary tracking-widest">
-                            {role === 'tecnico' ? 'Portal Técnico' : 'Plataforma Empresa'}
+                            {role === 'admin' ? 'Panel de Control' : role === 'tecnico' ? 'Portal Técnico' : 'Plataforma Empresa'}
                         </p>
                     </div>
                 </div>

@@ -95,6 +95,18 @@ export const db = {
     }
   },
 
+  getAllProfiles: async (): Promise<any[]> => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*, clients(name)');
+
+    if (error) {
+      console.error('Error fetching all profiles:', error);
+      return [];
+    }
+    return data;
+  },
+
   getTechniciansWithStats: async (companyId: string): Promise<any[]> => {
     // Fetch profiles with role 'tecnico' and related to this company
     const { data: profiles, error: profileError } = await supabase
@@ -433,6 +445,60 @@ export const db = {
       return true;
     } catch (error) {
       console.error('Error deleting asset:', error);
+      return false;
+    }
+  },
+
+  // Invoice Methods
+  getInvoices: async (): Promise<any[]> => {
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*, clients(name)')
+      .order('invoice_date', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching invoices:', error);
+      return [];
+    }
+    return data;
+  },
+
+  createInvoice: async (invoiceData: {
+    client_id: string;
+    amount: number;
+    status: 'pending' | 'paid' | 'overdue' | 'cancelled';
+    due_date: string;
+    items: any[];
+  }) => {
+    try {
+      const { data, error } = await supabase
+        .from('invoices')
+        .insert(invoiceData)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await db.logActivity('invoice_created', 'invoice', data.id, `Factura para cliente ${data.client_id}`, invoiceData);
+
+      return data;
+    } catch (error) {
+      console.error('Error creating invoice:', error);
+      return null;
+    }
+  },
+
+  updateInvoiceStatus: async (id: string, status: string) => {
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .update({ status } as any)
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error updating invoice status:', error);
       return false;
     }
   }

@@ -15,6 +15,9 @@ import InspeccionesScreen from './components/InspeccionesScreen';
 import TecnicosScreen from './components/TecnicosScreen';
 import AjustesScreen from './components/AjustesScreen';
 import ReportesScreen from './components/ReportesScreen';
+import AdminDashboard from './components/AdminDashboard';
+import FacturacionScreen from './components/FacturacionScreen';
+import UsuariosScreen from './components/UsuariosScreen';
 import { supabase } from './services/supabase';
 import { db } from './services/db';
 import { UserProfile } from './types';
@@ -80,6 +83,9 @@ const App: React.FC = () => {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'home':
+        if (profile?.role === 'admin') {
+          return <AdminDashboard onNavigate={setCurrentScreen} />;
+        }
         if (profile?.role === 'tecnico') {
           return (
             <TechnicianDashboard
@@ -97,6 +103,10 @@ const App: React.FC = () => {
             onNavigateAlerts={handleNavigateAlerts}
           />
         );
+      case 'facturacion':
+        return <FacturacionScreen />;
+      case 'usuarios':
+        return <UsuariosScreen />;
       case 'equipos':
         return <EquiposScreen initialAssetId={viewAssetId} onClearInitialId={() => setViewAssetId(null)} />;
       case 'alertas':
