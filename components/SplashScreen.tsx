@@ -1,103 +1,130 @@
 
 import React, { useEffect, useState } from 'react';
 
-const SplashScreen: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
-    const [animationStage, setAnimationStage] = useState(0); // 0: Start, 1: Spray, 2: Move & Logo, 3: FadeOut
+interface SplashScreenProps {
+    onComplete: () => void;
+    isLoggedIn?: boolean;
+}
+
+const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isLoggedIn = false }) => {
+    const [stage, setStage] = useState(0);
+    // 0: Init
+    // 1: Shoot (Powder)
+    // 2: Reveal Text
+    // 3: Exit
+
+    const duration = isLoggedIn ? 5000 : 10000;
 
     useEffect(() => {
-        // Stage 1: Initial Delay then Spray
-        const sprayTimer = setTimeout(() => setAnimationStage(1), 500);
+        // Core Animation Stages
+        const t1 = setTimeout(() => setStage(1), 400);  // Start shooting
+        const t2 = setTimeout(() => setStage(2), 1800); // Reveal Text
 
-        // Stage 2: Move left and show text
-        const logoTimer = setTimeout(() => setAnimationStage(2), 2000);
-
-        // Stage 3: Fade out splash
-        const fadeTimer = setTimeout(() => setAnimationStage(3), 4000);
-
-        // Finish
-        const completeTimer = setTimeout(() => onComplete(), 4500);
+        // Final exit based on the requested duration
+        // We start the fade out (Stage 3) slightly before the total duration
+        const t3 = setTimeout(() => setStage(3), duration - 600);
+        const t4 = setTimeout(onComplete, duration);
 
         return () => {
-            clearTimeout(sprayTimer);
-            clearTimeout(logoTimer);
-            clearTimeout(fadeTimer);
-            clearTimeout(completeTimer);
+            clearTimeout(t1);
+            clearTimeout(t2);
+            clearTimeout(t3);
+            clearTimeout(t4);
         };
-    }, [onComplete]);
+    }, [duration, onComplete]);
 
     return (
-        <div className={`fixed inset-0 z-[99999] bg-[#102216] flex items-center justify-center transition-opacity duration-500 ${animationStage === 3 ? 'opacity-0' : 'opacity-100'}`}>
+        <div
+            className={`fixed inset-0 flex items-center justify-center bg-[#0a150e] transition-opacity duration-500 ease-in-out`}
+            style={{
+                zIndex: 99999,
+                opacity: stage === 3 ? 0 : 1,
+                pointerEvents: stage === 3 ? 'none' : 'auto'
+            }}
+        >
             <style>{`
-                @keyframes smokePrimary {
-                    0% { transform: scale(0.5) translate(0, 0); opacity: 0; }
-                    20% { opacity: 0.8; }
-                    100% { transform: scale(2.5) translate(100px, -20px); opacity: 0; }
-                }
-                @keyframes smokeSecondary {
-                    0% { transform: scale(0.3) translate(0, 0); opacity: 0; }
-                    30% { opacity: 0.6; }
-                    100% { transform: scale(2) translate(80px, 20px); opacity: 0; }
-                }
                 @keyframes shake {
-                    0%, 100% { transform: rotate(-5deg); }
-                    50% { transform: rotate(5deg); }
+                    0%, 100% { transform: rotate(0deg); }
+                    25% { transform: rotate(-5deg); }
+                    75% { transform: rotate(5deg); }
+                }
+                @keyframes spray {
+                    0% { transform: translateX(0) scale(0.5); opacity: 0.8; }
+                    100% { transform: translateX(200px) scale(3); opacity: 0; }
                 }
                 .particle {
                     position: absolute;
                     background: white;
                     border-radius: 50%;
-                    filter: blur(8px);
-                    opacity: 0;
+                    filter: blur(2px);
                 }
             `}</style>
 
-            <div className={`relative flex items-center transition-all duration-1000 ease-in-out ${animationStage >= 2 ? '-translate-x-12 sm:-translate-x-20' : 'translate-x-0'}`}>
-                {/* Extinguisher Icon */}
-                <div className={`relative z-10 transition-transform duration-700 ${animationStage === 1 ? 'scale-110' : 'scale-100'}`}>
-                    <div className={`${animationStage === 1 ? 'animate-[shake_0.2s_infinite]' : ''}`}>
-                        <span className="material-symbols-outlined !text-7xl sm:!text-9xl text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-                            fire_extinguisher
-                        </span>
+            <div className="relative flex flex-col items-center justify-center w-full max-w-[90vw]">
+
+                <div className="relative flex items-center justify-center w-full">
+                    {/* Extinguisher Container */}
+                    <div
+                        className={`relative z-20 flex flex-col items-center justify-center transition-all duration-700 ease-out`}
+                        style={{
+                            transform: stage >= 2 ? 'translateX(-20%)' : 'translateX(0)',
+                        }}
+                    >
+                        <div className={`${stage === 1 ? 'animate-[shake_0.2s_infinite]' : ''} relative`}>
+                            <span className="material-symbols-outlined text-[80px] sm:text-[120px] text-white drop-shadow-2xl">
+                                fire_extinguisher
+                            </span>
+
+                            {stage === 1 && (
+                                <div className="absolute top-1/2 right-0 translate-x-4 -translate-y-1/2 w-10 h-10 pointer-events-none">
+                                    {[...Array(15)].map((_, i) => (
+                                        <div
+                                            key={i}
+                                            className="particle"
+                                            style={{
+                                                width: Math.random() * 8 + 4 + 'px',
+                                                height: Math.random() * 8 + 4 + 'px',
+                                                animation: `spray ${0.4 + Math.random() * 0.4}s linear infinite`,
+                                                top: (Math.random() - 0.5) * 30 + 'px',
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Smoke/Powder Particles */}
-                    {animationStage === 1 && (
-                        <div className="absolute top-1/2 left-3/4 w-40 h-20 -translate-y-1/2 pointer-events-none">
-                            {[...Array(15)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="particle"
-                                    style={{
-                                        width: Math.random() * 30 + 10 + 'px',
-                                        height: Math.random() * 30 + 10 + 'px',
-                                        animation: `${i % 2 === 0 ? 'smokePrimary' : 'smokeSecondary'} ${Math.random() * 0.8 + 0.5}s infinite`,
-                                        animationDelay: Math.random() * 0.5 + 's',
-                                        left: '0px',
-                                        top: Math.random() * 40 - 20 + 'px'
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Logo and Slogan */}
-                <div className={`ml-6 sm:ml-10 transition-all duration-1000 ${animationStage >= 2 ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
-                    <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tighter italic">
-                        Extintor<span className="text-primary font-black">uy</span>
-                    </h1>
-                    <div className="overflow-hidden h-6 mt-1">
-                        <p className={`text-[10px] sm:text-xs font-black uppercase tracking-[0.4em] text-primary transition-transform duration-700 delay-500 ${animationStage >= 2 ? 'translate-y-0' : 'translate-y-full'}`}>
-                            Logística & Seguridad 4.0
+                    {/* Text Container */}
+                    <div
+                        className={`absolute left-1/2 ml-4 flex flex-col items-start transition-all duration-1000 ease-out`}
+                        style={{
+                            opacity: stage >= 2 ? 1 : 0,
+                            transform: stage >= 2 ? 'translateX(-5%)' : 'translateX(10%)',
+                            zIndex: 10
+                        }}
+                    >
+                        <h1 className="text-3xl sm:text-5xl font-black text-white italic tracking-tighter leading-none whitespace-nowrap drop-shadow-lg">
+                            Extintor<span className="text-primary not-italic">UY</span>
+                        </h1>
+                        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-primary/80 mt-1">
+                            Logística & Seguridad
                         </p>
                     </div>
                 </div>
-            </div>
 
-            {/* Background Decorative Elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px] animate-pulse"></div>
-                <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-emerald-600/5 rounded-full blur-[100px] animate-pulse"></div>
+                {/* Loading Message */}
+                <div className={`mt-12 transition-opacity duration-500 ${stage >= 1 ? 'opacity-100' : 'opacity-0'}`}>
+                    <div className="flex flex-col items-center gap-2">
+                        <div className="flex gap-1">
+                            <div className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                            <div className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                            <div className="w-1 h-1 bg-primary rounded-full animate-bounce"></div>
+                        </div>
+                        <span className="text-[10px] sm:text-xs font-bold text-white/40 uppercase tracking-[0.4em]">
+                            Cargando experiencia...
+                        </span>
+                    </div>
+                </div>
             </div>
         </div>
     );
