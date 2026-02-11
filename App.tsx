@@ -14,6 +14,7 @@ import TechnicianDashboard from './components/TechnicianDashboard';
 import InspeccionesScreen from './components/InspeccionesScreen';
 import TecnicosScreen from './components/TecnicosScreen';
 import AjustesScreen from './components/AjustesScreen';
+import ReportesScreen from './components/ReportesScreen';
 import { supabase } from './services/supabase';
 import { db } from './services/db';
 import { UserProfile } from './types';
@@ -116,6 +117,8 @@ const App: React.FC = () => {
         return <MapScreen onStartInspection={() => handleStartInspection('#UY-9921-24')} />;
       case 'inspeccion':
         return <InspectionScreen onBack={() => setCurrentScreen('home')} assetId={selectedAssetId} />;
+      case 'reportes':
+        return <ReportesScreen />;
       case 'ajustes':
         return <AjustesScreen profile={profile} onLogout={handleLogout} onRefreshProfile={() => profile && fetchProfile(profile.id)} />;
       default:
