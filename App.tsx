@@ -201,11 +201,13 @@ const App: React.FC = () => {
               </div>
             </header>
 
-            <main className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth relative no-scrollbar">
-              <div className="p-4 pb-24 lg:p-8 h-full animate-fadeIn transition-all duration-700">
+            <main className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth relative no-scrollbar bg-background-dark/30">
+              <div className="w-full max-w-7xl mx-auto p-3 sm:p-4 lg:p-8 pb-40 lg:pb-12 animate-fadeIn transition-all duration-700">
                 {renderScreen()}
               </div>
             </main>
+
+
 
             {/* Bottom Nav for Mobile */}
             {currentScreen !== 'inspeccion' && (

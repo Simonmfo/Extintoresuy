@@ -51,62 +51,66 @@ const Dashboard: React.FC<DashboardProps> = ({ onStartInspection, onNavigate, on
   return (
     <div className="p-4 lg:p-0 space-y-6 max-w-7xl mx-auto h-full">
       {/* Top Section Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Main Risk Metric Card */}
-        <section className="lg:col-span-2 bg-white/5 rounded-3xl p-6 lg:p-8 border border-white/10 relative overflow-hidden group">
+        <section className="lg:col-span-2 bg-white/5 rounded-3xl p-5 lg:p-8 border border-white/10 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors"></div>
 
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-8 relative z-10">
-            <div className="text-center lg:text-left flex-1">
-              <h2 className="text-sm font-bold text-primary uppercase tracking-widest mb-2">Estado de Cumplimiento</h2>
-              <h3 className="text-3xl font-black text-white mb-4">Decreto 372/023 <br /><span className="text-slate-500">Seguridad Industrial</span></h3>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 lg:gap-8 relative z-10">
+            <div className="text-center md:text-left flex-1">
+              <h2 className="text-[10px] lg:text-sm font-bold text-primary uppercase tracking-widest mb-2">Estado de Cumplimiento</h2>
+              <h3 className="text-2xl lg:text-3xl font-black text-white mb-4 leading-tight">Decreto 372/023 <br /><span className="text-slate-500">Seguridad Industrial</span></h3>
 
-              <div className="flex items-center gap-4 justify-center lg:justify-start">
-                <div className={`px-4 py-2 rounded-full border ${stats.compliance > 70 ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-status-red/10 border-status-red/30 text-status-red'} font-bold flex items-center gap-2`}>
+              <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
+                <div className={`px-4 py-2 rounded-full border ${stats.compliance > 70 ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-status-red/10 border-status-red/30 text-status-red'} font-bold flex items-center gap-2 text-xs lg:text-sm`}>
                   <span className="material-symbols-outlined !text-lg">{stats.compliance > 70 ? 'verified' : 'warning'}</span>
                   {stats.compliance > 70 ? 'Bajo Riesgo' : 'Riesgo Alto'}
                 </div>
-                <span className="text-sm text-slate-400 font-medium">Total: {stats.total} equipos</span>
+                <span className="text-xs text-slate-400 font-medium">Total: {stats.total} equipos</span>
               </div>
             </div>
 
-            <div className="shrink-0">
+            <div className="shrink-0 scale-90 lg:scale-100">
               <ComplianceGauge percentage={stats.compliance} />
             </div>
           </div>
         </section>
 
         {/* Quick Actions & Stats Column */}
-        <div className="space-y-6 flex flex-col">
+        <div className="flex flex-col gap-4 lg:gap-6">
           <button
             onClick={() => onStartInspection()}
-            className="flex-1 flex items-center gap-6 bg-primary hover:bg-green-400 p-6 rounded-3xl text-background-dark shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all group lg:min-h-[140px]"
+            className="flex-1 flex items-center gap-4 lg:gap-6 bg-primary hover:bg-green-400 p-5 lg:p-6 rounded-3xl text-background-dark shadow-xl shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all group min-h-[100px] lg:min-h-[140px]"
           >
-            <div className="bg-black/10 p-4 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform">
-              <span className="material-symbols-outlined !text-[40px] fill-1">qr_code_scanner</span>
+            <div className="bg-black/10 size-12 lg:size-16 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform shrink-0">
+              <span className="material-symbols-outlined !text-3xl lg:text-[40px] fill-1">qr_code_scanner</span>
             </div>
             <div className="text-left">
-              <span className="block text-2xl font-black leading-none mb-1">Nueva<br />Inspección</span>
-              <span className="block text-xs font-bold opacity-70 uppercase tracking-widest">Iniciar Escaneo</span>
+              <span className="block text-xl lg:text-2xl font-black leading-tight mb-0.5">Nueva<br className="hidden lg:block" />Inspección</span>
+              <span className="block text-[10px] font-bold opacity-70 uppercase tracking-widest">Iniciar Escaneo</span>
             </div>
           </button>
 
-          <div className="grid grid-cols-2 gap-4 flex-1">
+          <div className="grid grid-cols-2 gap-4">
             <div
               onClick={() => onNavigateAlerts('expired')}
-              className="bg-white/5 border border-white/10 p-5 rounded-3xl hover:bg-white/10 transition-colors cursor-pointer group"
+              className="bg-white/5 border border-white/10 p-4 lg:p-5 rounded-3xl hover:bg-white/10 transition-colors cursor-pointer group flex flex-col items-center lg:items-start text-center lg:text-left"
             >
-              <span className="material-symbols-outlined text-status-red mb-3 !text-3xl group-hover:scale-110 transition-transform">event_busy</span>
-              <span className="block text-4xl font-black text-white">{stats.expired.toString().padStart(2, '0')}</span>
-              <p className="text-xs font-bold text-slate-400 uppercase leading-tight mt-2">Críticos /<br />Vencidos</p>
+              <span className="material-symbols-outlined text-status-red mb-2 lg:mb-3 !text-2xl lg:!text-3xl group-hover:scale-110 transition-transform">event_busy</span>
+              <div className="flex flex-col items-center lg:items-start">
+                <span className="block text-3xl lg:text-4xl font-black text-white leading-none">{stats.expired.toString().padStart(2, '0')}</span>
+                <p className="text-[9px] lg:text-xs font-bold text-slate-400 uppercase leading-tight mt-1.5 lg:mt-2">Críticos / Vencidos</p>
+              </div>
             </div>
             <div
               onClick={() => onNavigateAlerts('pending')}
-              className="bg-white/5 border border-white/10 p-5 rounded-3xl hover:bg-white/10 transition-colors cursor-pointer group"
+              className="bg-white/5 border border-white/10 p-4 lg:p-5 rounded-3xl hover:bg-white/10 transition-colors cursor-pointer group flex flex-col items-center lg:items-start text-center lg:text-left"
             >
-              <span className="material-symbols-outlined text-status-yellow mb-3 !text-3xl group-hover:scale-110 transition-transform">inventory_2</span>
-              <span className="block text-4xl font-black text-white">{stats.pending.toString().padStart(2, '0')}</span>
-              <p className="text-xs font-bold text-slate-400 uppercase leading-tight mt-2">Pendientes<br />Revisión</p>
+              <span className="material-symbols-outlined text-status-yellow mb-2 lg:mb-3 !text-2xl lg:!text-3xl group-hover:scale-110 transition-transform">inventory_2</span>
+              <div className="flex flex-col items-center lg:items-start">
+                <span className="block text-3xl lg:text-4xl font-black text-white leading-none">{stats.pending.toString().padStart(2, '0')}</span>
+                <p className="text-[9px] lg:text-xs font-bold text-slate-400 uppercase leading-tight mt-1.5 lg:mt-2">Pendientes Revisión</p>
+              </div>
             </div>
           </div>
         </div>

@@ -91,15 +91,18 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
             {/* Right Column - Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-6 relative z-10">
-                <div className="w-full max-w-md bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl shadow-black/50">
-                    <div className="text-center mb-10 lg:hidden">
-                        <span className="material-symbols-outlined text-6xl text-primary mb-4">local_fire_department</span>
-                        <h1 className="text-3xl font-bold text-white">ExtintorUY</h1>
+                <div className="w-full max-w-md bg-white/5 backdrop-blur-xl p-8 lg:p-10 rounded-[2.5rem] border border-white/10 shadow-2xl shadow-black/50">
+                    <div className="text-center mb-8 lg:hidden">
+                        <div className="size-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary border border-primary/20 mx-auto mb-4">
+                            <span className="material-symbols-outlined !text-4xl">fire_extinguisher</span>
+                        </div>
+                        <h1 className="text-2xl font-black text-white tracking-tight">Extintores<span className="text-primary">UY</span></h1>
+                        <p className="text-[10px] uppercase font-bold text-slate-500 tracking-[0.2em] mt-1">Plataforma Empresa</p>
                     </div>
 
-                    <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-white mb-2">Bienvenido de nuevo</h2>
-                        <p className="text-slate-400 text-sm">Ingresa tus credenciales para acceder al panel de control.</p>
+                    <div className="mb-8 text-center lg:text-left">
+                        <h2 className="text-2xl font-bold text-white mb-2">Bienvenido</h2>
+                        <p className="text-slate-400 text-sm">Gestiona la seguridad de tu empresa de forma inteligente.</p>
                     </div>
 
                     <form onSubmit={handleAuth} className="space-y-5">
