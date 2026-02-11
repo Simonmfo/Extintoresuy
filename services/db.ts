@@ -247,6 +247,22 @@ export const db = {
     }
   },
 
+  deleteClient: async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      await db.logActivity('delete', 'client', id, `Eliminación de cliente ${id}`);
+      return true;
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      return false;
+    }
+  },
+
   getAssetsByClient: async (clientId: string): Promise<InspectionAsset[]> => {
     let allAssets: any[] = [];
     let from = 0;

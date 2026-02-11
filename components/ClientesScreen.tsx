@@ -106,12 +106,28 @@ const ClientesScreen: React.FC = () => {
                                             </p>
                                         </td>
                                         <td className="p-6 text-right">
-                                            <button
-                                                onClick={() => openModal(client)}
-                                                className="size-10 rounded-xl bg-white/5 text-slate-500 border border-white/10 hover:bg-primary/20 hover:text-primary hover:border-primary/20 transition-all"
-                                            >
-                                                <span className="material-symbols-outlined !text-lg">edit</span>
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => openModal(client)}
+                                                    className="size-10 rounded-xl bg-white/5 text-slate-400 border border-white/10 hover:bg-primary/20 hover:text-primary hover:border-primary/20 transition-all flex items-center justify-center shadow-lg"
+                                                    title="Editar Cliente"
+                                                >
+                                                    <span className="material-symbols-outlined !text-lg">edit</span>
+                                                </button>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (window.confirm(`¿Estás seguro de eliminar a "${client.name}"? Esta acción no se puede deshacer y podría fallar si tiene equipos asociados.`)) {
+                                                            const ok = await db.deleteClient(client.id);
+                                                            if (ok) loadClients();
+                                                            else alert('Error al eliminar: Verifica que el cliente no tenga equipos o facturas asociadas.');
+                                                        }
+                                                    }}
+                                                    className="size-10 rounded-xl bg-white/5 text-slate-500 border border-white/10 hover:bg-red-500/20 hover:text-red-500 hover:border-red-500/20 transition-all flex items-center justify-center shadow-lg"
+                                                    title="Eliminar Cliente"
+                                                >
+                                                    <span className="material-symbols-outlined !text-lg">delete</span>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
