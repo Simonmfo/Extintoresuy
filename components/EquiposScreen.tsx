@@ -131,7 +131,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                         <div class="qr-id">${asset.id}</div>
                                         <div class="qr-client">${selectedClient.name.substring(0, 15)}</div>
                                         <div class="qr-type">${asset.type}</div>
-                                        <div class="qr-footer">EXTINTORUY</div>
+                                        <div class="qr-footer">EXTINTORESUY</div>
                                     </div>
                                 </div>
                             `;
@@ -272,7 +272,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             <span class="id-text">${qrAssetToPrint.id}</span>
                                             <span>${selectedClient.name.substring(0, 15)}</span><br/>
                                             <span style="font-size: 8px">${qrAssetToPrint.type}</span><br/>
-                                            <span style="font-size: 8px">ExtintorUY</span>
+                                            <span style="font-size: 8px">ExtintoresUY</span>
                                         </div>
                                     </div>
                                     <script>
@@ -647,7 +647,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                                                     <span class="id-text">${asset.id}</span>
                                                                                     <span style="display:block; margin-bottom: 4px;">${selectedClient.name.substring(0, 20)}</span>
                                                                                     <span style="font-size: 8px; color: #666;">TIPO: ${asset.type}</span><br/>
-                                                                                    <span style="font-size: 8px; color: #666; font-weight: normal;">EXTINTORUY</span>
+                                                                                    <span style="font-size: 8px; color: #666; font-weight: normal;">EXTINTORESUY</span>
                                                                                 </div>
                                                                             </div>
                                                                         `;

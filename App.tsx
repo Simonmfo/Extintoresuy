@@ -85,11 +85,20 @@ const App: React.FC = () => {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'home':
-        return profile?.role === 'admin' ? (
-          <AdminDashboard onNavigate={handleNavigate} />
-        ) : (
+        if (profile?.role === 'admin') return <AdminDashboard onNavigate={handleNavigate} />;
+        if (profile?.role === 'tecnico') return (
+          <TechnicianDashboard
+            onStartInspection={() => handleNavigate('nueva-inspeccion')}
+            onNavigate={handleNavigate}
+            onNavigateAlerts={(type) => {
+              setAlertType(type);
+              handleNavigate('alertas');
+            }}
+          />
+        );
+        return (
           <Dashboard
-            onStartInspection={() => handleNavigate('mapa')}
+            onStartInspection={() => handleNavigate('nueva-inspeccion')}
             onNavigate={handleNavigate}
             onViewAsset={(id) => handleNavigate('equipos', id, true)}
             onNavigateAlerts={(type) => {
@@ -106,9 +115,20 @@ const App: React.FC = () => {
       case 'reportes':
         return <ReportesScreen companyId={profile?.role === 'admin' ? 'ALL' : profile?.id} />;
       case 'usuarios':
-        return profile?.role === 'admin' ? <UsuariosScreen /> : (
+        if (profile?.role === 'admin') return <UsuariosScreen />;
+        if (profile?.role === 'tecnico') return (
+          <TechnicianDashboard
+            onStartInspection={() => handleNavigate('nueva-inspeccion')}
+            onNavigate={handleNavigate}
+            onNavigateAlerts={(type) => {
+              setAlertType(type);
+              handleNavigate('alertas');
+            }}
+          />
+        );
+        return (
           <Dashboard
-            onStartInspection={() => handleNavigate('mapa')}
+            onStartInspection={() => handleNavigate('nueva-inspeccion')}
             onNavigate={handleNavigate}
             onViewAsset={(id) => handleNavigate('equipos', id, true)}
             onNavigateAlerts={(type) => {
@@ -156,8 +176,11 @@ const App: React.FC = () => {
       case 'nueva-inspeccion':
         return (
           <InspectionScreen
-            onComplete={() => handleNavigate('home')}
-            onCancel={() => handleNavigate('home')}
+            onBack={() => {
+              setSelectedAssetId(null);
+              handleNavigate('home');
+            }}
+            assetId={selectedAssetId}
           />
         );
       default:

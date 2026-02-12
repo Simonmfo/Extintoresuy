@@ -58,7 +58,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                         <div className="size-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary border border-primary/20">
                             <span className="material-symbols-outlined !text-3xl">fire_extinguisher</span>
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-white">Extintoruy Plataforma Empresa</span>
+                        <span className="text-xl font-bold tracking-tight text-white">ExtintoresUY</span>
                     </div>
                 </div>
 
@@ -85,7 +85,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 </div>
 
                 <div className="text-xs text-slate-600 font-medium">
-                    © 2026 ExtintorUY Plataforma Empresa. Todos los derechos reservados.
+                    © 2026 ExtintoresUY. Todos los derechos reservados.
                 </div>
             </div>
 
@@ -97,7 +97,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                             <span className="material-symbols-outlined !text-4xl">fire_extinguisher</span>
                         </div>
                         <h1 className="text-2xl font-black text-white tracking-tight">Extintores<span className="text-primary">UY</span></h1>
-                        <p className="text-[10px] uppercase font-bold text-slate-500 tracking-[0.2em] mt-1">Plataforma Empresa</p>
+                        <p className="text-[10px] uppercase font-bold text-slate-500 tracking-[0.2em] mt-1">ExtintoresUY</p>
                     </div>
 
                     <div className="mb-8 text-center lg:text-left">

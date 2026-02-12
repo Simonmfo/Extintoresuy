@@ -35,7 +35,7 @@ const ComplianceAI: React.FC = () => {
     <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mt-6">
       <div className="flex items-center gap-2 mb-3">
         <span className="material-symbols-outlined text-primary text-sm">auto_awesome</span>
-        <h3 className="text-xs font-black uppercase tracking-widest text-primary">Analista AI Extintoruy</h3>
+        <h3 className="text-xs font-black uppercase tracking-widest text-primary">Analista AI ExtintoresUY</h3>
       </div>
 
       <div className="flex gap-2">

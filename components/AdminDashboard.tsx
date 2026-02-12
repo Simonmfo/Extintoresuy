@@ -42,7 +42,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-black text-white tracking-tight">Panel Administrativo</h1>
-                    <p className="text-slate-500 font-medium">Control total de la infraestructura Extintoruy</p>
+                    <p className="text-slate-500 font-medium">Control total de la infraestructura ExtintoresUY</p>
                 </div>
                 <div className="flex gap-2">
                     <div className="bg-primary/10 border border-primary/20 px-4 py-2 rounded-2xl">
