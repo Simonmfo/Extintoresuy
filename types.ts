@@ -29,6 +29,7 @@ export interface InspectionAsset {
   nextHydrotest?: string;
   assignedTechnicianId?: string;
   lifecycleStatus?: 'active' | 'maintenance' | 'discarded';
+  companyId?: string;
 }
 
 export interface Client {

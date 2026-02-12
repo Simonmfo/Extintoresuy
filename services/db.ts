@@ -297,7 +297,7 @@ export const db = {
   getAsset: async (id: string): Promise<InspectionAsset | null> => {
     const { data, error } = await supabase
       .from('assets')
-      .select('*')
+      .select('*, clients(company_id)')
       .eq('id', id)
       .single();
 
@@ -306,7 +306,11 @@ export const db = {
       return null;
     }
 
-    return mapAsset(data);
+    const asset = mapAsset(data);
+    if ((data as any).clients) {
+      asset.companyId = (data as any).clients.company_id;
+    }
+    return asset;
   },
 
   getAssets: async (companyId?: string): Promise<InspectionAsset[]> => {

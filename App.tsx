@@ -181,6 +181,8 @@ const App: React.FC = () => {
               handleNavigate('home');
             }}
             assetId={selectedAssetId}
+            userCompanyId={profile?.role === 'tecnico' ? profile.company_id : profile?.id}
+            userRole={profile?.role}
           />
         );
       default:

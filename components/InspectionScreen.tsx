@@ -6,6 +6,8 @@ import { InspectionAsset } from '../types';
 interface InspectionScreenProps {
   onBack: () => void;
   assetId?: string | null;
+  userCompanyId?: string;
+  userRole?: string;
 }
 
 const processImage = (file: File): Promise<File> => {
@@ -48,7 +50,7 @@ const processImage = (file: File): Promise<File> => {
   });
 };
 
-const InspectionScreen: React.FC<InspectionScreenProps> = ({ onBack, assetId }) => {
+const InspectionScreen: React.FC<InspectionScreenProps> = ({ onBack, assetId, userCompanyId, userRole }) => {
   const [checklist, setChecklist] = useState({
     manometro: true,
     precinto: true,
@@ -213,11 +215,15 @@ const InspectionScreen: React.FC<InspectionScreenProps> = ({ onBack, assetId }) 
 
       const asset = await db.getAsset(scannedId);
       if (asset) {
+        // Ownership validation: Check if user has permission for this asset
+        if (userRole !== 'admin' && asset.companyId !== userCompanyId) {
+          setScanError(`Acceso Denegado: El equipo ${scannedId} pertenece a otra empresa o cliente fuera de su jurisdicción.`);
+          return;
+        }
+
         // If we came for a specific asset, validate it
         if (assetId && asset.id !== assetId) {
           setScanError(`Código incorrecto. Escaneaste "${asset.name}" (${asset.id}), pero se esperaba el equipo solicitado.`);
-          // Restart scanner after a short delay if we want to allow retry? 
-          // For now just show error.
           return;
         }
 
