@@ -34,6 +34,8 @@ const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [alertType, setAlertType] = useState<'expired' | 'pending'>('pending');
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
 
   const fetchProfile = async (userId: string) => {
     const data = await db.getProfile(userId);
@@ -71,7 +73,9 @@ const App: React.FC = () => {
       else setSelectedAssetId(assetId);
     }
     setCurrentScreen(screen);
+    setSidebarOpen(false); // Close sidebar on navigation
   };
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -165,8 +169,23 @@ const App: React.FC = () => {
               onNavigate={handleNavigate}
               onLogout={handleLogout}
               role={profile?.role || 'empresa'}
+              isOpen={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
             />
           </div>
+
+          {/* Sidebar for Mobile */}
+          <div className="lg:hidden">
+            <Sidebar
+              currentScreen={currentScreen}
+              onNavigate={handleNavigate}
+              onLogout={handleLogout}
+              role={profile?.role || 'empresa'}
+              isOpen={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
+            />
+          </div>
+
 
           {/* Main Content Area */}
           <div className="flex-1 flex flex-col relative h-screen overflow-hidden">
@@ -177,7 +196,9 @@ const App: React.FC = () => {
                   role={profile?.role || 'empresa'}
                   onNavigate={handleNavigate}
                   onLogout={handleLogout}
+                  onMenuClick={() => setSidebarOpen(true)}
                 />
+
               )}
             </div>
 
