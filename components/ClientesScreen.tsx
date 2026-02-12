@@ -3,7 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../services/db';
 import { Client } from '../types';
 
-const ClientesScreen: React.FC = () => {
+interface ClientesScreenProps {
+    companyId?: string;
+}
+
+const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId }) => {
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,11 +16,11 @@ const ClientesScreen: React.FC = () => {
 
     useEffect(() => {
         loadClients();
-    }, []);
+    }, [companyId]);
 
     const loadClients = async () => {
         setLoading(true);
-        const data = await db.getClients();
+        const data = await db.getClients(companyId);
         setClients(data);
         setLoading(false);
     };

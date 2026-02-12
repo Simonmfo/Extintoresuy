@@ -3,7 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../services/db';
 import { Client, InspectionAsset } from '../types';
 
-const ReportesScreen: React.FC = () => {
+interface ReportesScreenProps {
+    companyId?: string;
+}
+
+const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
     const [clients, setClients] = useState<Client[]>([]);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [assets, setAssets] = useState<InspectionAsset[]>([]);
@@ -13,12 +17,12 @@ const ReportesScreen: React.FC = () => {
     useEffect(() => {
         const loadClients = async () => {
             setLoading(true);
-            const data = await db.getClients();
+            const data = await db.getClients(companyId);
             setClients(data);
             setLoading(false);
         };
         loadClients();
-    }, []);
+    }, [companyId]);
 
     const handleSelectClient = async (client: Client) => {
         setLoading(true);
@@ -125,8 +129,8 @@ const ReportesScreen: React.FC = () => {
                                 key={client.id}
                                 onClick={() => handleSelectClient(client)}
                                 className={`w-full p-4 rounded-2xl text-left border transition-all flex items-center gap-4 ${selectedClient?.id === client.id
-                                        ? 'bg-primary border-primary text-background-dark'
-                                        : 'bg-white/5 border-white/5 text-slate-300 hover:bg-white/10 hover:border-white/10'
+                                    ? 'bg-primary border-primary text-background-dark'
+                                    : 'bg-white/5 border-white/5 text-slate-300 hover:bg-white/10 hover:border-white/10'
                                     }`}
                             >
                                 <div className={`size-10 rounded-xl flex items-center justify-center font-bold relative shrink-0 ${selectedClient?.id === client.id ? 'bg-background-dark/20 text-background-dark' : 'bg-slate-800 text-slate-500'

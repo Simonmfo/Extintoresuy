@@ -85,19 +85,45 @@ const App: React.FC = () => {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'home':
-        return profile?.role === 'admin' ? <AdminDashboard /> : <Dashboard />;
+        return profile?.role === 'admin' ? (
+          <AdminDashboard onNavigate={handleNavigate} />
+        ) : (
+          <Dashboard
+            onStartInspection={() => handleNavigate('mapa')}
+            onNavigate={handleNavigate}
+            onViewAsset={(id) => handleNavigate('equipos', id, true)}
+            onNavigateAlerts={(type) => {
+              setAlertType(type);
+              handleNavigate('alertas');
+            }}
+            companyId={profile?.id}
+          />
+        );
       case 'mapa':
         return <MapScreen />;
       case 'ajustes':
         return <AjustesScreen onNavigate={handleNavigate} currentScreen={currentScreen} />;
       case 'reportes':
-        return <ReportesScreen />;
+        return <ReportesScreen companyId={profile?.role === 'admin' ? 'ALL' : profile?.id} />;
       case 'usuarios':
-        return profile?.role === 'admin' ? <UsuariosScreen /> : <Dashboard />;
+        return profile?.role === 'admin' ? <UsuariosScreen /> : (
+          <Dashboard
+            onStartInspection={() => handleNavigate('mapa')}
+            onNavigate={handleNavigate}
+            onViewAsset={(id) => handleNavigate('equipos', id, true)}
+            onNavigateAlerts={(type) => {
+              setAlertType(type);
+              handleNavigate('alertas');
+            }}
+            companyId={profile?.id}
+          />
+        );
       case 'clientes':
-        return <ClientesScreen />;
+        return <ClientesScreen companyId={profile?.role === 'admin' ? 'ALL' : profile?.id} />;
       case 'tecnicos':
-        return profile?.role === 'admin' ? <TecnicosScreen /> : <Dashboard />;
+        return (profile?.role === 'admin' || profile?.role === 'empresa') ? (
+          <TecnicosScreen companyId={profile?.role === 'admin' ? 'ALL' : profile?.id} />
+        ) : <Dashboard />;
       case 'facturacion':
         return <FacturacionScreen />;
       case 'inspecciones':
@@ -110,14 +136,18 @@ const App: React.FC = () => {
               handleNavigate('equipos', id, true);
             }}
             type={alertType}
+            companyId={profile?.role === 'admin' ? 'ALL' : profile?.id || ''}
+            onAction={(id) => handleNavigate('equipos', id, true)}
+            onBack={() => handleNavigate('home')}
+            profile={profile}
           />
         );
       case 'equipos':
         return (
           <EquiposScreen
-            initialSelectedAssetId={selectedAssetId}
-            initialViewAssetId={viewAssetId}
-            onClearSelection={() => {
+            initialAssetId={viewAssetId || selectedAssetId}
+            companyId={profile?.role === 'admin' ? 'ALL' : profile?.id}
+            onClearInitialId={() => {
               setSelectedAssetId(null);
               setViewAssetId(null);
             }}

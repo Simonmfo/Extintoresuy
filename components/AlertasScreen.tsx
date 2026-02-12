@@ -21,8 +21,8 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
     const loadData = async () => {
         setLoading(true);
         const [rawAssets, allClients, allTechs] = await Promise.all([
-            db.getAssets(),
-            db.getClients(),
+            db.getAssets(companyId),
+            db.getClients(companyId),
             db.getTechniciansWithStats(companyId)
         ]);
 

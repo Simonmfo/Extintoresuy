@@ -52,19 +52,6 @@ export const db = {
     }
   },
 
-  getActivityLogs: async (limit: number = 10): Promise<any[]> => {
-    const { data, error } = await supabase
-      .from('activity_logs')
-      .select('*, profiles(full_name, email)')
-      .order('created_at', { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('Error fetching activity logs:', error);
-      return [];
-    }
-    return data;
-  },
 
   getProfile: async (id: string): Promise<any> => {
     const { data, error } = await supabase
@@ -107,13 +94,18 @@ export const db = {
     return data;
   },
 
-  getTechniciansWithStats: async (companyId: string): Promise<any[]> => {
-    // Fetch profiles with role 'tecnico' and related to this company
-    const { data: profiles, error: profileError } = await supabase
+  getTechniciansWithStats: async (companyId?: string): Promise<any[]> => {
+    // Fetch profiles with role 'tecnico'
+    let query = supabase
       .from('profiles')
       .select('*')
-      .eq('role', 'tecnico')
-      .eq('company_id', companyId);
+      .eq('role', 'tecnico');
+
+    if (companyId && companyId !== 'ALL') {
+      query = query.eq('company_id', companyId);
+    }
+
+    const { data: profiles, error: profileError } = await query;
 
     if (profileError) {
       console.error('Error fetching technicians:', profileError);
@@ -195,11 +187,17 @@ export const db = {
     // No-op for now
   },
 
-  getClients: async (): Promise<any[]> => {
-    const { data, error } = await supabase
+  getClients: async (companyId?: string): Promise<any[]> => {
+    let query = supabase
       .from('clients')
       .select('*')
       .order('name');
+
+    if (companyId && companyId !== 'ALL') {
+      query = query.eq('company_id', companyId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching clients:', error);
@@ -311,17 +309,33 @@ export const db = {
     return mapAsset(data);
   },
 
-  getAssets: async (): Promise<InspectionAsset[]> => {
+  getAssets: async (companyId?: string): Promise<InspectionAsset[]> => {
     let allAssets: any[] = [];
     let from = 0;
     const limit = 1000;
     let done = false;
 
+    // If companyId is provided, first get their clients
+    let allowedClientIds: string[] | null = null;
+    if (companyId && companyId !== 'ALL') {
+      const { data: clients } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('company_id', companyId);
+      allowedClientIds = clients?.map(c => c.id) || [];
+    }
+
     while (!done) {
-      const { data, error } = await supabase
+      let query = supabase
         .from('assets')
         .select('*')
         .range(from, from + limit - 1);
+
+      if (allowedClientIds) {
+        query = query.in('client_id', allowedClientIds);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching assets:', error);
@@ -360,7 +374,6 @@ export const db = {
         return { success: false, message: `Error al crear inspección: ${inspError.message}` };
       }
 
-      // Calculate next inspection date (2 years from now)
       // Calculate next inspection date (Monthly frequency by default)
       const nextDate = new Date(record.date);
       nextDate.setMonth(nextDate.getMonth() + 1);
@@ -393,8 +406,28 @@ export const db = {
     }
   },
 
-  getStats: async () => {
-    const assets = await db.getAssets();
+  getActivityLogs: async (limit: number = 10, companyId?: string): Promise<any[]> => {
+    let query = supabase
+      .from('activity_logs')
+      .select('*, profiles!inner(full_name, email, company_id)')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (companyId && companyId !== 'ALL') {
+      query = query.eq('profiles.company_id', companyId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching activity logs:', error);
+      return [];
+    }
+    return data;
+  },
+
+  getStats: async (companyId?: string) => {
+    const assets = await db.getAssets(companyId);
     const expired = assets.filter(a => a.status === 'expired' || a.status === 'failed').length;
     const pending = assets.filter(a => a.status === 'pending').length;
     const total = assets.length;
@@ -436,17 +469,15 @@ export const db = {
           last_inspection: assetData.lastInspection,
           location_status: assetData.lifecycleStatus || 'active',
           status: 'pending',
-          // Default location for now, or could generate
           location_lat: -34.9011,
           location_lng: -56.1645,
-          id: 'TEMP' // Valid ID to satisfy types, will be overwritten by trigger
+          id: 'TEMP'
         } as any)
         .select()
         .single();
 
       if (error) throw error;
 
-      // Log the creation
       await db.logActivity('create', 'asset', data.id, data.name || data.id, assetData);
 
       return data;
@@ -464,7 +495,7 @@ export const db = {
           name: updates.name,
           type: updates.type,
           description: updates.description,
-          status: updates.status, // Allow manual status update if needed
+          status: updates.status,
           agent: updates.agent,
           fire_class: updates.fireClass,
           expiration_date: updates.expirationDate,
@@ -479,7 +510,6 @@ export const db = {
 
       if (error) throw error;
 
-      // Log the update
       await db.logActivity('update', 'asset', id, updates.name || id, updates);
 
       return true;
@@ -494,7 +524,6 @@ export const db = {
       const { error } = await supabase.from('assets').delete().eq('id', id);
       if (error) throw error;
 
-      // Log the deletion
       await db.logActivity('delete', 'asset', id, id);
 
       return true;
@@ -504,7 +533,6 @@ export const db = {
     }
   },
 
-  // Invoice Methods
   getInvoices: async (): Promise<any[]> => {
     const { data, error } = await supabase
       .from('invoices')

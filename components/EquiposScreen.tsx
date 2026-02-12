@@ -8,9 +8,10 @@ import ReactDOM from 'react-dom';
 interface EquiposScreenProps {
     initialAssetId?: string | null;
     onClearInitialId?: () => void;
+    companyId?: string;
 }
 
-const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearInitialId }) => {
+const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearInitialId, companyId }) => {
     const [clients, setClients] = useState<Client[]>([]);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [assets, setAssets] = useState<InspectionAsset[]>([]);
@@ -58,12 +59,12 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
     useEffect(() => {
         const loadClients = async () => {
             setLoading(true);
-            const data = await db.getClients();
+            const data = await db.getClients(companyId);
             setClients(data);
             setLoading(false);
         };
         loadClients();
-    }, []);
+    }, [companyId]);
 
     const handleSelectClient = async (client: Client) => {
         if (selectedClient?.id === client.id) {

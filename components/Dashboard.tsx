@@ -9,24 +9,25 @@ interface DashboardProps {
   onNavigate: (screen: Screen) => void;
   onViewAsset: (assetId: string) => void;
   onNavigateAlerts: (type: 'expired' | 'pending') => void;
+  companyId?: string;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onStartInspection, onNavigate, onViewAsset, onNavigateAlerts }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onStartInspection, onNavigate, onViewAsset, onNavigateAlerts, companyId }) => {
   const [stats, setStats] = useState({ total: 0, expired: 0, pending: 0, compliance: 0 });
   const [activityLogs, setActivityLogs] = useState<any[]>([]);
   const [selectedLog, setSelectedLog] = useState<any>(null);
 
   useEffect(() => {
     const loadData = async () => {
-      const statsData = await db.getStats();
+      const statsData = await db.getStats(companyId);
       setStats(statsData);
 
-      const logs = await db.getActivityLogs(6);
+      const logs = await db.getActivityLogs(6, companyId);
       setActivityLogs(logs);
     };
 
     loadData();
-  }, []);
+  }, [companyId]);
 
   const getActionIcon = (action: string) => {
     switch (action) {

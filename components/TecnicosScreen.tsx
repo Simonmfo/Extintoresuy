@@ -54,7 +54,7 @@ const TecnicosScreen: React.FC<TecnicosScreenProps> = ({ companyId }) => {
                         role: 'tecnico',
                         full_name: newTecnico.fullName,
                         email: newTecnico.email,
-                        company_id: companyId
+                        company_id: companyId === 'ALL' ? null : companyId
                     });
             }
 
