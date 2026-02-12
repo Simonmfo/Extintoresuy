@@ -116,7 +116,9 @@ const UserMenu: React.FC<UserMenuProps> = ({ onNavigate, onLogout, role }) => {
                                     <div className="text-[11px] text-slate-400 leading-relaxed space-y-3 font-medium">
                                         <p>Esta plataforma es una herramienta especializada para la gestión del cumplimiento normativo de equipos contra incendios.</p>
                                         <p>Todos los registros cumplen con las directivas de la <strong>Dirección Nacional de Bomberos</strong> y las ordenanzas municipales vigentes.</p>
-                                        <p><strong>Privacidad:</strong> Los datos de equipos e inspecciones están protegidos para fines de auditoría y seguridad industrial únicamente.</p>
+                                        <p><strong>Seguridad de Datos:</strong> Utilizamos protocolos de encriptación de grado industrial para proteger el historial de sus activos. La infraestructura se aloja en centros de datos seguros con redundancia y respaldos automáticos.</p>
+                                        <p><strong>Privacidad:</strong> Los datos se gestionan bajo estrictos estándares de confidencialidad y según lo establecido en la Ley N° 18.331. La información técnica se utiliza exclusivamente para fines de auditoría y seguridad industrial.</p>
+                                        <p><strong>Integridad:</strong> Cada inspección genera un registro inmutable con marca de tiempo para garantizar la trazabilidad total ante cualquier peritaje.</p>
                                     </div>
                                 </section>
 
