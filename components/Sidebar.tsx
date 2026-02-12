@@ -7,11 +7,12 @@ interface SidebarProps {
     onNavigate: (screen: Screen) => void;
     onLogout?: () => void;
     role: 'admin' | 'tecnico' | 'empresa';
+    fullName?: string;
     isOpen?: boolean;
     onClose?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, role, isOpen, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, role, fullName, isOpen, onClose }) => {
     const navItems = role === 'admin'
         ? [
             { id: 'home', label: 'Admin Panel', icon: 'admin_panel_settings' },
@@ -111,18 +112,34 @@ const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, 
 
                 {/* User Section */}
                 <div className="p-3 lg:p-4 border-t border-white/5 bg-white/[0.02]">
-                    <button
-                        onClick={onLogout}
-                        className="w-full h-12 flex items-center gap-4 px-3 py-3 rounded-2xl text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-all group/logout overflow-hidden whitespace-nowrap"
-                    >
-                        <div className="size-8 rounded-xl bg-slate-800 flex items-center justify-center border border-white/10 group-hover/logout:border-red-500/30 shrink-0">
-                            <span className="material-symbols-outlined !text-sm group-hover/logout:text-red-500">logout</span>
+                    <div className="flex flex-col gap-2">
+                        {/* User Profile Info (Quick View) */}
+                        <div
+                            onClick={() => onNavigate('ajustes')}
+                            className="flex items-center gap-4 px-3 py-3 rounded-2xl hover:bg-white/5 cursor-pointer transition-all group/profile overflow-hidden whitespace-nowrap"
+                        >
+                            <div className="size-8 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
+                                <span className="material-symbols-outlined !text-sm text-primary">person</span>
+                            </div>
+                            <div className={`flex-1 text-left transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                                <span className="block text-[10px] font-medium opacity-50 uppercase tracking-tighter">Usuario Conectado</span>
+                                <span className="block text-xs font-black text-white">{fullName || 'Sin nombre'}</span>
+                            </div>
                         </div>
-                        <div className={`flex-1 text-left transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                            <span className="block text-xs font-black text-white group-hover/logout:text-red-500">Cerrar Sesión</span>
-                            <span className="block text-[10px] font-medium opacity-50 uppercase tracking-tighter">Usuario Activo</span>
-                        </div>
-                    </button>
+
+                        {/* Logout Button */}
+                        <button
+                            onClick={onLogout}
+                            className="w-full h-10 flex items-center gap-4 px-3 py-2 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-500 transition-all group/logout overflow-hidden whitespace-nowrap"
+                        >
+                            <div className="size-8 rounded-lg flex items-center justify-center shrink-0">
+                                <span className="material-symbols-outlined !text-sm group-hover/logout:text-red-500">logout</span>
+                            </div>
+                            <span className={`text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                                Cerrar Sesión
+                            </span>
+                        </button>
+                    </div>
                 </div>
             </aside>
         </>

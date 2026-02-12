@@ -127,48 +127,84 @@ const AjustesScreen: React.FC<AjustesScreenProps> = ({ profile, onLogout, onRefr
 
                     {/* Profile Section */}
                     <section className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
-                        <div className="px-8 py-6 border-b border-white/5 flex items-center gap-3">
-                            <span className="material-symbols-outlined text-primary">person_outline</span>
-                            <h2 className="text-lg font-bold text-white">Información del Perfil</h2>
+                        <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                                <span className="material-symbols-outlined text-primary">person_outline</span>
+                                <h2 className="text-lg font-bold text-white">Información del Perfil</h2>
+                            </div>
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/10">
+                                ID: {profile?.id.substring(0, 8)}...
+                            </span>
                         </div>
-                        <form onSubmit={handleUpdateProfile} className="p-8 space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Nombre Completo</label>
-                                    <input
-                                        type="text"
-                                        value={fullName}
-                                        onChange={(e) => setFullName(e.target.value)}
-                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all transition-duration-300"
-                                        placeholder="Tu nombre completo"
-                                    />
+
+                        <div className="p-8 space-y-8">
+                            {/* Grid de Datos Informativos (Read Only) */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="p-4 bg-black/20 rounded-2xl border border-white/5 space-y-1">
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Rol del Sistema</span>
+                                    <span className="text-sm font-bold text-white flex items-center gap-2 capitalize">
+                                        <span className={`size-2 rounded-full ${profile?.role === 'admin' ? 'bg-red-500' : 'bg-primary'}`}></span>
+                                        {profile?.role}
+                                    </span>
                                 </div>
-                                <div className="space-y-2 opacity-60 cursor-not-allowed">
-                                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Email Corporativo</label>
-                                    <div className="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-3.5 text-slate-400 flex items-center justify-between">
-                                        <span>{profile?.email}</span>
-                                        <span className="material-symbols-outlined text-sm">lock</span>
+                                <div className="p-4 bg-black/20 rounded-2xl border border-white/5 space-y-1">
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Fecha de Registro</span>
+                                    <span className="text-sm font-bold text-white">
+                                        {profile?.created_at ? new Date(profile.created_at).toLocaleDateString('es-UY', { day: '2-digit', month: 'long', year: 'numeric' }) : 'No disponible'}
+                                    </span>
+                                </div>
+                                <div className="p-4 bg-black/20 rounded-2xl border border-white/5 space-y-1">
+                                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">ID de Usuario (Completo)</span>
+                                    <code className="text-[10px] font-mono text-slate-400 break-all">{profile?.id}</code>
+                                </div>
+                                {profile?.company_id && (
+                                    <div className="p-4 bg-black/20 rounded-2xl border border-white/5 space-y-1">
+                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Empresa Madre / ID</span>
+                                        <code className="text-[10px] font-mono text-slate-400 break-all">{profile.company_id}</code>
                                     </div>
-                                </div>
+                                )}
                             </div>
 
-                            <div className="flex justify-end pt-4">
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="bg-primary hover:bg-emerald-500 text-background-dark font-black text-sm uppercase tracking-widest px-8 py-4 rounded-2xl transition-all transform active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center gap-2"
-                                >
-                                    {loading ? (
-                                        <span className="size-5 border-2 border-background-dark border-t-transparent rounded-full animate-spin"></span>
-                                    ) : (
-                                        <>
-                                            <span className="material-symbols-outlined text-xl">save</span>
-                                            Guardar Cambios
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </form>
+                            {/* Formulario Editable */}
+                            <form onSubmit={handleUpdateProfile} className="space-y-6 pt-4 border-t border-white/5">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Nombre Completo</label>
+                                        <input
+                                            type="text"
+                                            value={fullName}
+                                            onChange={(e) => setFullName(e.target.value)}
+                                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 shadow-inner"
+                                            placeholder="Tu nombre completo"
+                                        />
+                                    </div>
+                                    <div className="space-y-2 opacity-60">
+                                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Email Principal</label>
+                                        <div className="w-full bg-black/20 border border-white/5 rounded-2xl px-5 py-3.5 text-slate-400 flex items-center justify-between shadow-inner">
+                                            <span>{profile?.email}</span>
+                                            <span className="material-symbols-outlined text-sm">lock</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end pt-4">
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="bg-primary hover:bg-emerald-500 text-background-dark font-black text-sm uppercase tracking-widest px-8 py-4 rounded-2xl transition-all transform active:scale-[0.98] shadow-lg shadow-primary/20 flex items-center gap-2"
+                                    >
+                                        {loading ? (
+                                            <span className="size-5 border-2 border-background-dark border-t-transparent rounded-full animate-spin"></span>
+                                        ) : (
+                                            <>
+                                                <span className="material-symbols-outlined text-xl">save</span>
+                                                Actualizar Perfil
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </section>
 
                     {/* Security Section */}

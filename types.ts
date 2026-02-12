@@ -48,4 +48,5 @@ export interface UserProfile {
   role: 'admin' | 'tecnico' | 'empresa';
   avatar_url?: string;
   company_id?: string;
+  created_at?: string;
 }

@@ -45,7 +45,8 @@ const App: React.FC = () => {
         email: data.email,
         full_name: data.full_name,
         role: data.role as any,
-        company_id: (data as any).company_id
+        company_id: (data as any).company_id,
+        created_at: data.created_at
       });
     }
   };
@@ -226,6 +227,7 @@ const App: React.FC = () => {
               onNavigate={handleNavigate}
               onLogout={handleLogout}
               role={profile?.role || 'empresa'}
+              fullName={profile?.full_name || ''}
               isOpen={sidebarOpen}
               onClose={() => setSidebarOpen(false)}
             />
@@ -238,6 +240,7 @@ const App: React.FC = () => {
               onNavigate={handleNavigate}
               onLogout={handleLogout}
               role={profile?.role || 'empresa'}
+              fullName={profile?.full_name || ''}
               isOpen={sidebarOpen}
               onClose={() => setSidebarOpen(false)}
             />
