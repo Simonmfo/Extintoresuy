@@ -82,6 +82,44 @@ export const db = {
     }
   },
 
+  createUser: async (userData: { email: string; password?: string; fullName: string; role: string; companyId?: string | null }): Promise<{ success: boolean; message?: string }> => {
+    try {
+      // Create auth user
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password || 'Temporary123!', // Default password if none provided
+        options: {
+          data: {
+            full_name: userData.fullName,
+            role: userData.role
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      if (data.user) {
+        // Create/Update profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: data.user.id,
+            email: userData.email,
+            full_name: userData.fullName,
+            role: userData.role,
+            company_id: userData.companyId || null
+          });
+
+        if (profileError) throw profileError;
+      }
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      return { success: false, message: error.message };
+    }
+  },
+
   getAllProfiles: async (): Promise<any[]> => {
     const { data, error } = await supabase
       .from('profiles')
