@@ -56,20 +56,13 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isLoggedIn = fa
                 }
             `}</style>
 
-            <div className="flex flex-col items-center justify-center w-full max-w-[95vw]">
-
-                {/* Main Identity Block - This container stays centered */}
-                <div className="flex items-center justify-center transition-all duration-1000 ease-in-out">
-
-                    {/* Extinguisher - Shifts left to make room while grouped */}
-                    <div
-                        className={`relative z-20 flex items-center justify-center transition-all duration-1000 ease-in-out`}
-                        style={{
-                            transform: stage >= 2 ? 'translateX(0)' : 'translateX(0)', // Group container handles centering
-                        }}
-                    >
+            <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+                {/* Main Identity Block - Forced absolute center */}
+                <div className="flex items-center justify-center transition-all duration-1000 ease-in-out relative z-10">
+                    {/* Extinguisher */}
+                    <div className="relative z-20 flex items-center justify-center transition-all duration-1000 ease-in-out">
                         <div className={`${stage === 1 ? 'animate-[shake_0.2s_infinite]' : ''} relative`}>
-                            <span className="material-symbols-outlined text-[70px] sm:text-[110px] text-white drop-shadow-2xl">
+                            <span className="material-symbols-outlined text-[75px] sm:text-[120px] text-white drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                                 fire_extinguisher
                             </span>
 
@@ -92,9 +85,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isLoggedIn = fa
                         </div>
                     </div>
 
-                    {/* Text Container - Appears and expands width, pushing extinguisher left naturally */}
+                    {/* Text Container */}
                     <div
-                        className={`flex flex-col items-start overflow-hidden transition-all duration-1000 ease-in-out`}
+                        className="flex flex-col items-start overflow-hidden transition-all duration-1000 ease-in-out"
                         style={{
                             maxWidth: stage >= 2 ? '600px' : '0px',
                             opacity: stage >= 2 ? 1 : 0,
@@ -102,7 +95,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isLoggedIn = fa
                             transform: stage >= 2 ? 'translateX(0)' : 'translateX(20px)',
                         }}
                     >
-                        <h1 className="text-3xl sm:text-6xl font-black text-white italic tracking-tighter leading-none whitespace-nowrap drop-shadow-lg">
+                        <h1 className="text-3xl sm:text-6xl font-black text-white italic tracking-tighter leading-none whitespace-nowrap">
                             Extintores<span className="text-primary not-italic">UY</span>
                         </h1>
                         <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.4em] text-primary/80 mt-1 whitespace-nowrap">
@@ -111,18 +104,19 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isLoggedIn = fa
                     </div>
                 </div>
 
-                {/* Status Message - Centered below the identity block */}
-                <div className={`mt-10 transition-all duration-700 delay-500 overflow-hidden ${stage >= 1 ? 'max-h-20 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <div className="flex flex-col items-center gap-2">
-                        <div className="flex gap-1">
-                            <div className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                            <div className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                            <div className="w-1 h-1 bg-primary rounded-full animate-bounce"></div>
-                        </div>
-                        <p className="text-[9px] sm:text-[11px] font-black text-white/30 uppercase tracking-[0.5em]">
-                            Cargando experiencia...
-                        </p>
+                {/* Status Message - Positioned absolutely below the center */}
+                <div
+                    className="absolute bottom-12 left-1/2 -translate-x-1/2 transition-all duration-700 delay-500 flex flex-col items-center gap-3"
+                    style={{ opacity: stage >= 1 ? 0.3 : 0 }}
+                >
+                    <div className="flex gap-1.5">
+                        <div className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                        <div className="w-1 h-1 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                        <div className="w-1 h-1 bg-primary rounded-full animate-bounce"></div>
                     </div>
+                    <p className="text-[8px] sm:text-[10px] font-black text-white uppercase tracking-[0.6em] whitespace-nowrap">
+                        Iniciando Sistema
+                    </p>
                 </div>
             </div>
 

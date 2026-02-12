@@ -70,48 +70,75 @@ const UserMenu: React.FC<UserMenuProps> = ({ onNavigate, onLogout, role }) => {
                 )}
             </div>
 
-            {/* DEFINITIVE MODAL FIX: Fixed at root with extreme Z-index */}
+            {/* DEFINITIVE MODAL FIX: Using fixed inset-0 for absolute centering regardless of parent */}
             {showAbout && (
                 <div
-                    className="fixed inset-0 bg-black/95 backdrop-blur-2xl animate-fadeIn p-4 flex items-center justify-center"
-                    style={{ zIndex: 999999 }}
+                    className="fixed inset-0 w-screen h-screen bg-black/95 backdrop-blur-3xl flex items-center justify-center p-4 sm:p-6"
+                    style={{ zIndex: 10000000 }}
                 >
-                    <div className="bg-[#1a1c1e] border border-white/10 rounded-[40px] w-full max-w-md shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden animate-scaleIn">
-                        <div className="p-8 space-y-8">
-                            <div className="flex flex-col items-center text-center space-y-4">
-                                <div className="size-20 bg-primary/10 rounded-[32px] flex items-center justify-center text-primary shadow-inner">
-                                    <span className="material-symbols-outlined !text-5xl">verified_user</span>
-                                </div>
-                                <div>
-                                    <h3 className="text-3xl font-black text-white tracking-tight">Extintoruy</h3>
-                                    <p className="text-primary text-xs font-black uppercase tracking-[0.2em]">Versión 1.2.0 stable</p>
-                                </div>
-                            </div>
+                    <style>{`
+                        @keyframes modalEntry {
+                            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+                            to { opacity: 1; transform: scale(1) translateY(0); }
+                        }
+                        .animate-modal-entry { animation: modalEntry 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+                    `}</style>
 
-                            <div className="space-y-4">
-                                <div className="bg-white/5 p-6 rounded-[32px] border border-white/5 space-y-4">
-                                    <div className="flex items-center gap-2 text-slate-300">
-                                        <span className="material-symbols-outlined text-sm">gavel</span>
-                                        <p className="text-[10px] font-black uppercase tracking-widest">Políticas & Privacidad</p>
-                                    </div>
-                                    <div className="text-xs text-slate-400 leading-relaxed space-y-4 max-h-[25vh] overflow-y-auto custom-scrollbar pr-2 font-medium">
-                                        <p>Esta plataforma gestiona el cumplimiento normativo de equipos contra incendios bajo las ordenanzas de la Dirección Nacional de Bomberos de Uruguay.</p>
-                                        <p><strong>Seguridad:</strong> La integridad de la trazabilidad y los registros de inspección están garantizados mediante tecnologías de cifrado y auditoría persistente.</p>
-                                        <p>Software optimizado para operaciones de alta logística.</p>
-                                    </div>
-                                </div>
-                            </div>
-
+                    <div className="bg-[#1a1c1e] border border-white/10 rounded-[40px] w-full max-w-md max-h-[90vh] shadow-[0_40px_100px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden animate-modal-entry relative">
+                        {/* Header Fixed inside modal */}
+                        <div className="absolute top-0 right-0 p-6 z-20">
                             <button
                                 onClick={() => setShowAbout(false)}
-                                className="w-full bg-primary text-background-dark font-black py-5 rounded-[24px] text-sm uppercase tracking-widest shadow-xl shadow-primary/20 hover:brightness-110 active:scale-95 transition-all"
+                                className="size-11 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-all active:scale-90 border border-white/5"
                             >
-                                Entendido
+                                <span className="material-symbols-outlined !text-xl">close</span>
                             </button>
+                        </div>
+
+                        {/* Scrollable Content Area */}
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-8 pt-12 space-y-8">
+                            <div className="flex flex-col items-center text-center space-y-4 pt-4">
+                                <div className="size-20 bg-primary/10 rounded-[32px] flex items-center justify-center text-primary shadow-inner border border-primary/10">
+                                    <span className="material-symbols-outlined !text-5xl">verified_user</span>
+                                </div>
+                                <div className="space-y-1">
+                                    <h3 className="text-3xl font-black text-white tracking-tight">Extintores<span className="text-primary">UY</span></h3>
+                                    <p className="text-primary/60 text-[10px] font-black uppercase tracking-[0.3em]">Compliance Edition 1.2.0</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <section className="bg-white/5 p-6 rounded-[32px] border border-white/5 space-y-4">
+                                    <div className="flex items-center gap-2 text-slate-300">
+                                        <span className="material-symbols-outlined text-sm">gavel</span>
+                                        <p className="text-[10px] font-black uppercase tracking-widest">Información Legal</p>
+                                    </div>
+                                    <div className="text-[11px] text-slate-400 leading-relaxed space-y-3 font-medium">
+                                        <p>Esta plataforma es una herramienta especializada para la gestión del cumplimiento normativo de equipos contra incendios.</p>
+                                        <p>Todos los registros cumplen con las directivas de la <strong>Dirección Nacional de Bomberos</strong> y las ordenanzas municipales vigentes.</p>
+                                        <p><strong>Privacidad:</strong> Los datos de equipos e inspecciones están protegidos para fines de auditoría y seguridad industrial únicamente.</p>
+                                    </div>
+                                </section>
+
+                                <div className="px-4 py-2 bg-black/40 rounded-2xl flex items-center justify-between border border-white/5">
+                                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Soporte Técnico</span>
+                                    <span className="text-[10px] text-primary font-black">ACTIVO 24/7</span>
+                                </div>
+                            </div>
+
+                            <div className="pt-2">
+                                <button
+                                    onClick={() => setShowAbout(false)}
+                                    className="w-full bg-primary text-background-dark font-black py-4 rounded-[20px] text-xs uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:brightness-110 active:scale-[0.98] transition-all"
+                                >
+                                    Cerrar Información
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
+
         </>
     );
 };
