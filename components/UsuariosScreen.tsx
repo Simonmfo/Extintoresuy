@@ -276,18 +276,18 @@ const UsuariosScreen: React.FC = () => {
                                 </select>
                             </div>
 
-                            {formData.role !== 'admin' && (
+                            {formData.role === 'tecnico' && (
                                 <div className="space-y-1.5">
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Empresa / Cliente Asociado</label>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Empresa / Patrón Asociado</label>
                                     <select
                                         value={formData.companyId}
                                         onChange={e => setFormData({ ...formData, companyId: e.target.value })}
                                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-all"
-                                        required={formData.role !== 'admin'}
+                                        required={formData.role === 'tecnico'}
                                     >
-                                        <option value="">Seleccione una empresa...</option>
-                                        {clients.map(c => (
-                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                        <option value="">Seleccione la empresa empleadora...</option>
+                                        {users.filter(u => u.role === 'empresa').map(u => (
+                                            <option key={u.id} value={u.id}>{u.full_name || u.email}</option>
                                         ))}
                                     </select>
                                 </div>
