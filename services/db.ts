@@ -91,7 +91,8 @@ export const db = {
         options: {
           data: {
             full_name: userData.fullName,
-            role: userData.role
+            role: userData.role,
+            company_id: userData.companyId || null
           }
         }
       });
@@ -226,17 +227,19 @@ export const db = {
   },
 
   getClients: async (companyId?: string): Promise<any[]> => {
+    // SECURITY: If no companyId and not 'ALL', return empty (unless admin, but we use 'ALL' for that)
+    if (!companyId) return [];
+
     let query = supabase
       .from('clients')
       .select('*')
       .order('name');
 
-    if (companyId && companyId !== 'ALL') {
+    if (companyId !== 'ALL') {
       query = query.eq('company_id', companyId);
     }
 
     const { data, error } = await query;
-
     if (error) {
       console.error('Error fetching clients:', error);
       return [];
@@ -352,19 +355,26 @@ export const db = {
   },
 
   getAssets: async (companyId?: string): Promise<InspectionAsset[]> => {
+    // SECURITY: Requirement check
+    if (!companyId) return [];
+
     let allAssets: any[] = [];
     let from = 0;
     const limit = 1000;
     let done = false;
 
-    // If companyId is provided, first get their clients
+    // If companyId is provided and not 'ALL', first get their clients
     let allowedClientIds: string[] | null = null;
-    if (companyId && companyId !== 'ALL') {
+    if (companyId !== 'ALL') {
       const { data: clients } = await supabase
         .from('clients')
         .select('id')
         .eq('company_id', companyId);
+
       allowedClientIds = clients?.map(c => c.id) || [];
+
+      // If the company has no clients, it can't have assets
+      if (allowedClientIds.length === 0) return [];
     }
 
     while (!done) {
@@ -449,14 +459,17 @@ export const db = {
   },
 
   getActivityLogs: async (limit: number = 10, companyId?: string): Promise<any[]> => {
+    if (!companyId) return [];
+
     let query = supabase
       .from('activity_logs')
       .select('*, profiles!inner(full_name, email, company_id)')
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    if (companyId && companyId !== 'ALL') {
-      query = query.eq('profiles.company_id', companyId);
+    if (companyId !== 'ALL') {
+      // Filter logs by users belonging to this company or the company owner itself
+      query = query.or(`company_id.eq.${companyId},id.eq.${companyId}`, { foreignTable: 'profiles' });
     }
 
     const { data, error } = await query;

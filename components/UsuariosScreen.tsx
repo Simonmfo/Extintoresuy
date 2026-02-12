@@ -171,7 +171,9 @@ const UsuariosScreen: React.FC = () => {
                                             <div className="flex items-center gap-2">
                                                 <span className="material-symbols-outlined text-slate-600 !text-sm">corporate_fare</span>
                                                 <span className="text-sm text-slate-300 font-medium">
-                                                    {user.clients?.name || 'Acceso Global (Admin)'}
+                                                    {user.role === 'admin' ? 'Acceso Total (Admin)' :
+                                                        user.role === 'empresa' ? 'Dueño de Empresa' :
+                                                            user.clients?.name || 'Sin asignar'}
                                                 </span>
                                             </div>
                                         </td>

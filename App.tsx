@@ -109,7 +109,7 @@ const App: React.FC = () => {
           />
         );
       case 'mapa':
-        return <MapScreen />;
+        return <MapScreen onStartInspection={() => handleNavigate('nueva-inspeccion')} companyId={profile?.role === 'admin' ? 'ALL' : profile?.id} />;
       case 'ajustes':
         return <AjustesScreen onNavigate={handleNavigate} currentScreen={currentScreen} />;
       case 'reportes':

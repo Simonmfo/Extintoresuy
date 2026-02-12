@@ -3,9 +3,10 @@ import React from 'react';
 
 interface MapScreenProps {
   onStartInspection: () => void;
+  companyId?: string;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ onStartInspection }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ onStartInspection, companyId }) => {
   return (
     <div className="relative w-full h-full lg:h-[calc(100vh-100px)] overflow-hidden flex flex-col bg-[#0a140d] rounded-3xl border border-white/5 shadow-2xl">
       {/* Search & Filter Header Overlay */}
