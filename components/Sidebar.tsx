@@ -27,6 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, 
         : role === 'tecnico'
             ? [
                 { id: 'home', label: 'Inicio', icon: 'dashboard' },
+                { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
                 { id: 'inspecciones', label: 'Inspecciones', icon: 'assignment' },
                 { id: 'mapa', label: 'Mapa', icon: 'location_on' },
                 { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
