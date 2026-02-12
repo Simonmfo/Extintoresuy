@@ -15,10 +15,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
     useEffect(() => {
         const loadStats = async () => {
             const [assets, clients, invoices, logs] = await Promise.all([
-                db.getAssets(),
-                db.getClients(),
+                db.getAssets('ALL'),
+                db.getClients('ALL'),
                 db.getInvoices(),
-                db.getActivityLogs(8)
+                db.getActivityLogs(8, 'ALL')
             ]);
 
             const compliance = assets.length > 0

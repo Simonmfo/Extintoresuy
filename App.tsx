@@ -38,31 +38,51 @@ const App: React.FC = () => {
 
 
   const fetchProfile = async (userId: string) => {
-    const data = await db.getProfile(userId);
-    if (data) {
-      setProfile({
-        id: data.id,
-        email: data.email,
-        full_name: data.full_name,
-        role: data.role as any,
-        company_id: (data as any).company_id,
-        created_at: data.created_at
-      });
+    try {
+      console.log('Fetching profile for:', userId);
+      const data = await db.getProfile(userId);
+      console.log('Profile data:', data);
+      if (data) {
+        // Special case for the main admin - FORCED
+        const finalRole = data.email === 'simonfleitas99@gmail.com' ? 'admin' : data.role;
+
+        setProfile({
+          id: data.id,
+          email: data.email,
+          full_name: data.full_name,
+          role: finalRole as any,
+          company_id: (data as any).company_id,
+          created_at: data.created_at
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   React.useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session?.user) fetchProfile(session.user.id);
-      setLoading(false);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setLoading(false);
+      }
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session?.user) fetchProfile(session.user.id);
+      if (session?.user) {
+        setLoading(true);
+        fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
+        setLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -84,12 +104,13 @@ const App: React.FC = () => {
   };
 
   const renderScreen = () => {
-    const effectiveCompanyId = profile?.role === 'admin' ? 'ALL' : (profile?.role === 'tecnico' ? profile.company_id : profile?.id);
+    const userRole = profile?.role || (session?.user?.email === 'simonfleitas99@gmail.com' ? 'admin' : 'empresa');
+    const effectiveCompanyId = userRole === 'admin' ? 'ALL' : (userRole === 'tecnico' ? profile?.company_id : profile?.id);
 
     switch (currentScreen) {
       case 'home':
-        if (profile?.role === 'admin') return <AdminDashboard onNavigate={handleNavigate} />;
-        if (profile?.role === 'tecnico') return (
+        if (userRole === 'admin') return <AdminDashboard onNavigate={handleNavigate} />;
+        if (userRole === 'tecnico') return (
           <TechnicianDashboard
             onStartInspection={() => handleNavigate('nueva-inspeccion')}
             onNavigate={handleNavigate}
@@ -118,8 +139,8 @@ const App: React.FC = () => {
       case 'reportes':
         return <ReportesScreen companyId={effectiveCompanyId} />;
       case 'usuarios':
-        if (profile?.role === 'admin') return <UsuariosScreen />;
-        if (profile?.role === 'tecnico') return (
+        if (userRole === 'admin') return <UsuariosScreen />;
+        if (userRole === 'tecnico') return (
           <TechnicianDashboard
             onStartInspection={() => handleNavigate('nueva-inspeccion')}
             onNavigate={handleNavigate}
@@ -144,7 +165,7 @@ const App: React.FC = () => {
       case 'clientes':
         return <ClientesScreen companyId={effectiveCompanyId} />;
       case 'tecnicos':
-        return (profile?.role === 'admin' || profile?.role === 'empresa') ? (
+        return (userRole === 'admin' || userRole === 'empresa') ? (
           <TecnicosScreen companyId={effectiveCompanyId || ''} />
         ) : <Dashboard onStartInspection={() => handleNavigate('nueva-inspeccion')} onNavigate={handleNavigate} onViewAsset={(id) => handleNavigate('equipos', id, true)} onNavigateAlerts={(type) => { setAlertType(type); handleNavigate('alertas'); }} companyId={effectiveCompanyId} />;
       case 'facturacion':
@@ -214,7 +235,11 @@ const App: React.FC = () => {
         />
       )}
 
-      {!session ? (
+      {loading && session ? (
+        <div className="min-h-screen bg-background-dark flex items-center justify-center">
+          <div className="size-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : !session ? (
         <div className={`transition-opacity duration-1000 ${showSplash ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
           <LoginScreen onLoginSuccess={() => { }} />
         </div>
@@ -226,8 +251,8 @@ const App: React.FC = () => {
               currentScreen={currentScreen}
               onNavigate={handleNavigate}
               onLogout={handleLogout}
-              role={profile?.role || 'empresa'}
-              fullName={profile?.full_name || ''}
+              role={profile?.role || (session?.user?.email === 'simonfleitas99@gmail.com' ? 'admin' : 'empresa')}
+              fullName={profile?.full_name || (session?.user?.email === 'simonfleitas99@gmail.com' ? 'Simón Fleitas' : '')}
               isOpen={sidebarOpen}
               onClose={() => setSidebarOpen(false)}
             />
@@ -239,8 +264,8 @@ const App: React.FC = () => {
               currentScreen={currentScreen}
               onNavigate={handleNavigate}
               onLogout={handleLogout}
-              role={profile?.role || 'empresa'}
-              fullName={profile?.full_name || ''}
+              role={profile?.role || (session?.user?.email === 'simonfleitas99@gmail.com' ? 'admin' : 'empresa')}
+              fullName={profile?.full_name || (session?.user?.email === 'simonfleitas99@gmail.com' ? 'Simón Fleitas' : '')}
               isOpen={sidebarOpen}
               onClose={() => setSidebarOpen(false)}
             />
@@ -253,7 +278,7 @@ const App: React.FC = () => {
             <div className="lg:hidden">
               {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
                 <Header
-                  role={profile?.role || 'empresa'}
+                  role={profile?.role || (session?.user?.email === 'simonfleitas99@gmail.com' ? 'admin' : 'empresa')}
                   onNavigate={handleNavigate}
                   onLogout={handleLogout}
                   onMenuClick={() => setSidebarOpen(true)}
@@ -268,7 +293,7 @@ const App: React.FC = () => {
                 <span className="material-symbols-outlined text-slate-500">
                   {currentScreen === 'home' ? 'dashboard' : currentScreen === 'mapa' ? 'location_on' : 'grid_view'}
                 </span>
-                {currentScreen === 'home' ? 'Dashboard General' : currentScreen}
+                {currentScreen === 'home' ? (profile?.role === 'admin' || session?.user?.email === 'simonfleitas99@gmail.com' ? 'Panel de Control' : 'Dashboard General') : currentScreen}
               </h2>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-full border border-white/5">
@@ -278,7 +303,7 @@ const App: React.FC = () => {
                 <button className="size-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors">
                   <span className="material-symbols-outlined text-slate-300">notifications</span>
                 </button>
-                <UserMenu onNavigate={handleNavigate} onLogout={handleLogout} role={profile?.role} />
+                <UserMenu onNavigate={handleNavigate} onLogout={handleLogout} role={profile?.role || (session?.user?.email === 'simonfleitas99@gmail.com' ? 'admin' : 'empresa')} />
               </div>
             </header>
 
