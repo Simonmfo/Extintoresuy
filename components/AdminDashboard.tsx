@@ -21,8 +21,14 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
                 db.getActivityLogs(8, 'ALL')
             ]);
 
+            const today = new Date().toISOString().split('T')[0];
+            const expiredCount = assets.filter(a =>
+                (a.expirationDate && a.expirationDate < today) ||
+                a.status === 'failed'
+            ).length;
+
             const compliance = assets.length > 0
-                ? Math.round(((assets.length - assets.filter(a => a.status === 'expired').length) / assets.length) * 100)
+                ? Math.round(((assets.length - expiredCount) / assets.length) * 100)
                 : 100;
 
             setStats({

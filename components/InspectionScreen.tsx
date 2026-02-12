@@ -413,10 +413,11 @@ const InspectionScreen: React.FC<InspectionScreenProps> = ({ onBack, assetId, us
                     <span className="bg-white/10 px-2 py-1 rounded text-xs text-slate-300 font-medium">
                       {scannedAsset.type}
                     </span>
-                    <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${scannedAsset.status === 'ok' ? 'bg-emerald-500/20 text-emerald-500' :
-                      scannedAsset.status === 'expired' ? 'bg-red-500/20 text-red-500' : 'bg-amber-500/20 text-amber-500'
+                    <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${(scannedAsset.expirationDate && scannedAsset.expirationDate < new Date().toISOString().split('T')[0]) || scannedAsset.status === 'failed'
+                        ? 'bg-status-red/20 text-status-red'
+                        : scannedAsset.status === 'ok' ? 'bg-emerald-500/20 text-emerald-500' : 'bg-amber-500/20 text-amber-500'
                       }`}>
-                      {scannedAsset.status === 'ok' ? 'Habilitado' : scannedAsset.status === 'expired' ? 'Vencido' : 'Pendiente'}
+                      {(scannedAsset.expirationDate && scannedAsset.expirationDate < new Date().toISOString().split('T')[0]) ? 'Vencido' : scannedAsset.status === 'ok' ? 'Habilitado' : scannedAsset.status === 'failed' ? 'Rechazado' : 'Pendiente'}
                     </span>
                   </div>
                 </div>

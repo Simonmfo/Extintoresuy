@@ -498,12 +498,19 @@ export const db = {
 
   getStats: async (companyId?: string) => {
     const assets = await db.getAssets(companyId);
-    const expired = assets.filter(a => a.status === 'expired' || a.status === 'failed').length;
-    const pending = assets.filter(a => a.status === 'pending').length;
-    const total = assets.length;
-    const compliance = total > 0 ? Math.round(((total - expired) / total) * 100) : 0;
+    const today = new Date().toISOString().split('T')[0];
 
-    return { total, expired, pending, compliance };
+    // A asset is expired if its expirationDate is strictly less than today
+    const expiredCount = assets.filter(a =>
+      (a.expirationDate && a.expirationDate < today) ||
+      a.status === 'failed'
+    ).length;
+
+    const pendingCount = assets.filter(a => a.status === 'pending').length;
+    const total = assets.length;
+    const compliance = total > 0 ? Math.round(((total - expiredCount) / total) * 100) : 0;
+
+    return { total, expired: expiredCount, pending: pendingCount, compliance };
   },
 
   addAsset: async (assetData: {

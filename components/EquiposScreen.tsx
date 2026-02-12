@@ -85,14 +85,20 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
         // Create CSV content
         const headers = ['ID', 'Nombre', 'Tipo', 'Estado', 'Última Inspección', 'Ubicación'];
-        const rows = assets.map(asset => [
-            asset.id,
-            asset.name || 'Sin nombre',
-            asset.type || 'N/A',
-            asset.status === 'ok' ? 'Al día' : asset.status === 'expired' ? 'Vencido' : 'Pendiente',
-            asset.lastInspection || 'Nunca',
-            asset.description || 'N/A'
-        ]);
+        const today = new Date().toISOString().split('T')[0];
+        const rows = assets.map(asset => {
+            const isExpired = asset.expirationDate && asset.expirationDate < today;
+            const statusText = isExpired ? 'Vencido' : asset.status === 'ok' ? 'Al día' : asset.status === 'failed' ? 'Rechazado' : 'Pendiente';
+
+            return [
+                asset.id,
+                asset.name || 'Sin nombre',
+                asset.type || 'N/A',
+                statusText,
+                asset.lastInspection || 'Nunca',
+                asset.description || 'N/A'
+            ];
+        });
 
         const csvContent = "data:text/csv;charset=utf-8,"
             + [headers.join(','), ...rows.map(e => e.join(','))].join("\n");
@@ -745,8 +751,11 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${viewingAsset.lifecycleStatus === 'active' || !viewingAsset.lifecycleStatus ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-500/20 text-slate-400'}`}>
                                             {viewingAsset.lifecycleStatus === 'active' || !viewingAsset.lifecycleStatus ? 'Activo' : 'Inactivo'}
                                         </span>
-                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${viewingAsset.status === 'ok' ? 'bg-primary/20 text-primary' : 'bg-status-red/20 text-status-red'}`}>
-                                            {viewingAsset.status === 'ok' ? 'Conforme' : 'Alerta'}
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${(viewingAsset.expirationDate && viewingAsset.expirationDate < new Date().toISOString().split('T')[0]) || viewingAsset.status === 'failed'
+                                                ? 'bg-status-red/20 text-status-red'
+                                                : 'bg-primary/20 text-primary'
+                                            }`}>
+                                            {(viewingAsset.expirationDate && viewingAsset.expirationDate < new Date().toISOString().split('T')[0]) ? 'Vencido' : viewingAsset.status === 'ok' ? 'Conforme' : 'Alerta'}
                                         </span>
                                     </div>
                                 </div>

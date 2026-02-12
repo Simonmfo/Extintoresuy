@@ -52,20 +52,25 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             'Próx. PH'
         ];
 
-        const rows = assets.map(asset => [
-            asset.id,
-            asset.name || 'Sin nombre',
-            asset.type || 'N/A',
-            asset.agent || 'N/A',
-            asset.fireClass || 'N/A',
-            asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'Activo' : asset.lifecycleStatus === 'maintenance' ? 'Planta' : 'Descarte',
-            asset.status === 'ok' ? 'Al día' : asset.status === 'expired' ? 'Vencido' : 'Pendiente',
-            asset.description || 'N/A',
-            asset.expirationDate || 'N/A',
-            asset.lastInspection || 'N/A',
-            asset.nextInspection || 'N/A',
-            asset.nextHydrotest || 'N/A'
-        ]);
+        const rows = assets.map(asset => {
+            const isExpired = asset.expirationDate && asset.expirationDate < today;
+            const statusInsp = isExpired ? 'Vencido' : asset.status === 'ok' ? 'Al día' : asset.status === 'failed' ? 'Rechazado' : 'Pendiente';
+
+            return [
+                asset.id,
+                asset.name || 'Sin nombre',
+                asset.type || 'N/A',
+                asset.agent || 'N/A',
+                asset.fireClass || 'N/A',
+                asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'Activo' : asset.lifecycleStatus === 'maintenance' ? 'Planta' : 'Descarte',
+                statusInsp,
+                asset.description || 'N/A',
+                asset.expirationDate || 'N/A',
+                asset.lastInspection || 'N/A',
+                asset.nextInspection || 'N/A',
+                asset.nextHydrotest || 'N/A'
+            ];
+        });
 
         const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(e => e.map(cell => `"${(cell || '').toString().replace(/"/g, '""')}"`).join(','))].join("\n");
 
@@ -99,6 +104,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
     };
 
     const stats = getStats();
+    const today = new Date().toISOString().split('T')[0];
 
     return (
         <div className="space-y-6 max-w-6xl mx-auto h-full flex flex-col">
@@ -234,9 +240,11 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                                                         <p className="text-[9px] text-slate-500">{asset.agent || 'Sin agente'}</p>
                                                     </td>
                                                     <td className="py-4 text-center">
-                                                        <span className={`inline-flex px-1.5 py-0.5 rounded-[4px] text-[8px] font-bold uppercase tracking-wider ${asset.status === 'ok' ? 'bg-primary/20 text-primary' : 'bg-status-red/20 text-status-red'
+                                                        <span className={`inline-flex px-1.5 py-0.5 rounded-[4px] text-[8px] font-bold uppercase tracking-wider ${(asset.expirationDate && asset.expirationDate < today) || asset.status === 'failed'
+                                                            ? 'bg-status-red/20 text-status-red'
+                                                            : 'bg-primary/20 text-primary'
                                                             }`}>
-                                                            {asset.status === 'ok' ? 'OK' : 'ALERTA'}
+                                                            {(asset.expirationDate && asset.expirationDate < today) ? 'Vencido' : asset.status === 'ok' ? 'OK' : 'ALERTA'}
                                                         </span>
                                                     </td>
                                                     <td className="py-4 text-right pr-2 font-mono text-[10px] text-slate-300">

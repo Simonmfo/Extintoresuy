@@ -36,8 +36,13 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
         // }
 
         let filtered: InspectionAsset[] = [];
+        const today = new Date().toISOString().split('T')[0];
+
         if (type === 'expired') {
-            filtered = allAssets.filter(a => a.status === 'expired' || a.status === 'failed');
+            filtered = allAssets.filter(a =>
+                (a.expirationDate && a.expirationDate < today) ||
+                a.status === 'failed'
+            );
         } else {
             filtered = allAssets.filter(a => a.status === 'pending');
         }

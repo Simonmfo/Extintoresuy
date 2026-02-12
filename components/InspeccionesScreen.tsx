@@ -111,11 +111,11 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                                 <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                                     <span className="material-symbols-outlined !text-2xl">fire_extinguisher</span>
                                 </div>
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${asset.status === 'pending' ? 'bg-status-yellow/20 text-status-yellow' :
-                                    asset.status === 'expired' ? 'bg-status-red/20 text-status-red' :
-                                        'bg-primary/20 text-primary'
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${(asset.expirationDate && asset.expirationDate < new Date().toISOString().split('T')[0]) || asset.status === 'failed'
+                                        ? 'bg-status-red/20 text-status-red'
+                                        : asset.status === 'pending' ? 'bg-status-yellow/20 text-status-yellow' : 'bg-primary/20 text-primary'
                                     }`}>
-                                    {asset.status}
+                                    {(asset.expirationDate && asset.expirationDate < new Date().toISOString().split('T')[0]) ? 'vencido' : asset.status === 'failed' ? 'rechazado' : asset.status}
                                 </span>
                             </div>
                             <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">{asset.name}</h3>
