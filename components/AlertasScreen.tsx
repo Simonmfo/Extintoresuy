@@ -16,6 +16,7 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
     const [technicians, setTechnicians] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [assigningClient, setAssigningClient] = useState<{ id: string; name: string } | null>(null);
+    const [assigningAsset, setAssigningAsset] = useState<InspectionAsset | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const loadData = async () => {
@@ -63,11 +64,19 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
     }, [type, companyId]);
 
     const handleAssign = async (technicianId: string) => {
-        if (!assigningClient) return;
         setIsSubmitting(true);
-        const success = await db.assignAllClientAssetsToTechnician(assigningClient.id, technicianId);
+        let success = false;
+
+        if (assigningAsset) {
+            success = await db.assignAssetToTechnician(assigningAsset.id, technicianId);
+        } else if (assigningClient) {
+            const statuses = type === 'expired' ? ['expired', 'failed'] : ['pending'];
+            success = await db.assignAllClientAssetsToTechnician(assigningClient.id, technicianId, statuses);
+        }
+
         if (success) {
             setAssigningClient(null);
+            setAssigningAsset(null);
             await loadData();
         } else {
             alert('Error al asignar el técnico.');
@@ -75,10 +84,23 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
         setIsSubmitting(false);
     };
 
-    const handleUnassign = async (clientId: string) => {
+    const handleUnassignAsset = async (assetId: string) => {
+        if (!window.confirm('¿Deseas quitar la asignación de este equipo?')) return;
+        setIsSubmitting(true);
+        const success = await db.assignAssetToTechnician(assetId, null as any);
+        if (success) {
+            await loadData();
+        } else {
+            alert('Error al desasignar.');
+        }
+        setIsSubmitting(false);
+    };
+
+    const handleUnassignClient = async (clientId: string) => {
         if (!window.confirm('¿Deseas quitar la asignación de todos los equipos de este cliente?')) return;
         setIsSubmitting(true);
-        const success = await db.assignAllClientAssetsToTechnician(clientId, null as any);
+        const statuses = type === 'expired' ? ['expired', 'failed'] : ['pending'];
+        const success = await db.assignAllClientAssetsToTechnician(clientId, null as any, statuses);
         if (success) {
             await loadData();
         } else {
@@ -120,10 +142,10 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
                 <div className="flex justify-center py-20">
                     <span className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></span>
                 </div>
-            ) : (totalAssets as number) > 0 ? (
+            ) : totalAssets > 0 ? (
                 <div className="space-y-12">
-                    {Object.entries(groupedAssets).map(([clientId, group]: [string, any]) => {
-                        const hasAssignments = group.assets?.some((a: any) => a.assignedTechnicianId);
+                    {Object.entries(groupedAssets).map(([clientId, group]) => {
+                        const hasAssignments = group.assets?.some(a => a.assignedTechnicianId);
 
                         return (
                             <div key={clientId} className="space-y-6">
@@ -139,7 +161,7 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
                                     {profile?.role !== 'tecnico' && (
                                         hasAssignments ? (
                                             <button
-                                                onClick={() => handleUnassign(clientId)}
+                                                onClick={() => handleUnassignClient(clientId)}
                                                 className="px-4 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all flex items-center gap-2 w-fit"
                                             >
                                                 <span className="material-symbols-outlined text-sm">person_remove</span>
@@ -158,16 +180,14 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {group.assets.map((asset: InspectionAsset) => {
+                                    {group.assets.map(asset => {
                                         const assignedTech = technicians.find(t => t.id === asset.assignedTechnicianId);
 
                                         return (
                                             <div
                                                 key={asset.id}
-                                                onClick={() => onAction(asset.id)}
-                                                className="bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/[0.08] transition-all group flex flex-col gap-4 cursor-pointer relative overflow-hidden"
+                                                className="bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/[0.08] transition-all group flex flex-col gap-4 relative overflow-hidden"
                                             >
-                                                {/* Tech Badge Overlay */}
                                                 {assignedTech && (
                                                     <div className="absolute top-0 right-0 px-3 py-1 bg-primary/20 border-b border-l border-white/10 rounded-bl-xl">
                                                         <div className="flex items-center gap-1.5">
@@ -192,14 +212,40 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
                                                             <span className="text-[10px] font-mono text-primary font-bold">{asset.id}</span>
                                                         </div>
                                                         <p className="text-xs text-slate-400 mb-2">{asset.type}</p>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="material-symbols-outlined text-slate-500 !text-base shrink-0">person</span>
-                                                            <span className={`text-[10px] font-bold uppercase truncate ${assignedTech ? 'text-primary' : 'text-slate-500'}`}>
-                                                                {assignedTech ? assignedTech.full_name : 'No Asignado'}
-                                                            </span>
-                                                        </div>
+
+                                                        {profile?.role !== 'tecnico' && (
+                                                            <div className="flex items-center gap-2">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setAssigningAsset(asset);
+                                                                    }}
+                                                                    className="p-2 rounded-xl bg-white/5 border border-white/10 hover:border-primary/50 text-slate-400 hover:text-primary transition-all flex items-center justify-center"
+                                                                    title="Asignar a técnico"
+                                                                >
+                                                                    <span className="material-symbols-outlined !text-xl">assignment_ind</span>
+                                                                </button>
+                                                                {asset.assignedTechnicianId && (
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleUnassignAsset(asset.id);
+                                                                        }}
+                                                                        className="p-2 rounded-xl bg-white/5 border border-white/10 hover:border-red-500/50 text-slate-400 hover:text-red-500 transition-all flex items-center justify-center"
+                                                                        title="Quitar asignación"
+                                                                    >
+                                                                        <span className="material-symbols-outlined !text-xl">person_remove</span>
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => onAction(asset.id)}
+                                                                    className="p-2 rounded-xl bg-white/5 border border-white/10 hover:border-white/30 text-slate-400 hover:text-white transition-all flex items-center justify-center"
+                                                                >
+                                                                    <span className="material-symbols-outlined !text-xl">chevron_right</span>
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <span className="material-symbols-outlined text-slate-600 group-hover:text-white transition-colors">chevron_right</span>
                                                 </div>
                                             </div>
                                         );
@@ -217,16 +263,21 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
             )}
 
             {/* Assignment Modal */}
-            {assigningClient && (
+            {(assigningClient || assigningAsset) && (
                 <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
                     <div className="bg-background-dark border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl animate-scaleIn">
                         <div className="flex items-center justify-between mb-8">
                             <div>
-                                <h2 className="text-2xl font-black text-white">Asignar flota completa</h2>
-                                <p className="text-slate-500 text-sm mt-1">Cliente: {assigningClient.name}</p>
+                                <h2 className="text-2xl font-black text-white">{assigningAsset ? 'Asignar equipo' : 'Asignar flota completa'}</h2>
+                                <p className="text-slate-500 text-sm mt-1">
+                                    {assigningAsset ? `Extintor: ${assigningAsset.name || assigningAsset.id}` : `Cliente: ${assigningClient?.name}`}
+                                </p>
                             </div>
                             <button
-                                onClick={() => setAssigningClient(null)}
+                                onClick={() => {
+                                    setAssigningClient(null);
+                                    setAssigningAsset(null);
+                                }}
                                 className="size-10 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center"
                             >
                                 <span className="material-symbols-outlined text-slate-400">close</span>
@@ -262,7 +313,10 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
 
                         <div className="mt-8 flex gap-3">
                             <button
-                                onClick={() => setAssigningClient(null)}
+                                onClick={() => {
+                                    setAssigningClient(null);
+                                    setAssigningAsset(null);
+                                }}
                                 className="flex-1 py-4 rounded-xl border border-white/10 text-xs font-bold text-slate-400 uppercase tracking-widest hover:bg-white/5 transition-all"
                             >
                                 CANCELAR

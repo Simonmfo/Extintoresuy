@@ -220,13 +220,13 @@ export const db = {
     }
   },
 
-  assignAllClientAssetsToTechnician: async (clientId: string, technicianId: string, status: string = 'pending'): Promise<boolean> => {
+  assignAllClientAssetsToTechnician: async (clientId: string, technicianId: string, statuses: string[]): Promise<boolean> => {
     try {
       const { error } = await supabase
         .from('assets')
         .update({ assigned_technician_id: technicianId } as any)
         .eq('client_id', clientId)
-        .eq('status', status);
+        .in('status', statuses);
 
       if (error) throw error;
       return true;
