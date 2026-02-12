@@ -35,6 +35,20 @@ const TechnicianDashboard: React.FC<TechnicianDashboardProps> = ({
                     </div>
                 </button>
 
+                {/* Expired / Critical */}
+                <button
+                    onClick={() => onNavigateAlerts('expired')}
+                    className="flex flex-col items-start gap-4 bg-white/5 border border-white/10 p-8 rounded-3xl hover:bg-white/10 transition-all group active:scale-[0.98]"
+                >
+                    <div className="size-14 rounded-2xl bg-status-red/10 flex items-center justify-center text-status-red group-hover:bg-status-red/20 transition-colors">
+                        <span className="material-symbols-outlined !text-3xl">event_busy</span>
+                    </div>
+                    <div className="text-left">
+                        <h3 className="text-xl font-bold text-white mb-1">Críticos / Vencidos</h3>
+                        <p className="text-sm text-slate-500">Equipos con vigencia caducada o fallas.</p>
+                    </div>
+                </button>
+
                 {/* Pending Reviews */}
                 <button
                     onClick={() => onNavigateAlerts('pending')}

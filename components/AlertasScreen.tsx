@@ -30,9 +30,10 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
         setTechnicians(allTechs);
 
         let allAssets = rawAssets;
-        if (profile?.role === 'tecnico') {
-            allAssets = rawAssets.filter(a => a.assignedTechnicianId === profile.id);
-        }
+        // Commenting out or removing the restrictive filter for technicians
+        // if (profile?.role === 'tecnico') {
+        //     allAssets = rawAssets.filter(a => a.assignedTechnicianId === profile.id);
+        // }
 
         let filtered: InspectionAsset[] = [];
         if (type === 'expired') {
@@ -142,9 +143,9 @@ const AlertasScreen: React.FC<AlertasScreenProps> = ({ type, companyId, onAction
                 <div className="flex justify-center py-20">
                     <span className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></span>
                 </div>
-            ) : totalAssets > 0 ? (
+            ) : (totalAssets as number) > 0 ? (
                 <div className="space-y-12">
-                    {Object.entries(groupedAssets).map(([clientId, group]) => {
+                    {Object.entries(groupedAssets).map(([clientId, group]: [string, { clientName: string; assets: InspectionAsset[] }]) => {
                         const hasAssignments = group.assets?.some(a => a.assignedTechnicianId);
 
                         return (
