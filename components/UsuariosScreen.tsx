@@ -100,6 +100,18 @@ const UsuariosScreen: React.FC = () => {
         }
     };
 
+    const handleDeleteUser = async (user: any) => {
+        if (window.confirm(`¿Estás seguro de eliminar al usuario "${user.full_name || user.email}"? Esta acción eliminará su perfil de acceso y rol.`)) {
+            const ok = await db.deleteProfile(user.id);
+            if (ok) {
+                alert('Usuario eliminado del sistema');
+                loadData();
+            } else {
+                alert('Error al eliminar el usuario. Es posible que tenga registros asociados.');
+            }
+        }
+    };
+
     const filteredUsers = users.filter(user =>
         user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -186,13 +198,24 @@ const UsuariosScreen: React.FC = () => {
                                             </span>
                                         </td>
                                         <td className="p-6 text-right">
-                                            <button
-                                                onClick={() => handleOpenModal(user)}
-                                                className="hidden group-hover:inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline transition-all bg-primary/10 px-3 py-1.5 rounded-lg"
-                                            >
-                                                <span className="material-symbols-outlined !text-sm">edit</span>
-                                                Editar
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => handleOpenModal(user)}
+                                                    className="inline-flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-all"
+                                                >
+                                                    <span className="material-symbols-outlined !text-sm">edit</span>
+                                                    Editar
+                                                </button>
+                                                {user.role !== 'admin' && (
+                                                    <button
+                                                        onClick={() => handleDeleteUser(user)}
+                                                        className="inline-flex items-center gap-1.5 text-xs font-bold text-red-500 bg-red-500/10 px-3 py-1.5 rounded-lg hover:bg-red-500/20 transition-all"
+                                                    >
+                                                        <span className="material-symbols-outlined !text-sm">delete</span>
+                                                        Eliminar
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

@@ -121,6 +121,21 @@ export const db = {
     }
   },
 
+  deleteProfile: async (id: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting profile:', error);
+      return false;
+    }
+  },
+
   getAllProfiles: async (): Promise<any[]> => {
     const { data, error } = await supabase
       .from('profiles')
