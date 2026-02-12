@@ -257,28 +257,72 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                     <title>Etiqueta QR</title>
                                     <style>
                                         @page { size: auto; margin: 0mm; }
-                                        body { margin: 5px; font-family: sans-serif; }
-                                        .label {
-                                            width: 200px;
-                                            height: 120px;
-                                            border: 2px solid black;
-                                            padding: 5px;
+                                        body { 
+                                            margin: 5px; 
+                                            font-family: 'Segoe UI', system-ui, sans-serif;
+                                            background: white;
+                                        }
+                                        .qr-item {
+                                            border: 1px solid black;
+                                            padding: 10px;
                                             display: flex;
                                             align-items: center;
+                                            gap: 12px;
+                                            height: 90px;
+                                            width: 240px;
                                             box-sizing: border-box;
+                                            background: #fff;
+                                            border-radius: 4px;
                                         }
-                                        .info { margin-left: 10px; font-size: 10px; font-weight: bold; overflow: hidden; }
-                                        .id-text { font-size: 12px; display: block; margin-bottom: 2px; }
+                                        .qr-svg svg {
+                                            width: 60px !important;
+                                            height: 60px !important;
+                                            flex-shrink: 0;
+                                        }
+                                        .qr-info {
+                                            flex: 1;
+                                            display: flex;
+                                            flex-direction: column;
+                                            justify-content: center;
+                                            min-width: 0;
+                                        }
+                                        .qr-id { 
+                                            font-weight: 900; 
+                                            font-size: 11px; 
+                                            color: black; 
+                                            margin-bottom: 2px;
+                                            font-family: monospace;
+                                        }
+                                        .qr-client { 
+                                            font-size: 9px; 
+                                            color: #111; 
+                                            font-weight: 700;
+                                            white-space: nowrap;
+                                            overflow: hidden;
+                                            text-overflow: ellipsis;
+                                        }
+                                        .qr-type { 
+                                            font-size: 8px; 
+                                            color: #555;
+                                            margin-top: 2px;
+                                        }
+                                        .qr-footer {
+                                            font-size: 7px;
+                                            color: #999;
+                                            margin-top: 4px;
+                                            font-weight: bold;
+                                            letter-spacing: 0.5px;
+                                        }
                                     </style>
                                 </head>
                                 <body>
-                                    <div class="label">
-                                        ${qrHtml}
-                                        <div class="info">
-                                            <span class="id-text">${qrAssetToPrint.id}</span>
-                                            <span>${selectedClient.name.substring(0, 15)}</span><br/>
-                                            <span style="font-size: 8px">${qrAssetToPrint.type}</span><br/>
-                                            <span style="font-size: 8px">ExtintoresUY</span>
+                                    <div class="qr-item">
+                                        <div class="qr-svg">${qrHtml}</div>
+                                        <div class="qr-info">
+                                            <div class="qr-id">${qrAssetToPrint.id}</div>
+                                            <div class="qr-client">${selectedClient.name.substring(0, 15)}</div>
+                                            <div class="qr-type">${qrAssetToPrint.type}</div>
+                                            <div class="qr-footer">EXTINTORESUY</div>
                                         </div>
                                     </div>
                                     <script>
@@ -647,13 +691,13 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                                     const qrElem = document.getElementById(`batch-qr-${asset.id}`)?.querySelector('svg');
                                                                     if (qrElem) {
                                                                         labelsHtml += `
-                                                                            <div class="label">
-                                                                                ${qrElem.outerHTML}
-                                                                                <div class="info">
-                                                                                    <span class="id-text">${asset.id}</span>
-                                                                                    <span style="display:block; margin-bottom: 4px;">${selectedClient.name.substring(0, 20)}</span>
-                                                                                    <span style="font-size: 8px; color: #666;">TIPO: ${asset.type}</span><br/>
-                                                                                    <span style="font-size: 8px; color: #666; font-weight: normal;">EXTINTORESUY</span>
+                                                                            <div class="qr-item">
+                                                                                <div class="qr-svg">${qrElem.outerHTML}</div>
+                                                                                <div class="qr-info">
+                                                                                    <div class="qr-id">${asset.id}</div>
+                                                                                    <div class="qr-client">${selectedClient.name.substring(0, 15)}</div>
+                                                                                    <div class="qr-type">${asset.type}</div>
+                                                                                    <div class="qr-footer">EXTINTORESUY</div>
                                                                                 </div>
                                                                             </div>
                                                                         `;
@@ -666,26 +710,69 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                                         <head>
                                                                             <title>Códigos QR - ${selectedClient.name}</title>
                                                                             <style>
-                                                                                @page { size: auto; margin: 0; }
-                                                                                body { 
-                                                                                    margin: 0; padding: 0;
-                                                                                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                                                                                    display: flex; flex-direction: column; align-items: center;
-                                                                                    background: white;
-                                                                                }
-                                                                                .label {
-                                                                                    width: 250px; height: 120px;
-                                                                                    border: 1px solid black;
-                                                                                    padding: 10px; display: flex; align-items: center;
-                                                                                    box-sizing: border-box; page-break-after: always;
-                                                                                }
-                                                                                .info { margin-left: 15px; font-size: 10px; font-weight: bold; overflow: hidden; flex: 1; }
-                                                                                .id-text { font-size: 14px; display: block; margin-bottom: 4px; color: #000; font-weight: 900; }
-                                                                                svg { flex-shrink: 0; width: 80px !important; height: 80px !important; }
-                                                                            </style>
-                                                                        </head>
-                                                                        <body>
-                                                                            ${labelsHtml}
+                                                                        @page { size: auto; margin: 0; }
+                                                                        body { 
+                                                                            margin: 0; padding: 20px;
+                                                                            font-family: 'Segoe UI', system-ui, sans-serif; 
+                                                                            display: flex; flex-direction: column; align-items: center;
+                                                                            background: white; gap: 10px;
+                                                                        }
+                                                                        .qr-item {
+                                                                            border: 1px solid black;
+                                                                            padding: 10px;
+                                                                            display: flex;
+                                                                            align-items: center;
+                                                                            gap: 12px;
+                                                                            height: 90px;
+                                                                            width: 240px;
+                                                                            box-sizing: border-box;
+                                                                            page-break-after: always;
+                                                                            background: #fff;
+                                                                            border-radius: 4px;
+                                                                        }
+                                                                        .qr-svg svg {
+                                                                            width: 60px !important;
+                                                                            height: 60px !important;
+                                                                            flex-shrink: 0;
+                                                                        }
+                                                                        .qr-info {
+                                                                            flex: 1;
+                                                                            display: flex;
+                                                                            flex-direction: column;
+                                                                            justify-content: center;
+                                                                            min-width: 0;
+                                                                        }
+                                                                        .qr-id { 
+                                                                            font-weight: 900; 
+                                                                            font-size: 11px; 
+                                                                            color: black; 
+                                                                            margin-bottom: 2px;
+                                                                            font-family: monospace;
+                                                                        }
+                                                                        .qr-client { 
+                                                                            font-size: 9px; 
+                                                                            color: #111; 
+                                                                            font-weight: 700;
+                                                                            white-space: nowrap;
+                                                                            overflow: hidden;
+                                                                            text-overflow: ellipsis;
+                                                                        }
+                                                                        .qr-type { 
+                                                                            font-size: 8px; 
+                                                                            color: #555;
+                                                                            margin-top: 2px;
+                                                                        }
+                                                                        .qr-footer {
+                                                                            font-size: 7px;
+                                                                            color: #999;
+                                                                            margin-top: 4px;
+                                                                            font-weight: bold;
+                                                                            letter-spacing: 0.5px;
+                                                                        }
+                                                                    </style>
+                                                                </head>
+                                                                <body>
+                                                                    ${labelsHtml}
                                                                             <script>
                                                                                 window.onload = function() {
                                                                                     setTimeout(() => { window.print(); window.close(); }, 800);
@@ -752,8 +839,8 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             {viewingAsset.lifecycleStatus === 'active' || !viewingAsset.lifecycleStatus ? 'Activo' : 'Inactivo'}
                                         </span>
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${(viewingAsset.expirationDate && viewingAsset.expirationDate < new Date().toISOString().split('T')[0]) || viewingAsset.status === 'failed'
-                                                ? 'bg-status-red/20 text-status-red'
-                                                : 'bg-primary/20 text-primary'
+                                            ? 'bg-status-red/20 text-status-red'
+                                            : 'bg-primary/20 text-primary'
                                             }`}>
                                             {(viewingAsset.expirationDate && viewingAsset.expirationDate < new Date().toISOString().split('T')[0]) ? 'Vencido' : viewingAsset.status === 'ok' ? 'Conforme' : 'Alerta'}
                                         </span>
