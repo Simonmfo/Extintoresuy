@@ -7,9 +7,11 @@ import InspectionScreen from './components/InspectionScreen';
 import BottomNav from './components/BottomNav';
 import Header from './components/Header';
 import LandingPage from './components/LandingPage';
+import LoginScreen from './components/LoginScreen';
 
 const App: FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
 
@@ -55,7 +57,10 @@ const App: FC = () => {
   };
 
   if (!isAuthenticated) {
-    return <LandingPage onLogin={() => setIsAuthenticated(true)} />;
+    if (showLogin) {
+      return <LoginScreen onLoginSuccess={() => setIsAuthenticated(true)} />;
+    }
+    return <LandingPage onLogin={() => setShowLogin(true)} />;
   }
 
   return (
