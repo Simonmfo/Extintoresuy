@@ -2,6 +2,15 @@
 import { useState, type FC } from 'react';
 import { Screen } from './types';
 import Dashboard from './components/Dashboard';
+import AdminDashboard from './components/AdminDashboard';
+import UsuariosScreen from './components/UsuariosScreen';
+import ClientesScreen from './components/ClientesScreen';
+import FacturacionScreen from './components/FacturacionScreen';
+import ReportesScreen from './components/ReportesScreen';
+import EquiposScreen from './components/EquiposScreen';
+import TecnicosScreen from './components/TecnicosScreen';
+import AjustesScreen from './components/AjustesScreen';
+import InspeccionesScreen from './components/InspeccionesScreen';
 import MapScreen from './components/MapScreen';
 import InspectionScreen from './components/InspectionScreen';
 import BottomNav from './components/BottomNav';
@@ -32,19 +41,32 @@ const App: FC = () => {
   const renderScreen = () => {
     switch (currentScreen) {
       case 'home':
-        return <Dashboard onStartInspection={() => handleStartInspection('#UY-9921-24')} onNavigate={handleNavigate} />;
+        return (
+          <>
+            <div className="hidden lg:block h-full"><AdminDashboard onNavigate={handleNavigate} /></div>
+            <div className="block lg:hidden h-full"><Dashboard onStartInspection={() => handleStartInspection('#UY-9921-24')} onNavigate={handleNavigate} /></div>
+          </>
+        );
+      case 'usuarios':
+        return <UsuariosScreen />;
+      case 'clientes':
+        return <ClientesScreen onNavigate={handleNavigate} />;
+      case 'facturacion':
+        return <FacturacionScreen />;
+      case 'reportes':
+        return <ReportesScreen />;
+      case 'equipos':
+        return <EquiposScreen />;
+      case 'tecnicos':
+        return <TecnicosScreen />;
+      case 'ajustes':
+        return <AjustesScreen />;
+      case 'inspecciones':
+        return <InspeccionesScreen />;
       case 'mapa':
         return <MapScreen onStartInspection={() => handleStartInspection('#UY-9921-24')} />;
       case 'inspeccion':
         return <InspectionScreen onBack={() => setCurrentScreen('home')} />;
-      case 'clientes':
-        return (
-          <div className="flex flex-col items-center justify-center h-[70vh] text-slate-500">
-            <span className="material-symbols-outlined text-6xl mb-4">groups</span>
-            <p className="text-xl font-bold uppercase tracking-widest">Clientes</p>
-            <p className="text-sm mt-2">Listado de clientes pronto...</p>
-          </div>
-        );
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[70vh] text-slate-500">
