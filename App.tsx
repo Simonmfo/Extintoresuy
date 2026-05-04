@@ -1,5 +1,6 @@
 
-import { useState, type FC } from 'react';
+import { useState, useEffect, type FC } from 'react';
+import { supabase } from './services/supabase';
 import { Screen } from './types';
 import Dashboard from './components/Dashboard';
 import AdminDashboard from './components/AdminDashboard';
@@ -24,10 +25,30 @@ import PrivacyScreen from './components/PrivacyScreen';
 
 const App: FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [publicScreen, setPublicScreen] = useState<'landing' | 'login' | 'soporte' | 'terminos' | 'privacidad'>('landing');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+      setIsLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   const handleNavigate = (screen: Screen) => {
     setCurrentScreen(screen);
@@ -83,6 +104,15 @@ const App: FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background-dark flex flex-col items-center justify-center text-white">
+        <span className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></span>
+        <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">Cargando Plataforma...</p>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     switch (publicScreen) {
       case 'login':
@@ -106,7 +136,7 @@ const App: FC = () => {
         <Sidebar 
           currentScreen={currentScreen} 
           onNavigate={handleNavigate} 
-          onLogout={() => setIsAuthenticated(false)}
+          onLogout={handleLogout}
           role="admin"
           fullName="Administrador"
           isOpen={isSidebarOpen}
