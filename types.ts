@@ -16,3 +16,11 @@ export interface InspectionAsset {
   lat: number;
   lng: number;
 }
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  role: 'admin' | 'tecnico' | 'empresa' | 'fabrica';
+  company_id: string | null;
+}

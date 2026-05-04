@@ -1,7 +1,8 @@
 
 import { useState, useEffect, type FC } from 'react';
 import { supabase } from './services/supabase';
-import { Screen } from './types';
+import { db } from './services/db';
+import { Screen, UserProfile } from './types';
 import Dashboard from './components/Dashboard';
 import AdminDashboard from './components/AdminDashboard';
 import UsuariosScreen from './components/UsuariosScreen';
@@ -30,21 +31,37 @@ const App: FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const userProfile = await db.getProfile(session.user.id);
+        setProfile(userProfile as UserProfile);
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
       setIsLoading(false);
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        const userProfile = await db.getProfile(session.user.id);
+        setProfile(userProfile as UserProfile);
+        setIsAuthenticated(true);
+      } else {
+        setProfile(null);
+        setIsAuthenticated(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const companyId = profile?.role === 'admin' ? 'ALL' : profile?.role === 'fabrica' ? profile.id : (profile?.company_id || 'ALL');
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -64,26 +81,26 @@ const App: FC = () => {
       case 'home':
         return (
           <>
-            <div className="hidden lg:block h-full"><AdminDashboard onNavigate={handleNavigate} /></div>
+            <div className="hidden lg:block h-full"><AdminDashboard onNavigate={handleNavigate} companyId={companyId} /></div>
             <div className="block lg:hidden h-full"><Dashboard onStartInspection={() => handleStartInspection('#UY-9921-24')} onNavigate={handleNavigate} /></div>
           </>
         );
       case 'usuarios':
         return <UsuariosScreen />;
       case 'clientes':
-        return <ClientesScreen onNavigate={handleNavigate} companyId="ALL" />;
+        return <ClientesScreen onNavigate={handleNavigate} companyId={companyId} />;
       case 'facturacion':
         return <FacturacionScreen />;
       case 'reportes':
-        return <ReportesScreen companyId="ALL" />;
+        return <ReportesScreen companyId={companyId} />;
       case 'equipos':
-        return <EquiposScreen companyId="ALL" />;
+        return <EquiposScreen companyId={companyId} />;
       case 'tecnicos':
-        return <TecnicosScreen companyId="ALL" />;
+        return <TecnicosScreen companyId={companyId} />;
       case 'ajustes':
         return <AjustesScreen />;
       case 'inspecciones':
-        return <InspeccionesScreen onBack={() => setCurrentScreen('home')} profile={null} onStartInspection={(id) => handleStartInspection(id)} />;
+        return <InspeccionesScreen onBack={() => setCurrentScreen('home')} profile={profile} onStartInspection={(id) => handleStartInspection(id)} />;
       case 'mapa':
         return <MapScreen onStartInspection={() => handleStartInspection('#UY-9921-24')} />;
       case 'inspeccion':
@@ -137,8 +154,8 @@ const App: FC = () => {
           currentScreen={currentScreen} 
           onNavigate={handleNavigate} 
           onLogout={handleLogout}
-          role="admin"
-          fullName="Administrador"
+          role={profile?.role || 'admin'}
+          fullName={profile?.full_name || 'Administrador'}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />

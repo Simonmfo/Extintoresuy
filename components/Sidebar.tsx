@@ -6,7 +6,7 @@ interface SidebarProps {
     currentScreen: Screen;
     onNavigate: (screen: Screen) => void;
     onLogout?: () => void;
-    role: 'admin' | 'tecnico' | 'empresa';
+    role: 'admin' | 'tecnico' | 'empresa' | 'fabrica';
     fullName?: string;
     isOpen?: boolean;
     onClose?: () => void;
@@ -33,15 +33,21 @@ const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, 
                 { id: 'mapa', label: 'Mapa', icon: 'location_on' },
                 { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
             ]
-            : [
-                { id: 'home', label: 'Inicio', icon: 'dashboard' },
-                { id: 'clientes', label: 'Mis Clientes', icon: 'corporate_fare' },
-                { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
-                { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
-                { id: 'mapa', label: 'Mapa', icon: 'location_on' },
-                { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
-                { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
-            ];
+            : role === 'fabrica'
+                ? [
+                    { id: 'home', label: 'Inicio', icon: 'dashboard' },
+                    { id: 'clientes', label: 'Empresas', icon: 'corporate_fare' },
+                    { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
+                    { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
+                    { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
+                ]
+                : [
+                    { id: 'home', label: 'Inicio', icon: 'dashboard' },
+                    { id: 'equipos', label: 'Mis Equipos', icon: 'fire_extinguisher' },
+                    { id: 'inspecciones', label: 'Inspecciones', icon: 'assignment' },
+                    { id: 'mapa', label: 'Mapa', icon: 'location_on' },
+                    { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
+                ];
 
     return (
         <>
@@ -69,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, 
                         <div className={`transition-all duration-300 whitespace-nowrap ${isOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                             <h1 className="text-lg font-bold text-white tracking-tight">ExtintoresUY</h1>
                             <p className="text-[10px] uppercase font-bold text-primary tracking-widest">
-                                {role === 'admin' ? 'Panel de Control' : role === 'tecnico' ? 'Portal Técnico' : 'ExtintoresUY'}
+                                {role === 'admin' ? 'Panel de Control' : role === 'tecnico' ? 'Portal Técnico' : role === 'fabrica' ? 'Portal Fábrica' : 'Portal Empresa'}
                             </p>
                         </div>
                     </div>

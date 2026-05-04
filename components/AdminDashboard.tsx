@@ -6,19 +6,20 @@ import { Screen } from '../types';
 
 interface AdminDashboardProps {
     onNavigate: (screen: Screen) => void;
+    companyId: string;
 }
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, companyId }) => {
     const [stats, setStats] = useState({ totalAssets: 0, totalClients: 0, totalInvoices: 0, globalCompliance: 0 });
     const [recentLogs, setRecentLogs] = useState<any[]>([]);
 
     useEffect(() => {
         const loadStats = async () => {
             const [assets, clients, invoices, logs] = await Promise.all([
-                db.getAssets('ALL'),
-                db.getClients('ALL'),
+                db.getAssets(companyId),
+                db.getClients(companyId),
                 db.getInvoices(),
-                db.getActivityLogs(8, 'ALL')
+                db.getActivityLogs(8, companyId)
             ]);
 
             const today = new Date().toISOString().split('T')[0];
