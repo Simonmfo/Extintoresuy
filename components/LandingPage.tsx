@@ -65,8 +65,8 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin }) => {
             <div className="relative rounded-[2rem] border border-white/10 bg-gradient-to-b from-white/5 to-transparent p-4 backdrop-blur-xl shadow-2xl overflow-hidden transform rotate-2 hover:rotate-0 transition-transform duration-500">
               <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
               <img 
-                src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=1470&auto=format&fit=crop" 
-                alt="Fire extinguisher inspection" 
+                src="/hero-image.png" 
+                alt="Extintor con código QR para inspección digital" 
                 className="rounded-2xl w-full h-[500px] object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal transition-all duration-700"
               />
               {/* Floating Badge */}
