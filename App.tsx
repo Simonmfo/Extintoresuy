@@ -50,19 +50,19 @@ const App: FC = () => {
       case 'usuarios':
         return <UsuariosScreen />;
       case 'clientes':
-        return <ClientesScreen onNavigate={handleNavigate} />;
+        return <ClientesScreen onNavigate={handleNavigate} companyId="ALL" />;
       case 'facturacion':
         return <FacturacionScreen />;
       case 'reportes':
-        return <ReportesScreen />;
+        return <ReportesScreen companyId="ALL" />;
       case 'equipos':
-        return <EquiposScreen />;
+        return <EquiposScreen companyId="ALL" />;
       case 'tecnicos':
-        return <TecnicosScreen />;
+        return <TecnicosScreen companyId="ALL" />;
       case 'ajustes':
         return <AjustesScreen />;
       case 'inspecciones':
-        return <InspeccionesScreen />;
+        return <InspeccionesScreen onBack={() => setCurrentScreen('home')} profile={null} onStartInspection={(id) => handleStartInspection(id)} />;
       case 'mapa':
         return <MapScreen onStartInspection={() => handleStartInspection('#UY-9921-24')} />;
       case 'inspeccion':
