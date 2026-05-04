@@ -19,25 +19,25 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
         setError(null);
 
         try {
+            const authPromise = isSignUp
+                ? supabase.auth.signUp({ email, password })
+                : supabase.auth.signInWithPassword({ email, password });
+
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("La conexión tardó demasiado. Verifica tu internet o intenta de nuevo.")), 8000)
+            );
+
+            const { error: authError } = await Promise.race([authPromise, timeoutPromise]) as any;
+
+            if (authError) throw authError;
+
             if (isSignUp) {
-                const { error } = await supabase.auth.signUp({
-                    email,
-                    password,
-                });
-                if (error) throw error;
-                // Auto login after signup might not work if email confirmation is on, but for dev it's often off or we just tell them to check email.
-                // Supabase returns a session on signup if email confirmation is disabled.
                 alert('Registro exitoso. Por favor revisa tu email si es necesario o inicia sesión.');
             } else {
-                const { error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password,
-                });
-                if (error) throw error;
                 onLoginSuccess();
             }
         } catch (err: any) {
-            setError(err.message || 'Ha ocurrido un error');
+            setError(err.message || 'Ha ocurrido un error inesperado de red');
         } finally {
             setLoading(false);
         }
