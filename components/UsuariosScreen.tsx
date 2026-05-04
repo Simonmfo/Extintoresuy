@@ -184,13 +184,16 @@ const UsuariosScreen: React.FC = () => {
                                                 <span className="material-symbols-outlined text-slate-600 !text-sm">corporate_fare</span>
                                                 <span className="text-sm text-slate-300 font-medium">
                                                     {user.role === 'admin' ? 'Acceso Total (Admin)' :
-                                                        user.role === 'empresa' ? 'Dueño de Empresa' :
+                                                        user.role === 'fabrica' ? 'Fábrica / Instalador' :
+                                                        user.role === 'empresa' ? 'Cliente Final' :
                                                             user.clients?.name || 'Sin asignar'}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="p-6 text-center">
-                                            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${user.role === 'admin' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                            <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                                                user.role === 'admin' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                                                user.role === 'fabrica' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' :
                                                 user.role === 'tecnico' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
                                                     'bg-primary/10 text-primary border-primary/20'
                                                 }`}>
@@ -295,7 +298,8 @@ const UsuariosScreen: React.FC = () => {
                                     onChange={e => setFormData({ ...formData, role: e.target.value })}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-all"
                                 >
-                                    <option value="empresa">Empresa / Dueño</option>
+                                    <option value="empresa">Empresa / Cliente final</option>
+                                    <option value="fabrica">Fábrica (Recargador/Instalador)</option>
                                     <option value="tecnico">Técnico Operativo</option>
                                     <option value="admin">Administrador Global</option>
                                 </select>
@@ -303,16 +307,16 @@ const UsuariosScreen: React.FC = () => {
 
                             {formData.role === 'tecnico' && (
                                 <div className="space-y-1.5">
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Empresa / Patrón Asociado</label>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Empleador / Fábrica Asociada</label>
                                     <select
                                         value={formData.companyId}
                                         onChange={e => setFormData({ ...formData, companyId: e.target.value })}
                                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary transition-all"
                                         required={formData.role === 'tecnico'}
                                     >
-                                        <option value="">Seleccione la empresa empleadora...</option>
-                                        {users.filter(u => u.role === 'empresa').map(u => (
-                                            <option key={u.id} value={u.id}>{u.full_name || u.email}</option>
+                                        <option value="">Seleccione el empleador...</option>
+                                        {users.filter(u => u.role === 'empresa' || u.role === 'fabrica').map(u => (
+                                            <option key={u.id} value={u.id}>{u.full_name || u.email} ({u.role})</option>
                                         ))}
                                     </select>
                                 </div>
