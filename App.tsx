@@ -61,20 +61,26 @@ const App: FC = () => {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return;
-      try {
-        if (session?.user) {
-          const userProfile = await db.getProfile(session.user.id);
-          setProfile(userProfile as UserProfile);
-          setIsAuthenticated(true);
-        } else {
-          setProfile(null);
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        console.error("Error on auth state change:", error);
-      } finally {
+      if (session?.user) {
+        // Use setTimeout to escape the internal GoTrue lock and prevent deadlocks
+        setTimeout(async () => {
+          try {
+            const userProfile = await db.getProfile(session.user.id);
+            if (mounted) {
+              setProfile(userProfile as UserProfile);
+              setIsAuthenticated(true);
+            }
+          } catch (error) {
+            console.error("Error on auth state change:", error);
+          } finally {
+            if (mounted) setIsLoading(false);
+          }
+        }, 0);
+      } else {
+        setProfile(null);
+        setIsAuthenticated(false);
         if (mounted) setIsLoading(false);
       }
     });
