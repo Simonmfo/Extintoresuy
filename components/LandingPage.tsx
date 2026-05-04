@@ -2,9 +2,10 @@ import type { FC } from 'react';
 
 interface LandingPageProps {
   onLogin: () => void;
+  onNavigateTo: (page: 'soporte' | 'terminos' | 'privacidad') => void;
 }
 
-const LandingPage: FC<LandingPageProps> = ({ onLogin }) => {
+const LandingPage: FC<LandingPageProps> = ({ onLogin, onNavigateTo }) => {
   return (
     <div className="min-h-screen bg-background-dark text-white font-sans selection:bg-primary selection:text-black overflow-x-hidden">
       {/* Navbar */}
@@ -209,7 +210,7 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin }) => {
       <section id="beneficios" className="py-24 px-6 relative">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mt-12 hover:bg-white/10 transition-colors">
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 hover:bg-white/10 transition-colors">
               <span className="material-symbols-outlined text-primary text-3xl mb-4">trending_down</span>
               <h4 className="text-lg font-bold mb-2">Reducción de Costos</h4>
               <p className="text-sm text-slate-400">Evitá multas severas de bomberos e intendencias al mantener todo al día.</p>
@@ -224,7 +225,7 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin }) => {
               <h4 className="text-lg font-bold mb-2">Ahorro de Tiempo</h4>
               <p className="text-sm text-slate-400">Reemplazá tediosas planillas Excel por un dashboard automático en tiempo real.</p>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 -mt-12 hover:bg-white/10 transition-colors">
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 hover:bg-white/10 transition-colors">
               <span className="material-symbols-outlined text-primary text-3xl mb-4">groups</span>
               <h4 className="text-lg font-bold mb-2">Transparencia</h4>
               <p className="text-sm text-slate-400">Todos los empleados pueden leer el QR para saber si un extintor está utilizable.</p>
@@ -308,9 +309,9 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin }) => {
           </div>
           <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Extintores.uy. Todos los derechos reservados.</p>
           <div className="flex gap-4">
-            <a href="#" className="text-slate-500 hover:text-white transition-colors">Soporte</a>
-            <a href="#" className="text-slate-500 hover:text-white transition-colors">Términos</a>
-            <a href="#" className="text-slate-500 hover:text-white transition-colors">Privacidad</a>
+            <button onClick={() => onNavigateTo('soporte')} className="text-slate-500 hover:text-white transition-colors text-sm">Soporte</button>
+            <button onClick={() => onNavigateTo('terminos')} className="text-slate-500 hover:text-white transition-colors text-sm">Términos</button>
+            <button onClick={() => onNavigateTo('privacidad')} className="text-slate-500 hover:text-white transition-colors text-sm">Privacidad</button>
           </div>
         </div>
       </footer>

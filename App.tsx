@@ -9,10 +9,13 @@ import Header from './components/Header';
 import LandingPage from './components/LandingPage';
 import LoginScreen from './components/LoginScreen';
 import Sidebar from './components/Sidebar';
+import SupportScreen from './components/SupportScreen';
+import TermsScreen from './components/TermsScreen';
+import PrivacyScreen from './components/PrivacyScreen';
 
 const App: FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
+  const [publicScreen, setPublicScreen] = useState<'landing' | 'login' | 'soporte' | 'terminos' | 'privacidad'>('landing');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
@@ -59,10 +62,19 @@ const App: FC = () => {
   };
 
   if (!isAuthenticated) {
-    if (showLogin) {
-      return <LoginScreen onLoginSuccess={() => setIsAuthenticated(true)} />;
+    switch (publicScreen) {
+      case 'login':
+        return <LoginScreen onLoginSuccess={() => setIsAuthenticated(true)} />; // LoginScreen might need onBack if supported later, but for now we'll just render it
+      case 'soporte':
+        return <SupportScreen onBack={() => setPublicScreen('landing')} />;
+      case 'terminos':
+        return <TermsScreen onBack={() => setPublicScreen('landing')} />;
+      case 'privacidad':
+        return <PrivacyScreen onBack={() => setPublicScreen('landing')} />;
+      case 'landing':
+      default:
+        return <LandingPage onLogin={() => setPublicScreen('login')} onNavigateTo={(page) => setPublicScreen(page)} />;
     }
-    return <LandingPage onLogin={() => setShowLogin(true)} />;
   }
 
   return (
