@@ -24,7 +24,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 : supabase.auth.signInWithPassword({ email, password });
 
             const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("La conexión tardó demasiado. Verifica tu internet o intenta de nuevo.")), 8000)
+                setTimeout(() => reject(new Error("La conexión tardó demasiado. Verifica tu internet, desactiva bloqueadores de anuncios (AdBlock) o intenta de nuevo.")), 25000)
             );
 
             const { error: authError } = await Promise.race([authPromise, timeoutPromise]) as any;
@@ -155,13 +155,28 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                             )}
                         </button>
 
-                        <div className="text-center pt-4">
+                        <div className="text-center pt-4 flex flex-col gap-3">
                             <button
                                 type="button"
                                 onClick={() => setIsSignUp(!isSignUp)}
                                 className="text-slate-400 hover:text-white text-xs font-medium transition-colors border-b border-transparent hover:border-white/20 pb-0.5"
                             >
                                 {isSignUp ? '¿Ya tienes acceso? Inicia sesión' : '¿Nuevo usuario? Solicitar acceso'}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    try {
+                                        setError('Diagnosticando red...');
+                                        const res = await fetch('https://nannsywlxbomgifvlkqz.supabase.co/auth/v1/health', { method: 'GET', mode: 'no-cors' });
+                                        setError('Diagnóstico: La red parece estar bien (Pudo alcanzar Supabase).');
+                                    } catch (e: any) {
+                                        setError('Diagnóstico Fallido: Tu navegador está bloqueando totalmente a Supabase. Error: ' + e.message);
+                                    }
+                                }}
+                                className="text-slate-600 hover:text-slate-400 text-[10px] uppercase font-bold"
+                            >
+                                ¿Problemas para entrar? Diagnosticar Red
                             </button>
                         </div>
                     </form>
