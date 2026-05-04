@@ -235,6 +235,10 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onNavigateTo }) => {
             </p>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
+                <span className="material-symbols-outlined text-green-500 mt-1">chat</span>
+                <span className="text-slate-300"><strong>Alertas Automáticas por WhatsApp:</strong> Notificamos automáticamente al cliente y a la planta de recarga para evitar que tus equipos se venzan.</span>
+              </li>
+              <li className="flex items-start gap-3">
                 <span className="material-symbols-outlined text-primary mt-1">check_circle</span>
                 <span className="text-slate-300">Auditoría centralizada para múltiples sucursales u oficinas.</span>
               </li>
