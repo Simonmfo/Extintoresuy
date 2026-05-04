@@ -34,8 +34,15 @@ const App: FC = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
+    const timer = setTimeout(() => {
+      if (mounted) setIsLoading(false);
+    }, 2000);
+
     // Check initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return;
       try {
         if (session?.user) {
           const userProfile = await db.getProfile(session.user.id);
@@ -47,14 +54,15 @@ const App: FC = () => {
       } catch (error) {
         console.error("Error checking session:", error);
       } finally {
-        setIsLoading(false);
+        if (mounted) setIsLoading(false);
       }
     }).catch(() => {
-      setIsLoading(false);
+      if (mounted) setIsLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
       try {
         if (session?.user) {
           const userProfile = await db.getProfile(session.user.id);
@@ -66,10 +74,16 @@ const App: FC = () => {
         }
       } catch (error) {
         console.error("Error on auth state change:", error);
+      } finally {
+        if (mounted) setIsLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+      clearTimeout(timer);
+    };
   }, []);
 
   const companyId = profile?.role === 'admin' ? 'ALL' : profile?.role === 'fabrica' ? profile.id : (profile?.company_id || 'ALL');
