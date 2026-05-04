@@ -111,11 +111,6 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onNavigateTo }) => {
           </div>
           <div className="hidden md:block w-px h-16 bg-white/10"></div>
           <div>
-            <h3 className="text-4xl font-black text-primary mb-2">+500</h3>
-            <p className="text-slate-400 font-medium uppercase tracking-wider text-sm">Empresas protegidas</p>
-          </div>
-          <div className="hidden md:block w-px h-16 bg-white/10"></div>
-          <div>
             <h3 className="text-4xl font-black text-primary mb-2">0</h3>
             <p className="text-slate-400 font-medium uppercase tracking-wider text-sm">Multas por vencimientos</p>
           </div>
