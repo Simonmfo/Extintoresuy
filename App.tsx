@@ -8,10 +8,12 @@ import BottomNav from './components/BottomNav';
 import Header from './components/Header';
 import LandingPage from './components/LandingPage';
 import LoginScreen from './components/LoginScreen';
+import Sidebar from './components/Sidebar';
 
 const App: FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
 
@@ -64,15 +66,53 @@ const App: FC = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-background-dark flex flex-col relative overflow-x-hidden">
-      {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && <Header />}
+    <div className="min-h-screen bg-background-dark flex relative overflow-x-hidden text-white">
+      {/* Desktop Sidebar */}
+      {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
+        <Sidebar 
+          currentScreen={currentScreen} 
+          onNavigate={handleNavigate} 
+          onLogout={() => setIsAuthenticated(false)}
+          role="admin"
+          fullName="Administrador"
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+      )}
 
-      <main className="flex-1">
-        {renderScreen()}
-      </main>
+      {/* Main Content Area */}
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${currentScreen !== 'inspeccion' && currentScreen !== 'mapa' ? 'lg:pl-20' : ''}`}>
+        {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
+          <div className="lg:hidden">
+            <Header />
+          </div>
+        )}
 
-      {currentScreen !== 'inspeccion' && (
-        <BottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />
+        {/* Desktop Topbar */}
+        {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
+          <header className="hidden lg:flex items-center justify-between p-6 bg-background-dark/80 backdrop-blur-md sticky top-0 z-40 border-b border-white/5">
+            <div>
+              <h1 className="text-2xl font-black text-white tracking-tight">ExtintoresUY</h1>
+              <p className="text-sm font-medium text-slate-400">Plataforma de Mantenimiento</p>
+            </div>
+            <div className="flex gap-3">
+              <button className="flex size-10 items-center justify-center rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10 transition-colors">
+                <span className="material-symbols-outlined">notifications</span>
+              </button>
+            </div>
+          </header>
+        )}
+
+        <main className="flex-1 overflow-y-auto pb-20 lg:pb-8 relative">
+          {renderScreen()}
+        </main>
+      </div>
+
+      {/* Mobile Bottom Nav */}
+      {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
+        <div className="lg:hidden">
+          <BottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />
+        </div>
       )}
     </div>
   );
