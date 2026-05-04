@@ -36,25 +36,36 @@ const App: FC = () => {
   useEffect(() => {
     // Check initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const userProfile = await db.getProfile(session.user.id);
-        setProfile(userProfile as UserProfile);
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
+      try {
+        if (session?.user) {
+          const userProfile = await db.getProfile(session.user.id);
+          setProfile(userProfile as UserProfile);
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
+      } finally {
+        setIsLoading(false);
       }
+    }).catch(() => {
       setIsLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        const userProfile = await db.getProfile(session.user.id);
-        setProfile(userProfile as UserProfile);
-        setIsAuthenticated(true);
-      } else {
-        setProfile(null);
-        setIsAuthenticated(false);
+      try {
+        if (session?.user) {
+          const userProfile = await db.getProfile(session.user.id);
+          setProfile(userProfile as UserProfile);
+          setIsAuthenticated(true);
+        } else {
+          setProfile(null);
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error("Error on auth state change:", error);
       }
     });
 
