@@ -13,6 +13,7 @@ import EquiposScreen from './components/EquiposScreen';
 import TecnicosScreen from './components/TecnicosScreen';
 import AjustesScreen from './components/AjustesScreen';
 import InspeccionesScreen from './components/InspeccionesScreen';
+import FabricasScreen from './components/FabricasScreen';
 import MapScreen from './components/MapScreen';
 import InspectionScreen from './components/InspectionScreen';
 import BottomNav from './components/BottomNav';
@@ -130,6 +131,8 @@ const App: FC = () => {
         return <TecnicosScreen companyId={companyId} />;
       case 'ajustes':
         return <AjustesScreen profile={profile} onLogout={handleLogout} onRefreshProfile={() => {}} />;
+      case 'fabricas':
+        return <FabricasScreen />;
       case 'inspecciones':
         return <InspeccionesScreen onBack={() => setCurrentScreen('home')} profile={profile} onStartInspection={(id) => handleStartInspection(id)} />;
       case 'mapa':

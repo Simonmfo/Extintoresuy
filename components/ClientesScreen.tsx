@@ -92,7 +92,14 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId }) => {
                                                     {client.name.substring(0, 1).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <p className="font-bold text-white text-lg">{client.name}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="font-bold text-white text-lg">{client.name}</p>
+                                                        {(!companyId || companyId === 'ALL') && (
+                                                            <span className="text-[9px] bg-white/10 text-slate-300 px-2 py-0.5 rounded-md uppercase tracking-widest font-black border border-white/10">
+                                                                Por: {(client as any).creatorName}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     {client.rut && <p className="text-[10px] font-mono text-primary font-black uppercase tracking-widest">RUT: {client.rut}</p>}
                                                 </div>
                                             </div>

@@ -158,7 +158,14 @@ const TecnicosScreen: React.FC<TecnicosScreenProps> = ({ companyId }) => {
                                 </div>
                             </div>
 
-                            <h3 className="text-xl font-bold text-white mb-1">{tecnico.full_name || 'Sin Nombre'}</h3>
+                            <div className="flex items-center gap-2 mb-1">
+                                <h3 className="text-xl font-bold text-white">{tecnico.full_name || 'Sin Nombre'}</h3>
+                                {(!companyId || companyId === 'ALL') && (
+                                    <span className="text-[9px] bg-white/10 text-slate-300 px-2 py-0.5 rounded-md uppercase tracking-widest font-black border border-white/10 shrink-0">
+                                        Por: {(tecnico as any).creatorName}
+                                    </span>
+                                )}
+                            </div>
                             <p className="text-slate-500 text-sm mb-6 truncate">{tecnico.email}</p>
 
                             <div className="grid grid-cols-2 gap-3">

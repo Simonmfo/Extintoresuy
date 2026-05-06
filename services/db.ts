@@ -184,10 +184,49 @@ export const db = {
     }
 
     // Map counts to profiles
+    const fabricas = await db.getFabricasMap();
     return profiles.map(profile => {
       const performedCount = performedInspections?.filter(i => i.inspector_id === profile.id).length || 0;
       const pendingCount = (pendingAssets as any[])?.filter(a => a.assigned_technician_id === profile.id).length || 0;
-      return { ...profile, performedCount, pendingCount };
+      return { 
+        ...profile, 
+        performedCount, 
+        pendingCount,
+        creatorName: fabricas[profile.company_id] || 'Administrador'
+      };
+    });
+  },
+
+  getFabricasWithStats: async (): Promise<any[]> => {
+    const { data: fabricas, error: fabricasError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('role', 'fabrica');
+
+    if (fabricasError) {
+      console.error('Error fetching fabricas:', fabricasError);
+      return [];
+    }
+
+    const { data: allTechnicians } = await supabase.from('profiles').select('id, company_id').eq('role', 'tecnico');
+    const { data: allClients } = await supabase.from('clients').select('id, company_id' as any);
+    const { data: allAssets } = await supabase.from('assets').select('id, client_id' as any);
+
+    return fabricas.map(fabrica => {
+      const techniciansCount = allTechnicians?.filter(t => t.company_id === fabrica.id).length || 0;
+      
+      const fabricaClients = allClients?.filter(c => (c as any).company_id === fabrica.id) || [];
+      const clientsCount = fabricaClients.length;
+      
+      const clientIds = fabricaClients.map(c => (c as any).id);
+      const assetsCount = allAssets?.filter(a => clientIds.includes((a as any).client_id)).length || 0;
+
+      return {
+        ...fabrica,
+        techniciansCount,
+        clientsCount,
+        assetsCount
+      };
     });
   },
 
@@ -242,6 +281,12 @@ export const db = {
     // No-op for now
   },
 
+  getFabricasMap: async (): Promise<Record<string, string>> => {
+    const { data } = await supabase.from('profiles').select('id, full_name').eq('role', 'fabrica');
+    if (!data) return {};
+    return data.reduce((acc, curr) => ({ ...acc, [curr.id]: curr.full_name }), {});
+  },
+
   getClients: async (companyId?: string): Promise<any[]> => {
     // SECURITY: If no companyId and not 'ALL', return empty (unless admin, but we use 'ALL' for that)
     if (!companyId) return [];
@@ -260,7 +305,12 @@ export const db = {
       console.error('Error fetching clients:', error);
       return [];
     }
-    return data;
+
+    const fabricas = await db.getFabricasMap();
+    return data.map((client: any) => ({
+      ...client,
+      creatorName: fabricas[client.company_id] || 'Administrador'
+    }));
   },
 
   addClient: async (clientData: { name: string; address: string; contact_email: string; rut?: string }) => {

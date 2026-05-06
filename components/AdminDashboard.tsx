@@ -146,6 +146,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, companyId }
                             <p className="text-lg font-black text-white leading-tight">Mapa de Cobertura Nacional</p>
                             <p className="text-xs text-emerald-400/60 font-medium mt-1 uppercase tracking-wider">Logística</p>
                         </button>
+                        
+                        <button
+                            onClick={() => onNavigate('fabricas')}
+                            className="w-full p-6 bg-purple-500/10 border border-purple-500/20 rounded-3xl text-left hover:bg-purple-500/20 transition-all group"
+                        >
+                            <span className="material-symbols-outlined text-purple-400 !text-3xl mb-4 group-hover:scale-110 transition-transform">factory</span>
+                            <p className="text-lg font-black text-white leading-tight">Plantas de Recarga (Fábricas)</p>
+                            <p className="text-xs text-purple-400/60 font-medium mt-1 uppercase tracking-wider">Control de Proveedores</p>
+                        </button>
                     </div>
                 </div>
             </div>

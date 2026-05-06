@@ -1,5 +1,5 @@
 
-export type Screen = 'home' | 'equipos' | 'clientes' | 'mapa' | 'reportes' | 'ajustes' | 'inspeccion' | 'usuarios' | 'facturacion' | 'tecnicos' | 'inspecciones';
+export type Screen = 'home' | 'equipos' | 'clientes' | 'mapa' | 'reportes' | 'ajustes' | 'inspeccion' | 'usuarios' | 'facturacion' | 'tecnicos' | 'inspecciones' | 'fabricas';
 
 export interface LocationItem {
   id: string;
@@ -40,6 +40,7 @@ export interface Client {
   contact_email: string;
   rut?: string;
   created_at: string;
+  creatorName?: string;
 }
 
 export interface UserProfile {
@@ -50,4 +51,5 @@ export interface UserProfile {
   company_id: string | null;
   avatar_url?: string;
   created_at?: string;
+  creatorName?: string;
 }
