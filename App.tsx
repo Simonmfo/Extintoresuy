@@ -198,8 +198,8 @@ const App: FC = () => {
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${currentScreen !== 'inspeccion' && currentScreen !== 'mapa' ? 'lg:pl-20' : ''}`}>
         {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
-          <div className="lg:hidden">
-            <Header />
+          <div className="lg:hidden shrink-0">
+            <Header onMenuClick={() => setIsSidebarOpen(true)} />
           </div>
         )}
 
@@ -218,8 +218,10 @@ const App: FC = () => {
           </header>
         )}
 
-        <main className="flex-1 overflow-y-auto pb-20 lg:pb-8 relative">
-          {renderScreen()}
+        <main className="flex-1 overflow-y-auto relative">
+          <div className="min-h-full pb-20 lg:pb-8">
+            {renderScreen()}
+          </div>
         </main>
       </div>
 

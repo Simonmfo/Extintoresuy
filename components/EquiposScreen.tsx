@@ -437,7 +437,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
     };
 
     return (
-        <div className="px-6 py-4 lg:p-8 space-y-6 max-w-5xl mx-auto h-full overflow-hidden flex flex-col relative">
+        <div className="px-6 py-6 lg:p-8 space-y-6 max-w-5xl mx-auto h-full overflow-hidden flex flex-col relative">
             {/* Hidden QR for generating print preview */}
             {qrAssetToPrint && (
                 <div style={{ position: 'absolute', top: -9999, left: -9999 }}>
