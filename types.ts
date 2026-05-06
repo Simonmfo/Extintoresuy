@@ -11,6 +11,7 @@ export interface LocationItem {
 
 export interface InspectionAsset {
   id: string;
+  equipmentCategory?: string;
   type: string;
   lastInspection: string;
   lat: number;

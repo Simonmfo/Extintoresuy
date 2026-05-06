@@ -14,6 +14,7 @@ export interface InspectionRecord {
 const mapAsset = (asset: any): InspectionAsset => ({
   id: asset.id,
   name: asset.name,
+  equipmentCategory: asset.equipment_category,
   type: asset.type,
   description: asset.description,
   lastInspection: asset.last_inspection,
@@ -515,6 +516,7 @@ export const db = {
 
   addAsset: async (assetData: {
     name: string;
+    equipmentCategory?: string;
     type: string;
     description: string;
     clientId: string;
@@ -533,6 +535,7 @@ export const db = {
         .from('assets')
         .insert({
           name: assetData.name,
+          equipment_category: assetData.equipmentCategory || 'Extintor',
           type: assetData.type,
           description: assetData.description,
           client_id: assetData.clientId,
@@ -570,6 +573,7 @@ export const db = {
         .from('assets')
         .update({
           name: updates.name,
+          equipment_category: (updates as any).equipmentCategory,
           type: updates.type,
           description: updates.description,
           status: updates.status,

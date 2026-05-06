@@ -17,7 +17,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
     const [assets, setAssets] = useState<InspectionAsset[]>([]);
     const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [newAsset, setNewAsset] = useState({ name: '', type: '', description: '', agent: '', fireClass: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active' });
+    const [newAsset, setNewAsset] = useState({ name: '', equipmentCategory: 'Extintor', type: '', description: '', agent: '', fireClass: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<InspectionAsset | null>(null);
     const [editingAsset, setEditingAsset] = useState<InspectionAsset | null>(null);
@@ -84,7 +84,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
         if (!selectedClient || assets.length === 0) return;
 
         // Create CSV content
-        const headers = ['ID', 'Nombre', 'Tipo', 'Estado', 'Última Inspección', 'Ubicación'];
+        const headers = ['ID', 'Nombre', 'Categoría', 'Tipo', 'Estado', 'Última Inspección', 'Ubicación'];
         const today = new Date().toISOString().split('T')[0];
         const rows = assets.map(asset => {
             const isExpired = asset.expirationDate && asset.expirationDate < today;
@@ -93,6 +93,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             return [
                 asset.id,
                 asset.name || 'Sin nombre',
+                asset.equipmentCategory || 'N/A',
                 asset.type || 'N/A',
                 statusText,
                 asset.lastInspection || 'Nunca',
@@ -628,7 +629,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                         <td className="py-3 pl-2 font-mono text-slate-400 text-[10px] text-primary hidden sm:table-cell">{asset.id}</td>
                                                         <td className="py-3">
                                                             <div className="font-bold text-white text-xs sm:text-sm">{asset.name || 'Equipo'}</div>
-                                                            <div className="text-[10px] text-slate-500">{asset.type}</div>
+                                                            <div className="text-[10px] text-slate-500">{asset.equipmentCategory || 'Extintor'} - {asset.type}</div>
                                                             <div className="hidden sm:block text-[9px] text-slate-600 truncate max-w-[120px]">{asset.description}</div>
                                                         </td>
                                                         <td className="py-3">
@@ -948,33 +949,59 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tipo</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Categoría de Equipo</label>
                                 <select
-                                    value={newAsset.type}
-                                    onChange={e => {
-                                        const type = e.target.value;
-                                        let agent = '';
-                                        let fireClass = '';
-
-                                        if (type.includes('PQS')) { agent = 'Polvo Químico ABC'; fireClass = 'A, B, C'; }
-                                        else if (type.includes('CO2')) { agent = 'CO2'; fireClass = 'B, C'; }
-                                        else if (type.includes('Agua')) { agent = 'Agua'; fireClass = 'A'; }
-                                        else if (type.includes('Espuma')) { agent = 'Espuma AFFF'; fireClass = 'A, B'; }
-
-                                        setNewAsset({ ...newAsset, type, agent, fireClass });
-                                    }}
+                                    value={newAsset.equipmentCategory}
+                                    onChange={e => setNewAsset({ ...newAsset, equipmentCategory: e.target.value })}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
                                 >
-                                    <option value="" disabled>Seleccionar Tipo</option>
-                                    <option value="PQS 4kg">PQS 4kg</option>
-                                    <option value="PQS 8kg">PQS 8kg</option>
-                                    <option value="CO2 2kg">CO2 2kg</option>
-                                    <option value="CO2 5kg">CO2 5kg</option>
-                                    <option value="Agua 10L">Agua 10L</option>
-                                    <option value="Espuma AFFF">Espuma AFFF</option>
-                                    <option value="Acetato de Potasio">Acetato de Potasio (Clase K)</option>
-                                    <option value="Clase D">Clase D (Metales)</option>
+                                    <option value="Extintor">Extintor</option>
+                                    <option value="Manguera / Nicho">Manguera / Nicho de Incendio</option>
+                                    <option value="Botiquín">Botiquín de Primeros Auxilios</option>
+                                    <option value="Alarma / Detector">Alarma / Detector de Humo</option>
+                                    <option value="Luminaria de Emergencia">Luminaria de Emergencia</option>
+                                    <option value="Otro">Otro Equipo de Seguridad</option>
                                 </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tipo / Detalles</label>
+                                {newAsset.equipmentCategory === 'Extintor' ? (
+                                    <select
+                                        value={newAsset.type}
+                                        onChange={e => {
+                                            const type = e.target.value;
+                                            let agent = '';
+                                            let fireClass = '';
+
+                                            if (type.includes('PQS')) { agent = 'Polvo Químico ABC'; fireClass = 'A, B, C'; }
+                                            else if (type.includes('CO2')) { agent = 'CO2'; fireClass = 'B, C'; }
+                                            else if (type.includes('Agua')) { agent = 'Agua'; fireClass = 'A'; }
+                                            else if (type.includes('Espuma')) { agent = 'Espuma AFFF'; fireClass = 'A, B'; }
+
+                                            setNewAsset({ ...newAsset, type, agent, fireClass });
+                                        }}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
+                                    >
+                                        <option value="" disabled>Seleccionar Tipo</option>
+                                        <option value="PQS 4kg">PQS 4kg</option>
+                                        <option value="PQS 8kg">PQS 8kg</option>
+                                        <option value="CO2 2kg">CO2 2kg</option>
+                                        <option value="CO2 5kg">CO2 5kg</option>
+                                        <option value="Agua 10L">Agua 10L</option>
+                                        <option value="Espuma AFFF">Espuma AFFF</option>
+                                        <option value="Acetato de Potasio">Acetato de Potasio (Clase K)</option>
+                                        <option value="Clase D">Clase D (Metales)</option>
+                                    </select>
+                                ) : (
+                                    <input
+                                        type="text"
+                                        value={newAsset.type}
+                                        onChange={e => setNewAsset({ ...newAsset, type: e.target.value })}
+                                        placeholder="Ej. Manguera 25mts / Tipo B"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                    />
+                                )}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -1146,33 +1173,59 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tipo</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Categoría de Equipo</label>
                                 <select
-                                    value={editingAsset.type}
-                                    onChange={e => {
-                                        const type = e.target.value;
-                                        let agent = '';
-                                        let fireClass = '';
-
-                                        if (type.includes('PQS')) { agent = 'Polvo Químico ABC'; fireClass = 'A, B, C'; }
-                                        else if (type.includes('CO2')) { agent = 'CO2'; fireClass = 'B, C'; }
-                                        else if (type.includes('Agua')) { agent = 'Agua'; fireClass = 'A'; }
-                                        else if (type.includes('Espuma')) { agent = 'Espuma AFFF'; fireClass = 'A, B'; }
-
-                                        setEditingAsset({ ...editingAsset, type, agent, fireClass });
-                                    }}
+                                    value={editingAsset.equipmentCategory || 'Extintor'}
+                                    onChange={e => setEditingAsset({ ...editingAsset, equipmentCategory: e.target.value })}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
                                 >
-                                    <option value="" disabled>Seleccionar Tipo</option>
-                                    <option value="PQS 4kg">PQS 4kg</option>
-                                    <option value="PQS 8kg">PQS 8kg</option>
-                                    <option value="CO2 2kg">CO2 2kg</option>
-                                    <option value="CO2 5kg">CO2 5kg</option>
-                                    <option value="Agua 10L">Agua 10L</option>
-                                    <option value="Espuma AFFF">Espuma AFFF</option>
-                                    <option value="Acetato de Potasio">Acetato de Potasio (Clase K)</option>
-                                    <option value="Clase D">Clase D (Metales)</option>
+                                    <option value="Extintor">Extintor</option>
+                                    <option value="Manguera / Nicho">Manguera / Nicho de Incendio</option>
+                                    <option value="Botiquín">Botiquín de Primeros Auxilios</option>
+                                    <option value="Alarma / Detector">Alarma / Detector de Humo</option>
+                                    <option value="Luminaria de Emergencia">Luminaria de Emergencia</option>
+                                    <option value="Otro">Otro Equipo de Seguridad</option>
                                 </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tipo / Detalles</label>
+                                {editingAsset.equipmentCategory === 'Extintor' ? (
+                                    <select
+                                        value={editingAsset.type}
+                                        onChange={e => {
+                                            const type = e.target.value;
+                                            let agent = '';
+                                            let fireClass = '';
+
+                                            if (type.includes('PQS')) { agent = 'Polvo Químico ABC'; fireClass = 'A, B, C'; }
+                                            else if (type.includes('CO2')) { agent = 'CO2'; fireClass = 'B, C'; }
+                                            else if (type.includes('Agua')) { agent = 'Agua'; fireClass = 'A'; }
+                                            else if (type.includes('Espuma')) { agent = 'Espuma AFFF'; fireClass = 'A, B'; }
+
+                                            setEditingAsset({ ...editingAsset, type, agent, fireClass });
+                                        }}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
+                                    >
+                                        <option value="" disabled>Seleccionar Tipo</option>
+                                        <option value="PQS 4kg">PQS 4kg</option>
+                                        <option value="PQS 8kg">PQS 8kg</option>
+                                        <option value="CO2 2kg">CO2 2kg</option>
+                                        <option value="CO2 5kg">CO2 5kg</option>
+                                        <option value="Agua 10L">Agua 10L</option>
+                                        <option value="Espuma AFFF">Espuma AFFF</option>
+                                        <option value="Acetato de Potasio">Acetato de Potasio (Clase K)</option>
+                                        <option value="Clase D">Clase D (Metales)</option>
+                                    </select>
+                                ) : (
+                                    <input
+                                        type="text"
+                                        value={editingAsset.type}
+                                        onChange={e => setEditingAsset({ ...editingAsset, type: e.target.value })}
+                                        placeholder="Ej. Manguera 25mts / Tipo B"
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                    />
+                                )}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
