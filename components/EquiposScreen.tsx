@@ -106,7 +106,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `reporte_extintores_${selectedClient.name.replace(/\s+/g, '_')}.csv`);
+        link.setAttribute("download", `reporte_equipos_${selectedClient.name.replace(/\s+/g, '_')}.csv`);
 
         document.body.appendChild(link);
         link.click();
@@ -416,7 +416,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
     };
 
     const handleDeleteAsset = async (assetId: string) => {
-        if (!window.confirm("¿Está seguro de que desea eliminar este extintor permanentemente?")) return;
+        if (!window.confirm("¿Está seguro de que desea eliminar este equipo permanentemente?")) return;
 
         // Optimistic update or loading state
         // setIsSubmitting(true); // Maybe not needed for delete if fast, but good for safety
@@ -429,7 +429,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                 setAssets(updatedAssets);
             }
         } else {
-            alert("Error al eliminar el extintor.");
+            alert("Error al eliminar el equipo.");
         }
         // setIsSubmitting(false);
     };
@@ -552,7 +552,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             className="hidden sm:flex items-center gap-2 bg-primary/10 hover:bg-primary text-primary hover:text-background-dark px-3 py-1.5 rounded-lg border border-primary/20 hover:border-primary transition-all text-xs font-bold uppercase tracking-wider cursor-pointer"
                                         >
                                             <span className="material-symbols-outlined !text-base">add_circle</span>
-                                            Agregar Extintor
+                                            Agregar Equipo
                                         </div>
                                     </>
                                 )}
@@ -595,7 +595,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                         className="w-full flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary text-primary hover:text-background-dark px-3 py-3 rounded-lg border border-primary/20 hover:border-primary transition-all text-xs font-bold uppercase tracking-wider"
                                     >
                                         <span className="material-symbols-outlined !text-base">add_circle</span>
-                                        Agregar Extintor
+                                        Agregar Equipo
                                     </button>
                                 </div>
 
@@ -627,7 +627,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                     >
                                                         <td className="py-3 pl-2 font-mono text-slate-400 text-[10px] text-primary hidden sm:table-cell">{asset.id}</td>
                                                         <td className="py-3">
-                                                            <div className="font-bold text-white text-xs sm:text-sm">{asset.name || 'Extintor'}</div>
+                                                            <div className="font-bold text-white text-xs sm:text-sm">{asset.name || 'Equipo'}</div>
                                                             <div className="text-[10px] text-slate-500">{asset.type}</div>
                                                             <div className="hidden sm:block text-[9px] text-slate-600 truncate max-w-[120px]">{asset.description}</div>
                                                         </td>
@@ -832,7 +832,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                     <span className="material-symbols-outlined !text-4xl text-primary">fire_extinguisher</span>
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-black text-white">{viewingAsset.name || 'Extintor'}</h2>
+                                    <h2 className="text-2xl font-black text-white">{viewingAsset.name || 'Equipo'}</h2>
                                     <p className="text-primary font-mono text-sm uppercase tracking-widest">{viewingAsset.id}</p>
                                     <div className="flex items-center gap-3 mt-2">
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${viewingAsset.lifecycleStatus === 'active' || !viewingAsset.lifecycleStatus ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-500/20 text-slate-400'}`}>
@@ -925,7 +925,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
                     <div className="bg-background-dark border border-white/10 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-scaleIn max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-black text-white">Nuevo Extintor</h2>
+                            <h2 className="text-xl font-black text-white">Nuevo Equipo</h2>
                             <button
                                 onClick={() => setIsAddModalOpen(false)}
                                 className="p-1 rounded-full hover:bg-white/10 transition-colors"
@@ -942,7 +942,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                     required
                                     value={newAsset.name}
                                     onChange={e => setNewAsset({ ...newAsset, name: e.target.value })}
-                                    placeholder="Ej. Extintor Hall"
+                                    placeholder="Ej. Extintor Hall / Manguera 1"
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
                                 />
                             </div>
@@ -1119,7 +1119,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
                     <div className="bg-background-dark border border-white/10 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-scaleIn max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-xl font-black text-white">Editar Extintor</h2>
+                            <h2 className="text-xl font-black text-white">Editar Equipo</h2>
                             <button
                                 onClick={() => setEditingAsset(null)}
                                 className="p-1 rounded-full hover:bg-white/10 transition-colors"
