@@ -181,8 +181,8 @@ const App: FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background-dark flex relative overflow-x-hidden text-white">
-      {/* Desktop Sidebar */}
+    <div className="min-h-screen bg-background-dark text-white font-sans flex flex-col lg:flex-row">
+      {/* Sidebar (Fixed/Hidden on mobile) */}
       {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
         <Sidebar 
           currentScreen={currentScreen} 
@@ -198,7 +198,7 @@ const App: FC = () => {
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${currentScreen !== 'inspeccion' && currentScreen !== 'mapa' ? 'lg:pl-20' : ''}`}>
         {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
-          <div className="lg:hidden shrink-0">
+          <div className="lg:hidden fixed top-0 left-0 right-0 z-50">
             <Header onMenuClick={() => setIsSidebarOpen(true)} />
           </div>
         )}
@@ -211,15 +211,12 @@ const App: FC = () => {
               <p className="text-sm font-medium text-slate-400">Plataforma de Mantenimiento</p>
             </div>
             <div className="flex gap-3">
-              <button className="flex size-10 items-center justify-center rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10 transition-colors">
-                <span className="material-symbols-outlined">notifications</span>
-              </button>
             </div>
           </header>
         )}
 
-        <main className="flex-1 overflow-y-auto relative">
-          <div className="min-h-full pb-20 lg:pb-8">
+        <main className="flex-1 w-full max-w-full overflow-x-hidden">
+          <div className={`min-h-full pb-20 lg:pb-8 ${currentScreen !== 'inspeccion' && currentScreen !== 'mapa' ? 'pt-16 lg:pt-0' : ''}`}>
             {renderScreen()}
           </div>
         </main>
@@ -227,7 +224,7 @@ const App: FC = () => {
 
       {/* Mobile Bottom Nav */}
       {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
-        <div className="lg:hidden">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
           <BottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />
         </div>
       )}

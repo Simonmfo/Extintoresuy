@@ -23,11 +23,6 @@ const Header: FC<HeaderProps> = ({ onMenuClick }) => {
           <p className="text-[9px] uppercase tracking-widest text-primary font-bold">Compliance</p>
         </div>
       </div>
-      <div className="flex gap-2">
-        <button className="flex size-9 items-center justify-center rounded-xl bg-white/5 text-white border border-white/10 active:bg-white/10 transition-colors">
-          <span className="material-symbols-outlined !text-xl">notifications</span>
-        </button>
-      </div>
     </header>
   );
 };
