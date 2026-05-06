@@ -1004,35 +1004,37 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                 )}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Agente Extintor</label>
-                                    <select
-                                        value={newAsset.agent}
-                                        onChange={e => setNewAsset({ ...newAsset, agent: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none text-xs"
-                                    >
-                                        <option value="">Seleccionar...</option>
-                                        <option value="Agua">Agua</option>
-                                        <option value="Agua Pulverizada">Agua Pulverizada</option>
-                                        <option value="Polvo Químico ABC">Polvo Químico ABC</option>
-                                        <option value="CO2">CO2 (Dióxido de Carbono)</option>
-                                        <option value="Espuma AFFF">Espuma AFFF</option>
-                                        <option value="Clase D">Agentes Especiales (Clase D)</option>
-                                        <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
-                                    </select>
+                            {newAsset.equipmentCategory === 'Extintor' && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Agente Extintor</label>
+                                        <select
+                                            value={newAsset.agent}
+                                            onChange={e => setNewAsset({ ...newAsset, agent: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none text-xs"
+                                        >
+                                            <option value="">Seleccionar...</option>
+                                            <option value="Agua">Agua</option>
+                                            <option value="Agua Pulverizada">Agua Pulverizada</option>
+                                            <option value="Polvo Químico ABC">Polvo Químico ABC</option>
+                                            <option value="CO2">CO2 (Dióxido de Carbono)</option>
+                                            <option value="Espuma AFFF">Espuma AFFF</option>
+                                            <option value="Clase D">Agentes Especiales (Clase D)</option>
+                                            <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
+                                        <input
+                                            type="text"
+                                            value={newAsset.fireClass}
+                                            onChange={e => setNewAsset({ ...newAsset, fireClass: e.target.value })}
+                                            placeholder="Ej. A, B, C"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
-                                    <input
-                                        type="text"
-                                        value={newAsset.fireClass}
-                                        onChange={e => setNewAsset({ ...newAsset, fireClass: e.target.value })}
-                                        placeholder="Ej. A, B, C"
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                    />
-                                </div>
-                            </div>
+                            )}
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -1059,52 +1061,58 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última Recarga</label>
-                                    <input
-                                        type="date"
-                                        value={newAsset.lastRecharge}
-                                        onChange={e => {
-                                            const date = e.target.value;
-                                            setNewAsset({ ...newAsset, lastRecharge: date, expirationDate: addYears(date, 2) });
-                                        }}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Vencimiento Carga</label>
-                                    <input
-                                        type="date"
-                                        value={newAsset.expirationDate}
-                                        onChange={e => setNewAsset({ ...newAsset, expirationDate: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
-                                    />
-                                </div>
+                                {newAsset.equipmentCategory === 'Extintor' && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última Recarga</label>
+                                        <input
+                                            type="date"
+                                            value={newAsset.lastRecharge}
+                                            onChange={e => {
+                                                const date = e.target.value;
+                                                setNewAsset({ ...newAsset, lastRecharge: date, expirationDate: addYears(date, 2) });
+                                            }}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                        />
+                                    </div>
+                                )}
+                                {['Extintor', 'Botiquín'].includes(newAsset.equipmentCategory) && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Vencimiento {newAsset.equipmentCategory === 'Botiquín' ? 'Insumos' : 'Carga'}</label>
+                                        <input
+                                            type="date"
+                                            value={newAsset.expirationDate}
+                                            onChange={e => setNewAsset({ ...newAsset, expirationDate: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                        />
+                                    </div>
+                                )}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última PH</label>
-                                    <input
-                                        type="date"
-                                        value={newAsset.lastHydrotest || ''}
-                                        onChange={e => {
-                                            const date = e.target.value;
-                                            setNewAsset({ ...newAsset, lastHydrotest: date, nextHydrotest: addYears(date, 4) });
-                                        }}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
-                                    />
+                            {['Extintor', 'Manguera / Nicho'].includes(newAsset.equipmentCategory) && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última PH</label>
+                                        <input
+                                            type="date"
+                                            value={newAsset.lastHydrotest || ''}
+                                            onChange={e => {
+                                                const date = e.target.value;
+                                                setNewAsset({ ...newAsset, lastHydrotest: date, nextHydrotest: addYears(date, 4) });
+                                            }}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Próxima PH</label>
+                                        <input
+                                            type="date"
+                                            value={newAsset.nextHydrotest}
+                                            onChange={e => setNewAsset({ ...newAsset, nextHydrotest: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Próxima PH</label>
-                                    <input
-                                        type="date"
-                                        value={newAsset.nextHydrotest}
-                                        onChange={e => setNewAsset({ ...newAsset, nextHydrotest: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
-                                    />
-                                </div>
-                            </div>
+                            )}
 
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Estado Operativo</label>
@@ -1228,35 +1236,37 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                 )}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Agente Extintor</label>
-                                    <select
-                                        value={editingAsset.agent || ''}
-                                        onChange={e => setEditingAsset({ ...editingAsset, agent: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none text-xs"
-                                    >
-                                        <option value="">Seleccionar...</option>
-                                        <option value="Agua">Agua</option>
-                                        <option value="Agua Pulverizada">Agua Pulverizada</option>
-                                        <option value="Polvo Químico ABC">Polvo Químico ABC</option>
-                                        <option value="CO2">CO2 (Dióxido de Carbono)</option>
-                                        <option value="Espuma AFFF">Espuma AFFF</option>
-                                        <option value="Clase D">Agentes Especiales (Clase D)</option>
-                                        <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
-                                    </select>
+                            {editingAsset.equipmentCategory === 'Extintor' && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Agente Extintor</label>
+                                        <select
+                                            value={editingAsset.agent || ''}
+                                            onChange={e => setEditingAsset({ ...editingAsset, agent: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none text-xs"
+                                        >
+                                            <option value="">Seleccionar...</option>
+                                            <option value="Agua">Agua</option>
+                                            <option value="Agua Pulverizada">Agua Pulverizada</option>
+                                            <option value="Polvo Químico ABC">Polvo Químico ABC</option>
+                                            <option value="CO2">CO2 (Dióxido de Carbono)</option>
+                                            <option value="Espuma AFFF">Espuma AFFF</option>
+                                            <option value="Clase D">Agentes Especiales (Clase D)</option>
+                                            <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
+                                        <input
+                                            type="text"
+                                            value={editingAsset.fireClass || ''}
+                                            onChange={e => setEditingAsset({ ...editingAsset, fireClass: e.target.value })}
+                                            placeholder="Ej. A, B, C"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
-                                    <input
-                                        type="text"
-                                        value={editingAsset.fireClass || ''}
-                                        onChange={e => setEditingAsset({ ...editingAsset, fireClass: e.target.value })}
-                                        placeholder="Ej. A, B, C"
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                    />
-                                </div>
-                            </div>
+                            )}
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -1283,52 +1293,58 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última Recarga</label>
-                                    <input
-                                        type="date"
-                                        value={editingAsset.lastRecharge || ''}
-                                        onChange={e => {
-                                            const date = e.target.value;
-                                            setEditingAsset({ ...editingAsset, lastRecharge: date, expirationDate: addYears(date, 2) });
-                                        }}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Vencimiento Carga</label>
-                                    <input
-                                        type="date"
-                                        value={editingAsset.expirationDate || ''}
-                                        onChange={e => setEditingAsset({ ...editingAsset, expirationDate: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
-                                    />
-                                </div>
+                                {editingAsset.equipmentCategory === 'Extintor' && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última Recarga</label>
+                                        <input
+                                            type="date"
+                                            value={editingAsset.lastRecharge || ''}
+                                            onChange={e => {
+                                                const date = e.target.value;
+                                                setEditingAsset({ ...editingAsset, lastRecharge: date, expirationDate: addYears(date, 2) });
+                                            }}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                        />
+                                    </div>
+                                )}
+                                {['Extintor', 'Botiquín'].includes(editingAsset.equipmentCategory || 'Extintor') && (
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Vencimiento {editingAsset.equipmentCategory === 'Botiquín' ? 'Insumos' : 'Carga'}</label>
+                                        <input
+                                            type="date"
+                                            value={editingAsset.expirationDate || ''}
+                                            onChange={e => setEditingAsset({ ...editingAsset, expirationDate: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                        />
+                                    </div>
+                                )}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última PH</label>
-                                    <input
-                                        type="date"
-                                        value={editingAsset.lastHydrotest || ''}
-                                        onChange={e => {
-                                            const date = e.target.value;
-                                            setEditingAsset({ ...editingAsset, lastHydrotest: date, nextHydrotest: addYears(date, 4) });
-                                        }}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
-                                    />
+                            {['Extintor', 'Manguera / Nicho'].includes(editingAsset.equipmentCategory || 'Extintor') && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última PH</label>
+                                        <input
+                                            type="date"
+                                            value={editingAsset.lastHydrotest || ''}
+                                            onChange={e => {
+                                                const date = e.target.value;
+                                                setEditingAsset({ ...editingAsset, lastHydrotest: date, nextHydrotest: addYears(date, 4) });
+                                            }}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Próxima PH</label>
+                                        <input
+                                            type="date"
+                                            value={editingAsset.nextHydrotest || ''}
+                                            onChange={e => setEditingAsset({ ...editingAsset, nextHydrotest: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Próxima PH</label>
-                                    <input
-                                        type="date"
-                                        value={editingAsset.nextHydrotest || ''}
-                                        onChange={e => setEditingAsset({ ...editingAsset, nextHydrotest: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors"
-                                    />
-                                </div>
-                            </div>
+                            )}
 
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Estado Operativo</label>
