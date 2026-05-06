@@ -370,7 +370,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             const updatedAssets = await db.getAssetsByClient(selectedClient.id);
             setAssets(updatedAssets);
             setIsAddModalOpen(false);
-            setNewAsset({ name: '', type: '', description: '', agent: '', fireClass: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active' });
+            setNewAsset({ name: '', equipmentCategory: 'Extintor', type: '', description: '', agent: '', fireClass: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active' });
         }
         setIsSubmitting(false);
     };

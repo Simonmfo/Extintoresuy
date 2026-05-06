@@ -252,7 +252,7 @@ export const db = {
       .order('name');
 
     if (companyId !== 'ALL') {
-      query = query.eq('company_id', companyId);
+      query = (query as any).eq('company_id', companyId);
     }
 
     const { data, error } = await query;
@@ -273,7 +273,7 @@ export const db = {
         .insert({
           ...clientData,
           company_id: user.id
-        })
+        } as any)
         .select()
         .single();
 
@@ -382,9 +382,9 @@ export const db = {
     // If companyId is provided and not 'ALL', first get their clients
     let allowedClientIds: string[] | null = null;
     if (companyId !== 'ALL') {
-      const { data: clients } = await supabase
+      const { data: clients } = await (supabase
         .from('clients')
-        .select('id')
+        .select('id') as any)
         .eq('company_id', companyId);
 
       allowedClientIds = clients?.map(c => c.id) || [];
@@ -450,7 +450,7 @@ export const db = {
         last_inspection: record.date,
         next_inspection_date: nextDate.toISOString().split('T')[0],
         status: record.status === 'passed' ? 'ok' : 'failed'
-      })
+      } as any)
         .eq('id', record.assetId)
         .select();
 
@@ -586,7 +586,7 @@ export const db = {
           last_recharge_date: updates.lastRecharge,
           last_hydrotest_date: updates.lastHydrotest,
           next_hydrotest_date: updates.nextHydrotest
-        })
+        } as any)
         .eq('id', id);
 
       if (error) throw error;

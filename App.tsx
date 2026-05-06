@@ -119,7 +119,7 @@ const App: FC = () => {
       case 'usuarios':
         return <UsuariosScreen />;
       case 'clientes':
-        return <ClientesScreen onNavigate={handleNavigate} companyId={companyId} />;
+        return <ClientesScreen companyId={companyId} />;
       case 'facturacion':
         return <FacturacionScreen />;
       case 'reportes':
@@ -129,7 +129,7 @@ const App: FC = () => {
       case 'tecnicos':
         return <TecnicosScreen companyId={companyId} />;
       case 'ajustes':
-        return <AjustesScreen />;
+        return <AjustesScreen profile={profile} onLogout={handleLogout} onRefreshProfile={() => {}} />;
       case 'inspecciones':
         return <InspeccionesScreen onBack={() => setCurrentScreen('home')} profile={profile} onStartInspection={(id) => handleStartInspection(id)} />;
       case 'mapa':

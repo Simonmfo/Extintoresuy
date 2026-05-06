@@ -11,11 +11,35 @@ export interface LocationItem {
 
 export interface InspectionAsset {
   id: string;
+  name?: string;
   equipmentCategory?: string;
   type: string;
+  description?: string;
   lastInspection: string;
   lat: number;
   lng: number;
+  status?: string;
+  imageUrl?: string;
+  clientId?: string;
+  companyId?: string;
+  agent?: string;
+  fireClass?: string;
+  expirationDate?: string;
+  lifecycleStatus?: 'active' | 'maintenance' | 'discarded';
+  nextInspection?: string;
+  lastRecharge?: string;
+  lastHydrotest?: string;
+  nextHydrotest?: string;
+  assignedTechnicianId?: string;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  address: string;
+  contact_email: string;
+  rut?: string;
+  created_at: string;
 }
 
 export interface UserProfile {
@@ -24,4 +48,6 @@ export interface UserProfile {
   full_name: string;
   role: 'admin' | 'tecnico' | 'empresa' | 'fabrica';
   company_id: string | null;
+  avatar_url?: string;
+  created_at?: string;
 }
