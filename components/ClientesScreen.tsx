@@ -5,9 +5,10 @@ import { Client } from '../types';
 
 interface ClientesScreenProps {
     companyId?: string;
+    readOnly?: boolean;
 }
 
-const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId }) => {
+const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = false }) => {
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,22 +50,24 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId }) => {
     };
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto h-full flex flex-col animate-fadeIn">
+        <div className={`space-y-6 px-4 lg:px-8 max-w-7xl mx-auto h-full flex flex-col animate-fadeIn ${readOnly ? '' : 'pt-20 lg:pt-8'}`}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
                         <span className="material-symbols-outlined text-primary !text-4xl">corporate_fare</span>
-                        Gestión de Empresas
+                        Directorio de Empresas
                     </h1>
-                    <p className="text-slate-400 text-sm mt-1">Controle su cartera de clientes y puntos de servicio.</p>
+                    <p className="text-slate-400 text-sm mt-1">Gestiona los clientes y sus sucursales</p>
                 </div>
-                <button
-                    onClick={() => openModal()}
-                    className="bg-primary text-background-dark font-black px-6 py-3 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 uppercase text-xs tracking-wider"
-                >
-                    <span className="material-symbols-outlined !text-lg">add_business</span>
-                    Nueva Empresa
-                </button>
+                {!readOnly && (
+                    <button
+                        onClick={() => openModal()}
+                        className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                        <span className="material-symbols-outlined !text-xl">add</span>
+                        Añadir Empresa
+                    </button>
+                )}
             </div>
 
             <div className="flex-1 bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
@@ -74,72 +77,74 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId }) => {
                             <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
                         </div>
                     ) : (
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full text-left border-collapse min-w-[600px] sm:min-w-0">
                             <thead>
                                 <tr className="text-[10px] uppercase tracking-widest text-slate-500 border-b border-white/5 bg-white/[0.02]">
-                                    <th className="p-6">Razón Social / RUT</th>
-                                    <th className="p-6">Dirección Principal</th>
-                                    <th className="p-6">Contacto / Correo</th>
-                                    <th className="p-6 text-right">Acciones</th>
+                                    <th className="p-4 sm:p-6">Razón Social / RUT</th>
+                                    <th className="p-4 sm:p-6 hidden sm:table-cell">Dirección Principal</th>
+                                    <th className="p-4 sm:p-6">Contacto / Correo</th>
+                                    {!readOnly && <th className="p-4 sm:p-6 text-right">Acciones</th>}
                                 </tr>
                             </thead>
                             <tbody>
                                 {clients.map(client => (
                                     <tr key={client.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors group">
-                                        <td className="p-6">
+                                        <td className="p-4 sm:p-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="size-10 rounded-xl bg-slate-800 flex items-center justify-center text-primary font-bold shrink-0">
+                                                <div className="size-8 sm:size-10 rounded-xl bg-slate-800 flex items-center justify-center text-primary font-bold shrink-0 text-sm sm:text-base">
                                                     {client.name.substring(0, 1).toUpperCase()}
                                                 </div>
-                                                <div>
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="font-bold text-white text-lg">{client.name}</p>
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                                                        <p className="font-bold text-white text-base sm:text-lg truncate max-w-[150px] sm:max-w-xs">{client.name}</p>
                                                         {(!companyId || companyId === 'ALL') && (
-                                                            <span className="text-[9px] bg-white/10 text-slate-300 px-2 py-0.5 rounded-md uppercase tracking-widest font-black border border-white/10">
+                                                            <span className="text-[9px] bg-white/10 text-slate-300 px-2 py-0.5 rounded-md uppercase tracking-widest font-black border border-white/10 shrink-0">
                                                                 Por: {(client as any).creatorName}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    {client.rut && <p className="text-[10px] font-mono text-primary font-black uppercase tracking-widest">RUT: {client.rut}</p>}
+                                                    {client.rut && <p className="text-[10px] font-mono text-primary font-black uppercase tracking-widest mt-0.5">RUT: {client.rut}</p>}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="p-6">
+                                        <td className="p-4 sm:p-6 hidden sm:table-cell">
                                             <p className="text-sm text-slate-400 font-medium">
                                                 <span className="material-symbols-outlined !text-sm align-middle mr-1">location_on</span>
                                                 {client.address || 'Sin dirección registrada'}
                                             </p>
                                         </td>
-                                        <td className="p-6">
+                                        <td className="p-4 sm:p-6">
                                             <p className="text-sm text-slate-400 font-medium">
                                                 <span className="material-symbols-outlined !text-sm align-middle mr-1">mail</span>
                                                 {client.contact_email || 'N/A'}
                                             </p>
                                         </td>
-                                        <td className="p-6 text-right">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    onClick={() => openModal(client)}
-                                                    className="size-10 rounded-xl bg-white/5 text-slate-400 border border-white/10 hover:bg-primary/20 hover:text-primary hover:border-primary/20 transition-all flex items-center justify-center shadow-lg"
-                                                    title="Editar Cliente"
-                                                >
-                                                    <span className="material-symbols-outlined !text-lg">edit</span>
-                                                </button>
-                                                <button
-                                                    onClick={async () => {
-                                                        if (window.confirm(`¿Estás seguro de eliminar a "${client.name}"? Esta acción no se puede deshacer y podría fallar si tiene equipos asociados.`)) {
-                                                            const ok = await db.deleteClient(client.id);
-                                                            if (ok) loadClients();
-                                                            else alert('Error al eliminar: Verifica que el cliente no tenga equipos o facturas asociadas.');
-                                                        }
-                                                    }}
-                                                    className="size-10 rounded-xl bg-white/5 text-slate-500 border border-white/10 hover:bg-red-500/20 hover:text-red-500 hover:border-red-500/20 transition-all flex items-center justify-center shadow-lg"
-                                                    title="Eliminar Cliente"
-                                                >
-                                                    <span className="material-symbols-outlined !text-lg">delete</span>
-                                                </button>
-                                            </div>
-                                        </td>
+                                        {!readOnly && (
+                                            <td className="p-4 sm:p-6 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => openModal(client)}
+                                                        className="size-10 rounded-xl bg-white/5 text-slate-400 border border-white/10 hover:bg-primary/20 hover:text-primary hover:border-primary/20 transition-all flex items-center justify-center shadow-lg"
+                                                        title="Editar Cliente"
+                                                    >
+                                                        <span className="material-symbols-outlined !text-lg">edit</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (window.confirm(`¿Estás seguro de eliminar a "${client.name}"? Esta acción no se puede deshacer y podría fallar si tiene equipos asociados.`)) {
+                                                                const ok = await db.deleteClient(client.id);
+                                                                if (ok) loadClients();
+                                                                else alert('Error al eliminar: Verifica que el cliente no tenga equipos o facturas asociadas.');
+                                                            }
+                                                        }}
+                                                        className="size-10 rounded-xl bg-white/5 text-slate-500 border border-white/10 hover:bg-red-500/20 hover:text-red-500 hover:border-red-500/20 transition-all flex items-center justify-center shadow-lg"
+                                                        title="Eliminar Cliente"
+                                                    >
+                                                        <span className="material-symbols-outlined !text-lg">delete</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                                 {clients.length === 0 && (

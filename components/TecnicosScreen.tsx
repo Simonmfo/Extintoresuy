@@ -1,13 +1,13 @@
-
 import React, { useEffect, useState } from 'react';
 import { db } from '../services/db';
 import { supabase } from '../services/supabase';
 
 interface TecnicosScreenProps {
-    companyId: string;
+    companyId?: string;
+    readOnly?: boolean;
 }
 
-const TecnicosScreen: React.FC<TecnicosScreenProps> = ({ companyId }) => {
+const TecnicosScreen: React.FC<TecnicosScreenProps> = ({ companyId, readOnly = false }) => {
     const [technicians, setTechnicians] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -93,17 +93,19 @@ const TecnicosScreen: React.FC<TecnicosScreenProps> = ({ companyId }) => {
                 <div>
                     <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
                         <span className="material-symbols-outlined text-primary !text-4xl">engineering</span>
-                        Gestión de Técnicos
+                        Directorio de Técnicos
                     </h1>
-                    <p className="text-slate-400 mt-1">Administra el personal de campo y visualiza su rendimiento.</p>
+                    <p className="text-slate-400 text-sm mt-1">Gestione el personal técnico de su empresa</p>
                 </div>
-                <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="flex items-center justify-center gap-2 bg-primary hover:bg-green-400 text-background-dark px-6 py-4 rounded-2xl font-black transition-all shadow-lg shadow-primary/20 active:scale-95"
-                >
-                    <span className="material-symbols-outlined">person_add</span>
-                    NUEVO TÉCNICO
-                </button>
+                {!readOnly && (
+                    <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                        <span className="material-symbols-outlined !text-xl">person_add</span>
+                        Añadir Técnico
+                    </button>
+                )}
             </div>
 
             {/* Stats Overview */}
@@ -145,16 +147,18 @@ const TecnicosScreen: React.FC<TecnicosScreenProps> = ({ companyId }) => {
                                     <span className="inline-flex px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-wider">
                                         ACTIVO
                                     </span>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDelete(tecnico.id, tecnico.full_name);
-                                        }}
-                                        className="size-8 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center group/del"
-                                        title="Eliminar Técnico"
-                                    >
-                                        <span className="material-symbols-outlined !text-xl">delete</span>
-                                    </button>
+                                    {!readOnly && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(tecnico.id, tecnico.full_name);
+                                            }}
+                                            className="size-8 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center group/del"
+                                            title="Eliminar Técnico"
+                                        >
+                                            <span className="material-symbols-outlined !text-xl">delete</span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 

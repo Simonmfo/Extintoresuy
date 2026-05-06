@@ -9,9 +9,10 @@ interface EquiposScreenProps {
     initialAssetId?: string | null;
     onClearInitialId?: () => void;
     companyId?: string;
+    readOnly?: boolean;
 }
 
-const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearInitialId, companyId }) => {
+const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearInitialId, companyId, readOnly = false }) => {
     const [clients, setClients] = useState<Client[]>([]);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [assets, setAssets] = useState<InspectionAsset[]>([]);
@@ -548,13 +549,15 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             </div>
                                         </div>
 
-                                        <div
-                                            onClick={openAddModal}
-                                            className="hidden sm:flex items-center gap-2 bg-primary/10 hover:bg-primary text-primary hover:text-background-dark px-3 py-1.5 rounded-lg border border-primary/20 hover:border-primary transition-all text-xs font-bold uppercase tracking-wider cursor-pointer"
-                                        >
-                                            <span className="material-symbols-outlined !text-base">add_circle</span>
-                                            Agregar Equipo
-                                        </div>
+                                        {!readOnly && (
+                                            <div
+                                                onClick={openAddModal}
+                                                className="hidden sm:flex items-center gap-2 bg-primary/10 hover:bg-primary text-primary hover:text-background-dark px-3 py-1.5 rounded-lg border border-primary/20 hover:border-primary transition-all text-xs font-bold uppercase tracking-wider cursor-pointer"
+                                            >
+                                                <span className="material-symbols-outlined !text-base">add_circle</span>
+                                                Agregar Equipo
+                                            </div>
+                                        )}
                                     </>
                                 )}
                                 <span className={`material-symbols-outlined text-slate-500 transition-transform duration-300 ${selectedClient?.id === client.id ? 'rotate-180 text-primary' : ''}`}>
@@ -591,13 +594,15 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             </span>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={openAddModal}
-                                        className="w-full flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary text-primary hover:text-background-dark px-3 py-3 rounded-lg border border-primary/20 hover:border-primary transition-all text-xs font-bold uppercase tracking-wider"
-                                    >
-                                        <span className="material-symbols-outlined !text-base">add_circle</span>
-                                        Agregar Equipo
-                                    </button>
+                                    {!readOnly && (
+                                        <button
+                                            onClick={openAddModal}
+                                            className="w-full flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary text-primary hover:text-background-dark px-3 py-3 rounded-lg border border-primary/20 hover:border-primary transition-all text-xs font-bold uppercase tracking-wider"
+                                        >
+                                            <span className="material-symbols-outlined !text-base">add_circle</span>
+                                            Agregar Equipo
+                                        </button>
+                                    )}
                                 </div>
 
                                 {loading ? (
@@ -606,7 +611,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                     </div>
                                 ) : assets.length > 0 ? (
                                     <div className="overflow-x-auto">
-                                        <table className="w-full text-left border-collapse">
+                                        <table className="w-full text-left border-collapse min-w-[800px] sm:min-w-0">
                                             <thead>
                                                 <tr className="text-[10px] uppercase tracking-wider text-slate-500 border-b border-white/5">
                                                     <th className="pb-3 pl-2 hidden sm:table-cell">ID</th>
@@ -653,13 +658,15 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                             >
                                                                 <span className="material-symbols-outlined !text-lg">print</span>
                                                             </button>
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); handleDeleteAsset(asset.id); }}
-                                                                className="text-slate-400 hover:text-red-500 transition-colors p-2 hover:bg-red-500/10 rounded-full"
-                                                                title="Eliminar"
-                                                            >
-                                                                <span className="material-symbols-outlined !text-lg">delete</span>
-                                                            </button>
+                                                            {!readOnly && (
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); handleDeleteAsset(asset.id); }}
+                                                                    className="text-slate-400 hover:text-red-500 transition-colors p-2 hover:bg-red-500/10 rounded-full"
+                                                                    title="Eliminar"
+                                                                >
+                                                                    <span className="material-symbols-outlined !text-lg">delete</span>
+                                                                </button>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -909,13 +916,15 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                 <span className="material-symbols-outlined !text-lg">print</span>
                                 Imprimir Etiqueta
                             </button>
-                            <button
-                                onClick={() => handleEditAsset(viewingAsset)}
-                                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-primary text-background-dark rounded-xl shadow-lg shadow-primary/20 hover:bg-green-400 transition-all font-black text-sm uppercase tracking-tight"
-                            >
-                                <span className="material-symbols-outlined !text-lg fill-1">edit</span>
-                                Editar Datos
-                            </button>
+                            {!readOnly && (
+                                <button
+                                    onClick={() => handleEditAsset(viewingAsset)}
+                                    className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-primary text-background-dark rounded-xl shadow-lg shadow-primary/20 hover:bg-green-400 transition-all font-black text-sm uppercase tracking-tight"
+                                >
+                                    <span className="material-symbols-outlined !text-lg fill-1">edit</span>
+                                    Editar Datos
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
