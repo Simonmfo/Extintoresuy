@@ -29,7 +29,7 @@ const FabricasScreen: React.FC = () => {
 
     if (selectedFabrica) {
         return (
-            <div className="p-4 lg:p-8 pt-20 lg:pt-8 h-full max-w-7xl mx-auto space-y-6 flex flex-col">
+            <div className="px-6 py-4 lg:p-8 pt-20 lg:pt-8 h-full max-w-7xl mx-auto space-y-6 flex flex-col">
                 <div className="flex items-center justify-between mb-2">
                     <button 
                         onClick={() => setSelectedFabrica(null)}
@@ -74,7 +74,7 @@ const FabricasScreen: React.FC = () => {
                     </button>
                 </div>
 
-                <div className="flex-1 -mx-4 lg:-mx-8">
+                <div className="flex-1">
                     {activeTab === 'clientes' && <ClientesScreen companyId={selectedFabrica.id} readOnly={true} />}
                     {activeTab === 'tecnicos' && <TecnicosScreen companyId={selectedFabrica.id} readOnly={true} />}
                     {activeTab === 'equipos' && <EquiposScreen companyId={selectedFabrica.id} readOnly={true} />}
@@ -84,7 +84,7 @@ const FabricasScreen: React.FC = () => {
     }
 
     return (
-        <div className="p-4 lg:p-8 pt-20 lg:pt-8 h-full max-w-7xl mx-auto space-y-6">
+        <div className="px-6 py-4 lg:p-8 pt-20 lg:pt-8 h-full max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Plantas de Recarga</h1>

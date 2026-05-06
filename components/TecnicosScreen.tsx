@@ -88,7 +88,7 @@ const TecnicosScreen: React.FC<TecnicosScreenProps> = ({ companyId, readOnly = f
     };
 
     return (
-        <div className="p-4 lg:p-8 space-y-8 max-w-6xl mx-auto h-full overflow-y-auto">
+        <div className="px-6 py-4 lg:p-8 space-y-8 max-w-6xl mx-auto h-full overflow-y-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
