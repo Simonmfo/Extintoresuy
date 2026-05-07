@@ -47,6 +47,7 @@ const client = new Client({
     }),
     puppeteer: {
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+        headless: true,
         handleSIGINT: false,
         args: [
             '--no-sandbox',
@@ -56,7 +57,11 @@ const client = new Client({
             '--no-first-run',
             '--no-zygote',
             '--single-process',
-            '--disable-gpu'
+            '--disable-gpu',
+            '--disable-canvas-aa',
+            '--disable-2d-canvas-clip-aa',
+            '--disable-gl-drawing-for-tests',
+            '--font-render-hinting=none'
         ],
     }
 });

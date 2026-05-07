@@ -38,9 +38,8 @@ class SupabaseStore {
                 updated_at: new Date().toISOString()
             });
 
-        if (error) {
-            console.error('Error saving session to Supabase:', error);
-        }
+        // Clear memory
+        zip.files = {}; 
     }
 
     async extract(options) {
