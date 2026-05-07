@@ -41,6 +41,7 @@ export interface Client {
   name: string;
   address: string;
   contact_email: string;
+  phone?: string;
   rut?: string;
   created_at: string;
   company_id?: string;

@@ -13,7 +13,7 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editClient, setEditClient] = useState<Client | null>(null);
-    const [formData, setFormData] = useState({ name: '', address: '', contact_email: '', rut: '' });
+    const [formData, setFormData] = useState({ name: '', address: '', contact_email: '', phone: '', rut: '' });
 
     useEffect(() => {
         loadClients();
@@ -44,8 +44,9 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
             name: client.name,
             address: client.address || '',
             contact_email: client.contact_email || '',
+            phone: client.phone || '',
             rut: client.rut || ''
-        } : { name: '', address: '', contact_email: '', rut: '' });
+        } : { name: '', address: '', contact_email: '', phone: '', rut: '' });
         setIsModalOpen(true);
     };
 
@@ -118,7 +119,14 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                                                 <span className="material-symbols-outlined !text-sm align-middle mr-1">mail</span>
                                                 {client.contact_email || 'N/A'}
                                             </p>
+                                            {client.phone && (
+                                                <p className="text-[11px] text-primary/80 font-bold mt-1">
+                                                    <span className="material-symbols-outlined !text-[12px] align-middle mr-1">whatsapp</span>
+                                                    {client.phone}
+                                                </p>
+                                            )}
                                         </td>
+
                                         {!readOnly && (
                                             <td className="p-4 sm:p-6 text-right">
                                                 <div className="flex items-center justify-end gap-2">
@@ -208,13 +216,13 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Correo de Contacto</label>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Celular (WhatsApp Avisos)</label>
                                         <input
-                                            type="email"
-                                            value={formData.contact_email}
-                                            onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
+                                            type="tel"
+                                            value={formData.phone}
+                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                             className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none transition-colors"
-                                            placeholder="contacto@empresa.com"
+                                            placeholder="Ej: 099123456"
                                         />
                                     </div>
                                 </div>
