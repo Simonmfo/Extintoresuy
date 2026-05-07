@@ -54,9 +54,10 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Inventario');
 
-            // 1. Set Row 1 and 2 Heights for space
+            // 1. Set Row 1, 2 and 3 Heights for space
             worksheet.getRow(1).height = 40;
             worksheet.getRow(2).height = 40;
+            worksheet.getRow(3).height = 40;
 
             // 2. Define Columns (Widths and Keys only, no auto-headers)
             worksheet.columns = [
@@ -146,8 +147,8 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                         extension: factoryProfile.logo_url.toLowerCase().endsWith('.png') ? 'png' : 'jpeg',
                     });
 
-                    // Calculate dimensions to fill Row 1 and 2 height (40 + 40 = 80)
-                    const targetHeight = 80;
+                    // Calculate dimensions to fill Row 1, 2 and 3 height (40 + 40 + 40 = 120)
+                    const targetHeight = 120;
                     const ratio = targetHeight / img.height;
                     const displayW = img.width * ratio;
                     const displayH = targetHeight;
