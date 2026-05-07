@@ -358,7 +358,7 @@ const AjustesScreen: React.FC<AjustesScreenProps> = ({ profile, onLogout, onRefr
                                         <div className="p-4 border-2 border-slate-100 rounded-2xl">
                                             <QRCode value={botStatus.qr} size={200} />
                                         </div>
-                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Abre WhatsApp > Dispositivos vinculados</p>
+                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Abre WhatsApp &gt; Dispositivos vinculados</p>
                                     </div>
                                 )}
 
