@@ -26,7 +26,7 @@ const client = new Client({
     authStrategy: new RemoteAuth({
         store: store,
         backupSyncIntervalMs: 300000, // Sync every 5 minutes
-        session: 'extintoresuy-session'
+        clientId: 'extintoresuy-session'
     }),
     puppeteer: {
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
@@ -66,6 +66,15 @@ client.on('qr', async (qr) => {
 
 client.on('ready', async () => {
     console.log('WhatsApp Client is ready!');
+    
+    // Force save session to Supabase immediately
+    console.log('Forzando guardado de sesión en Supabase...');
+    try {
+        await store.save({ session: 'extintoresuy-session' });
+    } catch (saveErr) {
+        console.error('Error al forzar guardado:', saveErr);
+    }
+
     await supabase
         .from('bot_status')
         .upsert({ 

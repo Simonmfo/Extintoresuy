@@ -8,10 +8,11 @@ class SupabaseStore {
     }
 
     async sessionExists(options) {
+        const sessionId = options.clientId || options.session;
         const { data, error } = await this.supabase
             .from('bot_sessions')
             .select('id')
-            .eq('id', options.session)
+            .eq('id', sessionId)
             .single();
         
         if (data) {
@@ -23,7 +24,8 @@ class SupabaseStore {
     }
 
     async save(options) {
-        const sessionPath = path.join(process.cwd(), `.wwebjs_auth/session-${options.session}`);
+        const sessionId = options.clientId || options.session;
+        const sessionPath = path.join(process.cwd(), `.wwebjs_auth/session-${sessionId}`);
         if (!await fs.pathExists(sessionPath)) return;
 
         const zip = new JSZip();
@@ -34,7 +36,7 @@ class SupabaseStore {
         const { error } = await this.supabase
             .from('bot_sessions')
             .upsert({
-                id: options.session,
+                id: sessionId,
                 data: { zip: content },
                 updated_at: new Date().toISOString()
             });
@@ -50,10 +52,11 @@ class SupabaseStore {
     }
 
     async extract(options) {
+        const sessionId = options.clientId || options.session;
         const { data, error } = await this.supabase
             .from('bot_sessions')
             .select('data')
-            .eq('id', options.session)
+            .eq('id', sessionId)
             .single();
 
         if (error || !data) {
@@ -61,7 +64,7 @@ class SupabaseStore {
             return;
         }
 
-        const sessionPath = path.join(process.cwd(), `.wwebjs_auth/session-${options.session}`);
+        const sessionPath = path.join(process.cwd(), `.wwebjs_auth/session-${sessionId}`);
         await fs.ensureDir(sessionPath);
 
         const zip = await JSZip.loadAsync(data.data.zip, { base64: true });
@@ -79,10 +82,11 @@ class SupabaseStore {
     }
 
     async delete(options) {
+        const sessionId = options.clientId || options.session;
         const { error } = await this.supabase
             .from('bot_sessions')
             .delete()
-            .eq('id', options.session);
+            .eq('id', sessionId);
 
         if (error) {
             console.error('Error deleting session from Supabase:', error);
