@@ -73,8 +73,8 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             // 4. Set Columns (Start headers at Row 4)
             worksheet.columns = [
                 { header: 'Id', key: 'id', width: 15 },
-                { header: 'Establecimiento', key: 'establecimiento', width: 30 },
-                { header: 'Matricula', key: 'matricula', width: 15 },
+                { header: 'CLIENTE', key: 'cliente', width: 30 },
+                { header: 'FECHA DE EMISIÓN', key: 'fechaEmision', width: 20 },
                 { header: 'UNIT', key: 'unit', width: 10 },
                 { header: 'Recarga', key: 'recarga', width: 15 },
                 { header: 'Vto. Ensayo', key: 'vtoEnsayo', width: 15 },
@@ -89,7 +89,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             // 5. Shift Headers to Row 4
             const headerRow = worksheet.getRow(4);
             headerRow.values = [
-                'Id', 'Establecimiento', 'Matricula', 'UNIT', 'Recarga', 
+                'Id', 'CLIENTE', 'FECHA DE EMISIÓN', 'UNIT', 'Recarga', 
                 'Vto. Ensayo', 'Vto. Carga', 'Estado', 'Retirado', 
                 'ubicación', 'TIPO', 'CAP'
             ];
@@ -101,18 +101,19 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             };
             headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
-            // Clear first row headers (ExcelJS puts them in row 1 by default when columns are defined)
+            // Clear first row headers
             worksheet.getRow(1).values = [null, b1.value, c1.value]; 
 
             // 6. Add Data Rows starting from Row 5
+            const emissionDate = new Date().toLocaleDateString('es-UY');
             assets.forEach((asset, index) => {
                 const isExpired = asset.expirationDate && asset.expirationDate < today;
                 const statusInsp = isExpired ? 'Vencido' : asset.status === 'ok' ? 'OK' : 'ALERTA';
 
                 const row = worksheet.addRow({
                     id: asset.id,
-                    establecimiento: selectedClient.name,
-                    matricula: asset.id,
+                    cliente: selectedClient.name,
+                    fechaEmision: emissionDate,
                     unit: asset.unit || 'UNIT 507',
                     recarga: asset.lastRecharge || 'N/A',
                     vtoEnsayo: asset.nextHydrotest || 'N/A',
@@ -123,6 +124,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                     tipo: asset.agent || asset.type || 'N/A',
                     cap: asset.capacity || 'N/A'
                 });
+
                 
                 // Styling data row
                 row.font = { size: 10 };
