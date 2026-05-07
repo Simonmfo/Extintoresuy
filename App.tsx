@@ -225,7 +225,7 @@ const App: FC = () => {
       {/* Mobile Bottom Nav */}
       {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
-          <BottomNav currentScreen={currentScreen} onNavigate={handleNavigate} />
+          <BottomNav currentScreen={currentScreen} onNavigate={handleNavigate} role={profile?.role || 'admin'} />
         </div>
       )}
     </div>
