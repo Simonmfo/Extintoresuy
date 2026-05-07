@@ -1039,7 +1039,6 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                 <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
                                             </select>
                                         </div>
-                                    <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Matrícula</label>
                                             <input
@@ -1050,6 +1049,8 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
                                             />
                                         </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT</label>
                                             <input
@@ -1060,8 +1061,6 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
                                             />
                                         </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Capacidad</label>
                                             <input
@@ -1072,6 +1071,8 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
                                             />
                                         </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
                                             <input
@@ -1085,6 +1086,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                     </div>
                                 </>
                             )}
+
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
