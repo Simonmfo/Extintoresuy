@@ -6,3 +6,9 @@ dist-ssr/
 .env.*
 !.env.example
 .DS_Store
+
+# WhatsApp Bot
+whatsapp-bot/node_modules/
+whatsapp-bot/.wwebjs_auth/
+whatsapp-bot/.wwebjs_cache/
+whatsapp-bot/.env
