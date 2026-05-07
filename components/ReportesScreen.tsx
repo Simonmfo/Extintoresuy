@@ -62,17 +62,17 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             // 2. Define Columns (Widths and Keys only, no auto-headers)
             worksheet.columns = [
                 { key: 'id', width: 15 },
-                { key: 'cliente', width: 30 },
-                { key: 'fechaEmision', width: 20 },
-                { key: 'unit', width: 10 },
-                { key: 'recarga', width: 15 },
-                { key: 'vtoEnsayo', width: 15 },
-                { key: 'vtoCarga', width: 15 },
-                { key: 'estado', width: 15 },
-                { key: 'retirado', width: 10 },
-                { key: 'ubicacion', width: 30 },
+                { key: 'establecimiento', width: 30 },
+                { key: 'ubicacion', width: 25 },
                 { key: 'tipo', width: 15 },
                 { key: 'cap', width: 10 },
+                { key: 'matricula', width: 15 },
+                { key: 'unit', width: 10 },
+                { key: 'recarga', width: 15 },
+                { key: 'vtoCarga', width: 15 },
+                { key: 'vtoEnsayo', width: 15 },
+                { key: 'estado', width: 15 },
+                { key: 'retirado', width: 10 },
             ];
 
             // 3. Set B1 to Client Name (Real name, Uppercase, Red)
@@ -90,9 +90,9 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             // 5. Add Table Headers at Row 4
             const headerRow = worksheet.getRow(4);
             headerRow.values = [
-                'Id', 'CLIENTE', 'FECHA DE EMISIÓN', 'UNIT', 'Recarga', 
-                'Vto. Ensayo', 'Vto. Carga', 'Estado', 'Retirado', 
-                'UBICACIÓN', 'TIPO', 'CAP'
+                'Id', 'Establecimiento', 'ubicación', 'TIPO', 'CAP', 
+                'Matricula', 'UNIT', 'Recarga', 'Vto. Carga', 
+                'Vto. Ensayo', 'Estado', 'Retirado'
             ];
             headerRow.height = 25;
             headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
@@ -104,29 +104,29 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
             // 6. Add Data Rows starting from Row 5
-            const emissionDate = new Date().toLocaleDateString('es-UY');
             assets.forEach((asset) => {
                 const isExpired = asset.expirationDate && asset.expirationDate < today;
                 const statusInsp = isExpired ? 'Vencido' : asset.status === 'ok' ? 'OK' : 'ALERTA';
 
                 const row = worksheet.addRow({
                     id: asset.id,
-                    cliente: selectedClient.name,
-                    fechaEmision: emissionDate,
+                    establecimiento: selectedClient.name,
+                    ubicacion: asset.name || 'N/A', // Using asset name for "NOMBRE REF"
+                    tipo: asset.agent || asset.type || 'N/A',
+                    cap: asset.capacity || 'N/A',
+                    matricula: asset.id,
                     unit: asset.unit || 'UNIT 507',
                     recarga: asset.lastRecharge || 'N/A',
-                    vtoEnsayo: asset.nextHydrotest || 'N/A',
                     vtoCarga: asset.expirationDate || 'N/A',
+                    vtoEnsayo: asset.nextHydrotest || 'N/A',
                     estado: statusInsp,
-                    retirado: asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI',
-                    ubicacion: asset.description || 'N/A',
-                    tipo: asset.agent || asset.type || 'N/A',
-                    cap: asset.capacity || 'N/A'
+                    retirado: asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI'
                 });
                 
                 row.font = { size: 10 };
                 row.alignment = { vertical: 'middle', horizontal: 'left' };
             });
+
 
             // 7. Add Logo if available (Space from D1 onwards)
             if (factoryProfile?.logo_url) {
