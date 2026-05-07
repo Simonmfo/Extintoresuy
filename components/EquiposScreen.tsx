@@ -18,7 +18,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
     const [assets, setAssets] = useState<InspectionAsset[]>([]);
     const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [newAsset, setNewAsset] = useState({ name: '', equipmentCategory: 'Extintor', type: '', description: '', agent: '', fireClass: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', capacity: '', unit: '' });
+    const [newAsset, setNewAsset] = useState({ name: '', equipmentCategory: 'Extintor', type: '', description: '', agent: '', fireClass: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', capacity: '', unit: '', matricula: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<InspectionAsset | null>(null);
     const [editingAsset, setEditingAsset] = useState<InspectionAsset | null>(null);
@@ -365,6 +365,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             nextHydrotest: newAsset.nextHydrotest,
             capacity: newAsset.capacity,
             unit: newAsset.unit,
+            matricula: newAsset.matricula,
             lifecycleStatus: newAsset.lifecycleStatus as any
         });
 
@@ -373,7 +374,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             const updatedAssets = await db.getAssetsByClient(selectedClient.id);
             setAssets(updatedAssets);
             setIsAddModalOpen(false);
-            setNewAsset({ name: '', equipmentCategory: 'Extintor', type: '', description: '', agent: '', fireClass: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', capacity: '', unit: '' });
+            setNewAsset({ name: '', equipmentCategory: 'Extintor', type: '', description: '', agent: '', fireClass: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', capacity: '', unit: '', matricula: '' });
         }
         setIsSubmitting(false);
     };
@@ -408,6 +409,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             nextHydrotest: editingAsset.nextHydrotest,
             capacity: editingAsset.capacity,
             unit: editingAsset.unit,
+            matricula: editingAsset.matricula,
             lifecycleStatus: editingAsset.lifecycleStatus
         });
 
@@ -1037,13 +1039,24 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                 <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
                                             </select>
                                         </div>
+                                    <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Matrícula</label>
                                             <input
                                                 type="text"
-                                                value={newAsset.fireClass}
-                                                onChange={e => setNewAsset({ ...newAsset, fireClass: e.target.value })}
-                                                placeholder="Ej. A, B, C"
+                                                value={newAsset.matricula}
+                                                onChange={e => setNewAsset({ ...newAsset, matricula: e.target.value })}
+                                                placeholder="Ej. 123456"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT</label>
+                                            <input
+                                                type="text"
+                                                value={newAsset.unit}
+                                                onChange={e => setNewAsset({ ...newAsset, unit: e.target.value })}
+                                                placeholder="Ej. 507"
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
                                             />
                                         </div>
@@ -1060,12 +1073,12 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Norma (UNIT)</label>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
                                             <input
                                                 type="text"
-                                                value={newAsset.unit}
-                                                onChange={e => setNewAsset({ ...newAsset, unit: e.target.value })}
-                                                placeholder="Ej. UNIT 507"
+                                                value={newAsset.fireClass}
+                                                onChange={e => setNewAsset({ ...newAsset, fireClass: e.target.value })}
+                                                placeholder="Ej. A, B, C"
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
                                             />
                                         </div>

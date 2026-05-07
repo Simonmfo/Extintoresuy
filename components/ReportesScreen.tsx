@@ -114,14 +114,15 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                     ubicacion: asset.name || 'N/A', // Using asset name for "NOMBRE REF"
                     tipo: asset.agent || asset.type || 'N/A',
                     cap: asset.capacity || 'N/A',
-                    matricula: asset.id,
-                    unit: asset.unit || 'UNIT 507',
+                    matricula: asset.matricula || 'N/A',
+                    unit: asset.unit || 'N/A',
                     recarga: asset.lastRecharge || 'N/A',
                     vtoCarga: asset.expirationDate || 'N/A',
                     vtoEnsayo: asset.nextHydrotest || 'N/A',
                     estado: statusInsp,
                     retirado: asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI'
                 });
+
                 
                 row.font = { size: 10 };
                 row.alignment = { vertical: 'middle', horizontal: 'left' };

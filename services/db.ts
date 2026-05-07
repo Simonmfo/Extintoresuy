@@ -574,6 +574,9 @@ export const db = {
     nextHydrotest?: string;
     lastInspection?: string;
     lifecycleStatus?: 'active' | 'maintenance' | 'discarded';
+    capacity?: string;
+    unit?: string;
+    matricula?: string;
   }) => {
     try {
       const { data, error } = await supabase
@@ -595,6 +598,7 @@ export const db = {
           location_status: assetData.lifecycleStatus || 'active',
           capacity: assetData.capacity,
           unit: assetData.unit,
+          matricula: assetData.matricula,
           status: 'pending',
           location_lat: -34.9011,
           location_lng: -56.1645,
@@ -632,7 +636,10 @@ export const db = {
           next_inspection_date: updates.nextInspection,
           last_recharge_date: updates.lastRecharge,
           last_hydrotest_date: updates.lastHydrotest,
-          next_hydrotest_date: updates.nextHydrotest
+          next_hydrotest_date: updates.nextHydrotest,
+          capacity: updates.capacity,
+          unit: updates.unit,
+          matricula: updates.matricula
         } as any)
         .eq('id', id);
 
