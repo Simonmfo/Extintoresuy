@@ -1018,57 +1018,59 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             {newAsset.equipmentCategory === 'Extintor' && (
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Agente Extintor</label>
-                                        <select
-                                            value={newAsset.agent}
-                                            onChange={e => setNewAsset({ ...newAsset, agent: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none text-xs"
-                                        >
-                                            <option value="">Seleccionar...</option>
-                                            <option value="Agua">Agua</option>
-                                            <option value="Agua Pulverizada">Agua Pulverizada</option>
-                                            <option value="Polvo Químico ABC">Polvo Químico ABC</option>
-                                            <option value="CO2">CO2 (Dióxido de Carbono)</option>
-                                            <option value="Espuma AFFF">Espuma AFFF</option>
-                                            <option value="Clase D">Agentes Especiales (Clase D)</option>
-                                            <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
-                                        </select>
+                                <>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Agente Extintor</label>
+                                            <select
+                                                value={newAsset.agent}
+                                                onChange={e => setNewAsset({ ...newAsset, agent: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none text-xs"
+                                            >
+                                                <option value="">Seleccionar...</option>
+                                                <option value="Agua">Agua</option>
+                                                <option value="Agua Pulverizada">Agua Pulverizada</option>
+                                                <option value="Polvo Químico ABC">Polvo Químico ABC</option>
+                                                <option value="CO2">CO2 (Dióxido de Carbono)</option>
+                                                <option value="Espuma AFFF">Espuma AFFF</option>
+                                                <option value="Clase D">Agentes Especiales (Clase D)</option>
+                                                <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
+                                            <input
+                                                type="text"
+                                                value={newAsset.fireClass}
+                                                onChange={e => setNewAsset({ ...newAsset, fireClass: e.target.value })}
+                                                placeholder="Ej. A, B, C"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                            />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
-                                        <input
-                                            type="text"
-                                            value={newAsset.fireClass}
-                                            onChange={e => setNewAsset({ ...newAsset, fireClass: e.target.value })}
-                                            placeholder="Ej. A, B, C"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                        />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Capacidad</label>
+                                            <input
+                                                type="text"
+                                                value={newAsset.capacity}
+                                                onChange={e => setNewAsset({ ...newAsset, capacity: e.target.value })}
+                                                placeholder="Ej. 4KG, 8KG"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Norma (UNIT)</label>
+                                            <input
+                                                type="text"
+                                                value={newAsset.unit}
+                                                onChange={e => setNewAsset({ ...newAsset, unit: e.target.value })}
+                                                placeholder="Ej. UNIT 507"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Capacidad</label>
-                                        <input
-                                            type="text"
-                                            value={newAsset.capacity}
-                                            onChange={e => setNewAsset({ ...newAsset, capacity: e.target.value })}
-                                            placeholder="Ej. 4KG, 8KG"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Norma (UNIT)</label>
-                                        <input
-                                            type="text"
-                                            value={newAsset.unit}
-                                            onChange={e => setNewAsset({ ...newAsset, unit: e.target.value })}
-                                            placeholder="Ej. UNIT 507"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                        />
-                                    </div>
-                                </div>
+                                </>
                             )}
 
                             <div className="grid grid-cols-2 gap-4">
@@ -1272,57 +1274,59 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             {editingAsset.equipmentCategory === 'Extintor' && (
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Agente Extintor</label>
-                                        <select
-                                            value={editingAsset.agent || ''}
-                                            onChange={e => setEditingAsset({ ...editingAsset, agent: e.target.value })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none text-xs"
-                                        >
-                                            <option value="">Seleccionar...</option>
-                                            <option value="Agua">Agua</option>
-                                            <option value="Agua Pulverizada">Agua Pulverizada</option>
-                                            <option value="Polvo Químico ABC">Polvo Químico ABC</option>
-                                            <option value="CO2">CO2 (Dióxido de Carbono)</option>
-                                            <option value="Espuma AFFF">Espuma AFFF</option>
-                                            <option value="Clase D">Agentes Especiales (Clase D)</option>
-                                            <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
-                                        </select>
+                                <>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Agente Extintor</label>
+                                            <select
+                                                value={editingAsset.agent || ''}
+                                                onChange={e => setEditingAsset({ ...editingAsset, agent: e.target.value })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none text-xs"
+                                            >
+                                                <option value="">Seleccionar...</option>
+                                                <option value="Agua">Agua</option>
+                                                <option value="Agua Pulverizada">Agua Pulverizada</option>
+                                                <option value="Polvo Químico ABC">Polvo Químico ABC</option>
+                                                <option value="CO2">CO2 (Dióxido de Carbono)</option>
+                                                <option value="Espuma AFFF">Espuma AFFF</option>
+                                                <option value="Clase D">Agentes Especiales (Clase D)</option>
+                                                <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
+                                            <input
+                                                type="text"
+                                                value={editingAsset.fireClass || ''}
+                                                onChange={e => setEditingAsset({ ...editingAsset, fireClass: e.target.value })}
+                                                placeholder="Ej. A, B, C"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                            />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
-                                        <input
-                                            type="text"
-                                            value={editingAsset.fireClass || ''}
-                                            onChange={e => setEditingAsset({ ...editingAsset, fireClass: e.target.value })}
-                                            placeholder="Ej. A, B, C"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                        />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Capacidad</label>
+                                            <input
+                                                type="text"
+                                                value={editingAsset.capacity || ''}
+                                                onChange={e => setEditingAsset({ ...editingAsset, capacity: e.target.value })}
+                                                placeholder="Ej. 4KG, 8KG"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Norma (UNIT)</label>
+                                            <input
+                                                type="text"
+                                                value={editingAsset.unit || ''}
+                                                onChange={e => setEditingAsset({ ...editingAsset, unit: e.target.value })}
+                                                placeholder="Ej. UNIT 507"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Capacidad</label>
-                                        <input
-                                            type="text"
-                                            value={editingAsset.capacity || ''}
-                                            onChange={e => setEditingAsset({ ...editingAsset, capacity: e.target.value })}
-                                            placeholder="Ej. 4KG, 8KG"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Norma (UNIT)</label>
-                                        <input
-                                            type="text"
-                                            value={editingAsset.unit || ''}
-                                            onChange={e => setEditingAsset({ ...editingAsset, unit: e.target.value })}
-                                            placeholder="Ej. UNIT 507"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                        />
-                                    </div>
-                                </div>
+                                </>
                             )}
 
                             <div className="grid grid-cols-2 gap-4">
