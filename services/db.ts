@@ -1,15 +1,8 @@
 
 import { supabase } from './supabase';
-import { InspectionAsset } from '../types';
+import { InspectionAsset, InspectionRecord } from '../types';
 
-export interface InspectionRecord {
-  id: string;
-  assetId: string;
-  date: string;
-  inspector: string;
-  status: 'passed' | 'failed';
-  details: any;
-}
+
 
 const mapAsset = (asset: any): InspectionAsset => ({
   id: asset.id,

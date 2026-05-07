@@ -1,21 +1,85 @@
 
-import { useState, type FC } from 'react';
+import { useState, useEffect, type FC } from 'react';
+import { db } from '../services/db';
+import { offlineService } from '../services/offline';
+import { InspectionAsset, InspectionRecord } from '../types';
 
 interface InspectionScreenProps {
   onBack: () => void;
+  assetId: string;
 }
 
-const InspectionScreen: FC<InspectionScreenProps> = ({ onBack }) => {
+const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, assetId }) => {
+  const [asset, setAsset] = useState<InspectionAsset | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [checklist, setChecklist] = useState({
     manometro: true,
-    precinto: false,
+    precinto: true,
     acceso: true,
     carteleria: true
   });
 
+  useEffect(() => {
+    loadAsset();
+  }, [assetId]);
+
+  const loadAsset = async () => {
+    setLoading(true);
+    // Try to get asset details
+    const data = await db.getAsset(assetId);
+    setAsset(data);
+    setLoading(false);
+  };
+
   const toggleCheck = (key: keyof typeof checklist) => {
     setChecklist(prev => ({ ...prev, [key]: !prev[key] }));
   };
+
+  const handleFinish = async () => {
+    setIsSubmitting(true);
+    
+    // Determine overall status
+    const allOk = Object.values(checklist).every(v => v);
+    
+    const record: InspectionRecord = {
+      id: `insp_${Date.now()}`,
+      assetId: assetId,
+      date: new Date().toISOString(),
+      inspector: 'Técnico Actual', // In a real app, get from auth profile
+      status: allOk ? 'passed' : 'failed',
+      details: checklist
+    };
+
+    const isOnline = await offlineService.isOnline();
+
+    if (isOnline) {
+      const res = await db.addInspection(record);
+      if (res.success) {
+        alert('Inspección guardada y sincronizada correctamente.');
+        onBack();
+      } else {
+        alert('Error al sincronizar: ' + res.message + '. Se guardará localmente.');
+        await offlineService.saveToQueue(record);
+        onBack();
+      }
+    } else {
+      await offlineService.saveToQueue(record);
+      alert('Sin conexión. La inspección se guardó localmente y se sincronizará cuando recuperes internet.');
+      onBack();
+    }
+    
+    setIsSubmitting(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-background-dark text-white">
+        <span className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></span>
+        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Cargando Activo...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-background-dark text-white overflow-y-auto pb-40">
@@ -36,7 +100,7 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack }) => {
         </button>
         <h1 className="text-lg font-black tracking-tight">Inspección de Extintor</h1>
         <div className="w-10 flex justify-end">
-          <span className="material-symbols-outlined text-primary animate-spin-slow">sync</span>
+          <span className={`material-symbols-outlined text-primary ${isSubmitting ? 'animate-spin' : ''}`}>sync</span>
         </div>
       </header>
 
@@ -46,47 +110,43 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack }) => {
           <div className="flex items-start justify-between">
             <div>
               <span className="text-[10px] uppercase tracking-widest font-black text-slate-500">ID del Activo</span>
-              <h2 className="text-3xl font-black text-white leading-none mt-1">#UY-9921-24</h2>
+              <h2 className="text-3xl font-black text-white leading-none mt-1">{asset?.id || assetId}</h2>
             </div>
             <div className="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-[10px] font-black uppercase border border-primary/30 tracking-widest">
-              Decreto 372/023
+              {asset?.type || 'Decreto 372/023'}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-              <span className="text-[9px] uppercase font-black text-slate-500 block mb-1 tracking-widest">Tipo</span>
-              <p className="font-bold text-sm">ABC Polvo 4kg</p>
+              <span className="text-[9px] uppercase font-black text-slate-500 block mb-1 tracking-widest">Estado Actual</span>
+              <p className={`font-bold text-sm ${asset?.status === 'ok' ? 'text-primary' : 'text-orange-500'}`}>
+                {asset?.status === 'ok' ? 'Operativo' : asset?.status === 'failed' ? 'Con Fallas' : 'Pendiente'}
+              </p>
             </div>
             <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-              <span className="text-[9px] uppercase font-black text-slate-500 block mb-1 tracking-widest">Última Insp.</span>
-              <p className="font-bold text-sm">12 Oct 2023</p>
+              <span className="text-[9px] uppercase font-black text-slate-500 block mb-1 tracking-widest">Vencimiento</span>
+              <p className="font-bold text-sm">{asset?.expirationDate || 'N/A'}</p>
             </div>
           </div>
 
-          {/* Mini Map */}
-          <div className="relative h-28 w-full rounded-2xl overflow-hidden border border-white/10 group">
-            <img
-              className="w-full h-full object-cover opacity-40 transition-transform group-hover:scale-110"
-              src="https://picsum.photos/seed/map-mini/600/300"
-              alt="Localización"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-            <div className="absolute bottom-3 left-3 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] text-white font-bold flex items-center gap-1.5 border border-white/10">
-              <span className="material-symbols-outlined !text-xs text-primary fill-1">location_on</span>
-              -34.9011, -56.1645
-            </div>
+          {/* Description */}
+          <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+            <span className="text-[9px] uppercase font-black text-slate-500 block mb-1 tracking-widest">Ubicación / Notas</span>
+            <p className="text-xs text-slate-300">{asset?.description || 'Sin descripción de ubicación registrada.'}</p>
           </div>
         </section>
 
-        {/* Warning Alert */}
-        <div className="bg-orange-500/10 border-l-4 border-orange-500 p-4 rounded-r-2xl flex items-center gap-4 animate-pulse-slow">
-          <span className="material-symbols-outlined text-orange-500 !text-3xl fill-1">warning</span>
-          <div>
-            <p className="text-sm font-black text-orange-400 uppercase tracking-tight leading-none mb-1">Alerta de Ubicación</p>
-            <p className="text-xs text-orange-200/60 font-medium">Fuera de radio de seguridad ({'>'}15m del punto original).</p>
+        {/* Warning Alert if expired */}
+        {asset?.expirationDate && new Date(asset.expirationDate) < new Date() && (
+          <div className="bg-red-500/10 border-l-4 border-red-500 p-4 rounded-r-2xl flex items-center gap-4 animate-pulse-slow">
+            <span className="material-symbols-outlined text-red-500 !text-3xl fill-1">warning</span>
+            <div>
+              <p className="text-sm font-black text-red-400 uppercase tracking-tight leading-none mb-1">Carga Vencida</p>
+              <p className="text-xs text-red-200/60 font-medium">Este equipo requiere recarga inmediata.</p>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Checklist Section */}
         <div className="space-y-4 pt-2">
@@ -111,7 +171,6 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack }) => {
                   </span>
                 </div>
 
-                {/* Custom Toggle Switch */}
                 <div
                   onClick={() => toggleCheck(item.id as keyof typeof checklist)}
                   className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${checklist[item.id as keyof typeof checklist] ? 'bg-primary' : 'bg-white/10'
@@ -141,16 +200,13 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack }) => {
       <div className="fixed bottom-0 inset-x-0 p-6 bg-background-dark/95 backdrop-blur-xl border-t border-white/10 z-[60]">
         <div className="max-w-md mx-auto space-y-6">
           <button
-            onClick={() => {
-              alert('¡Inspección Finalizada con éxito!');
-              onBack();
-            }}
-            className="w-full py-5 rounded-2xl bg-primary text-black font-black text-lg shadow-[0_15px_30px_rgba(19,236,91,0.3)] active:scale-[0.97] transition-all flex items-center justify-center gap-3 uppercase tracking-tighter"
+            onClick={handleFinish}
+            disabled={isSubmitting}
+            className={`w-full py-5 rounded-2xl bg-primary text-black font-black text-lg shadow-[0_15px_30px_rgba(19,236,91,0.3)] active:scale-[0.97] transition-all flex items-center justify-center gap-3 uppercase tracking-tighter ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <span className="material-symbols-outlined !text-2xl fill-1">draw</span>
-            Finalizar y Firmar
+            {isSubmitting ? 'Sincronizando...' : 'Finalizar y Firmar'}
           </button>
-          {/* iOS Indicator Mock */}
           <div className="w-32 h-1.5 bg-white/10 rounded-full mx-auto"></div>
         </div>
       </div>
@@ -159,3 +215,4 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack }) => {
 };
 
 export default InspectionScreen;
+

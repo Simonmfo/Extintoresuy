@@ -24,6 +24,7 @@ import Sidebar from './components/Sidebar';
 import SupportScreen from './components/SupportScreen';
 import TermsScreen from './components/TermsScreen';
 import PrivacyScreen from './components/PrivacyScreen';
+import { offlineService } from './services/offline';
 
 const App: FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,6 +41,11 @@ const App: FC = () => {
     const timer = setTimeout(() => {
       if (mounted) setIsLoading(false);
     }, 2000);
+
+    // Initialize offline sync
+    offlineService.initAutoSync((results) => {
+      console.log('Sincronización completada:', results);
+    });
 
     // Check initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -138,7 +144,7 @@ const App: FC = () => {
       case 'mapa':
         return <MapScreen onStartInspection={() => handleStartInspection('#UY-9921-24')} />;
       case 'inspeccion':
-        return <InspectionScreen onBack={() => setCurrentScreen('home')} />;
+        return <InspectionScreen onBack={() => setCurrentScreen('home')} assetId={selectedAssetId || ''} />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[70vh] text-slate-500">

@@ -57,3 +57,11 @@ export interface UserProfile {
   created_at?: string;
   creatorName?: string;
 }
+export interface InspectionRecord {
+  id: string;
+  assetId: string;
+  date: string;
+  inspector: string;
+  status: 'passed' | 'failed';
+  details: any;
+}
