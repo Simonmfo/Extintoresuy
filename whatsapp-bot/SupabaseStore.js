@@ -14,9 +14,10 @@ class SupabaseStore {
             .eq('id', options.session)
             .single();
         
-        if (error && error.code !== 'PGRST116') {
-            console.error('Error checking session existence:', error);
-            return false;
+        if (data) {
+            console.log('✅ Sesión encontrada en Supabase. Recuperando...');
+        } else {
+            console.log('ℹ️ No se encontró sesión previa. Se requiere nuevo QR.');
         }
         return !!data;
     }
@@ -37,6 +38,12 @@ class SupabaseStore {
                 data: { zip: content },
                 updated_at: new Date().toISOString()
             });
+
+        if (!error) {
+            console.log('✅ Sesión guardada en Supabase correctamente.');
+        } else {
+            console.error('❌ Error al guardar sesión en Supabase:', error);
+        }
 
         // Clear memory
         zip.files = {}; 
@@ -59,6 +66,7 @@ class SupabaseStore {
 
         const zip = await JSZip.loadAsync(data.data.zip, { base64: true });
         
+        console.log(`📦 Extrayendo ${Object.keys(zip.files).length} archivos de sesión...`);
         for (const [relativePath, file] of Object.entries(zip.files)) {
             if (file.dir) {
                 await fs.ensureDir(path.join(sessionPath, relativePath));
@@ -67,6 +75,7 @@ class SupabaseStore {
                 await fs.outputFile(path.join(sessionPath, relativePath), content);
             }
         }
+        console.log('✅ Sesión extraída correctamente.');
     }
 
     async delete(options) {

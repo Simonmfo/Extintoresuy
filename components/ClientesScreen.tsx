@@ -1,14 +1,16 @@
 
 import React, { useEffect, useState } from 'react';
 import { db } from '../services/db';
-import { Client } from '../types';
+import { Client, UserProfile } from '../types';
+import { supabase } from '../services/supabase';
 
 interface ClientesScreenProps {
     companyId?: string;
     readOnly?: boolean;
+    profile?: UserProfile | null;
 }
 
-const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = false }) => {
+const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = false, profile }) => {
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,7 +35,19 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
             if (ok) setIsModalOpen(false);
         } else {
             const res = await db.addClient(formData);
-            if (res) setIsModalOpen(false);
+            if (res) {
+                setIsModalOpen(false);
+                // Send welcome message if phone exists
+                if (formData.phone) {
+                    const factoryName = profile?.full_name || 'tu fábrica de confianza';
+                    const welcomeMsg = `Bienvenido a *ExtintoresUY*. A partir de ahora recibirás avisos automáticos sobre el estado de tus equipos de seguridad. Servicio de *${factoryName}*.`;
+                    
+                    await supabase.from('bot_commands').insert({
+                        command: 'send_message',
+                        payload: { phone: formData.phone, message: welcomeMsg }
+                    });
+                }
+            }
         }
         loadClients();
     };

@@ -13,6 +13,7 @@ interface AjustesScreenProps {
 
 const AjustesScreen: React.FC<AjustesScreenProps> = ({ profile, onLogout, onRefreshProfile }) => {
     const [fullName, setFullName] = useState(profile?.full_name || '');
+    const [phone, setPhone] = useState(profile?.phone || '');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [botStatus, setBotStatus] = useState<{ status: string, qr: string | null } | null>(null);
@@ -43,7 +44,8 @@ const AjustesScreen: React.FC<AjustesScreenProps> = ({ profile, onLogout, onRefr
         setMessage(null);
 
         const success = await db.updateProfile(profile.id, {
-            full_name: fullName
+            full_name: fullName,
+            phone: phone
         });
 
         if (success) {
@@ -196,6 +198,16 @@ const AjustesScreen: React.FC<AjustesScreenProps> = ({ profile, onLogout, onRefr
                                             onChange={(e) => setFullName(e.target.value)}
                                             className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 shadow-inner"
                                             placeholder="Tu nombre completo"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Celular (Para Notificaciones)</label>
+                                        <input
+                                            type="text"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-300 shadow-inner"
+                                            placeholder="Ej: 099123456"
                                         />
                                     </div>
                                     <div className="space-y-2 opacity-60">
