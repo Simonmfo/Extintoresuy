@@ -134,16 +134,35 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                     const blob = await response.blob();
                     const arrayBuffer = await blob.arrayBuffer();
                     
+                    // Create an image object to get dimensions
+                    const img = new Image();
+                    img.src = URL.createObjectURL(blob);
+                    await new Promise((resolve) => {
+                        img.onload = resolve;
+                    });
+
                     const imageId = workbook.addImage({
                         buffer: arrayBuffer,
                         extension: factoryProfile.logo_url.toLowerCase().endsWith('.png') ? 'png' : 'jpeg',
                     });
 
+                    // Calculate aspect ratio
+                    const maxW = 200;
+                    const maxH = 80;
+                    let displayW = img.width;
+                    let displayH = img.height;
+
+                    const ratio = Math.min(maxW / displayW, maxH / displayH);
+                    displayW *= ratio;
+                    displayH *= ratio;
+
                     // Add logo starting from Column D, Row 1
                     worksheet.addImage(imageId, {
-                        tl: { col: 3.2, row: 0.1 }, // Column D is index 3
-                        ext: { width: 150, height: 80 }
+                        tl: { col: 3.1, row: 0.1 }, 
+                        ext: { width: displayW, height: displayH }
                     });
+                    
+                    URL.revokeObjectURL(img.src);
                 } catch (imgError) {
                     console.error('Error adding logo to Excel:', imgError);
                 }
