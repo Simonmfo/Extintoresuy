@@ -55,44 +55,45 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             const worksheet = workbook.addWorksheet('Inventario');
 
             // 1. Set Row 1 and 2 Heights for space
-            worksheet.getRow(1).height = 30;
-            worksheet.getRow(2).height = 30;
+            worksheet.getRow(1).height = 40;
+            worksheet.getRow(2).height = 40;
 
-            // 2. Add Client Name (B1) - Uppercase, Red
-            const b1 = worksheet.getCell('B1');
-            b1.value = selectedClient.name.toUpperCase();
-            b1.font = { name: 'Arial Black', size: 14, color: { argb: 'FFFF0000' } }; // Red color
-            b1.alignment = { vertical: 'middle', horizontal: 'left' };
-
-            // 3. Add Date (C1)
-            const c1 = worksheet.getCell('C1');
-            c1.value = new Date().toLocaleDateString('es-UY');
-            c1.font = { bold: true };
-            c1.alignment = { vertical: 'middle', horizontal: 'center' };
-
-            // 4. Set Columns (Start headers at Row 4)
+            // 2. Define Columns (Widths and Keys only, no auto-headers)
             worksheet.columns = [
-                { header: 'Id', key: 'id', width: 15 },
-                { header: 'CLIENTE', key: 'cliente', width: 30 },
-                { header: 'FECHA DE EMISIÓN', key: 'fechaEmision', width: 20 },
-                { header: 'UNIT', key: 'unit', width: 10 },
-                { header: 'Recarga', key: 'recarga', width: 15 },
-                { header: 'Vto. Ensayo', key: 'vtoEnsayo', width: 15 },
-                { header: 'Vto. Carga', key: 'vtoCarga', width: 15 },
-                { header: 'Estado', key: 'estado', width: 15 },
-                { header: 'Retirado', key: 'retirado', width: 10 },
-                { header: 'ubicación', key: 'ubicacion', width: 30 },
-                { header: 'TIPO', key: 'tipo', width: 15 },
-                { header: 'CAP', key: 'cap', width: 10 },
+                { key: 'id', width: 15 },
+                { key: 'cliente', width: 30 },
+                { key: 'fechaEmision', width: 20 },
+                { key: 'unit', width: 10 },
+                { key: 'recarga', width: 15 },
+                { key: 'vtoEnsayo', width: 15 },
+                { key: 'vtoCarga', width: 15 },
+                { key: 'estado', width: 15 },
+                { key: 'retirado', width: 10 },
+                { key: 'ubicacion', width: 30 },
+                { key: 'tipo', width: 15 },
+                { key: 'cap', width: 10 },
             ];
 
-            // 5. Shift Headers to Row 4
+            // 3. Set B1 to Client Name (Real name, Uppercase, Red)
+            const b1 = worksheet.getCell('B1');
+            b1.value = selectedClient.name.toUpperCase();
+            b1.font = { name: 'Arial Black', size: 16, color: { argb: 'FFFF0000' }, bold: true };
+            b1.alignment = { vertical: 'middle', horizontal: 'left' };
+
+            // 4. Set C1 to Current Date
+            const c1 = worksheet.getCell('C1');
+            c1.value = new Date().toLocaleDateString('es-UY');
+            c1.font = { name: 'Arial', size: 12, bold: true };
+            c1.alignment = { vertical: 'middle', horizontal: 'center' };
+
+            // 5. Add Table Headers at Row 4
             const headerRow = worksheet.getRow(4);
             headerRow.values = [
                 'Id', 'CLIENTE', 'FECHA DE EMISIÓN', 'UNIT', 'Recarga', 
                 'Vto. Ensayo', 'Vto. Carga', 'Estado', 'Retirado', 
-                'ubicación', 'TIPO', 'CAP'
+                'UBICACIÓN', 'TIPO', 'CAP'
             ];
+            headerRow.height = 25;
             headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
             headerRow.fill = {
                 type: 'pattern',
@@ -101,12 +102,9 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             };
             headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
-            // Clear first row headers
-            worksheet.getRow(1).values = [null, b1.value, c1.value]; 
-
             // 6. Add Data Rows starting from Row 5
             const emissionDate = new Date().toLocaleDateString('es-UY');
-            assets.forEach((asset, index) => {
+            assets.forEach((asset) => {
                 const isExpired = asset.expirationDate && asset.expirationDate < today;
                 const statusInsp = isExpired ? 'Vencido' : asset.status === 'ok' ? 'OK' : 'ALERTA';
 
@@ -124,12 +122,11 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                     tipo: asset.agent || asset.type || 'N/A',
                     cap: asset.capacity || 'N/A'
                 });
-
                 
-                // Styling data row
                 row.font = { size: 10 };
                 row.alignment = { vertical: 'middle', horizontal: 'left' };
             });
+ });
 
             // 7. Add Logo if available (Space from D1 onwards)
             if (factoryProfile?.logo_url) {
