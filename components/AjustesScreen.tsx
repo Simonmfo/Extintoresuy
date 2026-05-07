@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { UserProfile } from '../types';
 import { db } from '../services/db';
 import { supabase } from '../services/supabase';
+import QRCode from "react-qr-code";
 
 interface AjustesScreenProps {
     profile: UserProfile | null;
@@ -14,6 +15,25 @@ const AjustesScreen: React.FC<AjustesScreenProps> = ({ profile, onLogout, onRefr
     const [fullName, setFullName] = useState(profile?.full_name || '');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [botStatus, setBotStatus] = useState<{ status: string, qr: string | null } | null>(null);
+
+    React.useEffect(() => {
+        const fetchBotStatus = async () => {
+            const { data, error } = await supabase
+                .from('bot_status')
+                .select('*')
+                .eq('id', 'whatsapp-bot')
+                .single();
+            
+            if (!error && data) {
+                setBotStatus(data);
+            }
+        };
+
+        fetchBotStatus();
+        const interval = setInterval(fetchBotStatus, 5000); // Poll every 5 seconds
+        return () => clearInterval(interval);
+    }, []);
 
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -304,6 +324,68 @@ const AjustesScreen: React.FC<AjustesScreenProps> = ({ profile, onLogout, onRefr
                             </div>
                         </div>
                     </section>
+                    {/* WhatsApp Bot Section (Only for Admin) */}
+                    {profile?.role === 'admin' && (
+                        <section className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden shadow-2xl mt-8">
+                            <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-primary">chat</span>
+                                    <h2 className="text-lg font-bold text-white">Bot de WhatsApp</h2>
+                                </div>
+                                <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${
+                                    botStatus?.status === 'ready' 
+                                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+                                    : botStatus?.status === 'waiting_qr'
+                                    ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                                    : 'bg-red-500/10 border-red-500/20 text-red-400'
+                                }`}>
+                                    <span className={`size-2 rounded-full ${
+                                        botStatus?.status === 'ready' ? 'bg-emerald-500' : 'bg-amber-500'
+                                    } animate-pulse`}></span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest">
+                                        {botStatus?.status === 'ready' ? 'Conectado' : botStatus?.status === 'waiting_qr' ? 'Esperando QR' : 'Desconectado'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                <p className="text-slate-400 text-sm leading-relaxed">
+                                    El bot se encarga de enviar avisos automáticos a los clientes 30 días antes del vencimiento de sus equipos.
+                                </p>
+
+                                {botStatus?.status === 'waiting_qr' && botStatus.qr && (
+                                    <div className="flex flex-col items-center gap-6 p-8 bg-white rounded-3xl">
+                                        <h3 className="text-background-dark font-black text-center">Escanea para conectar</h3>
+                                        <div className="p-4 border-2 border-slate-100 rounded-2xl">
+                                            <QRCode value={botStatus.qr} size={200} />
+                                        </div>
+                                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Abre WhatsApp > Dispositivos vinculados</p>
+                                    </div>
+                                )}
+
+                                {botStatus?.status === 'ready' && (
+                                    <div className="flex items-center gap-4 p-6 bg-emerald-500/5 rounded-3xl border border-emerald-500/10">
+                                        <div className="size-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                            <span className="material-symbols-outlined">check_circle</span>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-white">Bot Vinculado</h3>
+                                            <p className="text-xs text-slate-400">El sistema está enviando avisos automáticamente.</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="pt-4 flex justify-end">
+                                    <button 
+                                        onClick={() => window.open('https://dashboard.render.com', '_blank')}
+                                        className="text-xs font-bold text-slate-500 hover:text-white transition-colors flex items-center gap-2"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">settings_input_component</span>
+                                        Gestionar en Render
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+                    )}
                 </div>
             </div>
         </div>

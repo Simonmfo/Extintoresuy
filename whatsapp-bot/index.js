@@ -13,24 +13,7 @@ const port = process.env.PORT || 3000;
 // Express setup to keep the service alive
 let latestQR = null;
 
-app.get('/', (req, res) => {
-    if (latestQR) {
-        QRCode.toDataURL(latestQR, (err, url) => {
-            res.send(`
-                <html>
-                    <body style="background: #111; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif;">
-                        <h2>Escanea el código para conectar ExtintoresUY</h2>
-                        <img src="${url}" style="border: 10px solid white; border-radius: 10px;" />
-                        <p style="margin-top: 20px;">El código se actualiza automáticamente.</p>
-                        <script>setTimeout(() => location.reload(), 30000);</script>
-                    </body>
-                </html>
-            `);
-        });
-    } else {
-        res.send('El bot ya está conectado o esperando un nuevo código QR. Revisa los logs de Render.');
-    }
-});
+app.get('/', (req, res) => res.send('ExtintoresUY WhatsApp Bot Service is running.'));
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
 app.listen(port, () => {
@@ -66,15 +49,31 @@ const client = new Client({
     }
 });
 
-client.on('qr', (qr) => {
+client.on('qr', async (qr) => {
     console.log('QR RECEIVED');
-    latestQR = qr;
     qrcodeTerminal.generate(qr, { small: true });
+    
+    // Save QR to DB for the admin panel to see
+    await supabase
+        .from('bot_status')
+        .upsert({ 
+            id: 'whatsapp-bot', 
+            qr: qr, 
+            status: 'waiting_qr',
+            last_update: new Date().toISOString() 
+        });
 });
 
-client.on('ready', () => {
+client.on('ready', async () => {
     console.log('WhatsApp Client is ready!');
-    latestQR = null;
+    await supabase
+        .from('bot_status')
+        .upsert({ 
+            id: 'whatsapp-bot', 
+            qr: null, 
+            status: 'ready',
+            last_update: new Date().toISOString() 
+        });
 });
 
 client.on('remote_session_saved', () => {
