@@ -84,6 +84,41 @@ client.on('auth_failure', msg => {
     console.error('AUTHENTICATION FAILURE', msg);
 });
 
+// Realtime command listener
+supabase
+    .channel('bot-commands')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bot_commands' }, async (payload) => {
+        const { id, command, payload: data } = payload.new;
+        
+        if (command === 'send_message') {
+            console.log(`Processing command: send_message to ${data.phone}`);
+            
+            try {
+                // Update to processing
+                await supabase.from('bot_commands').update({ status: 'processing' }).eq('id', id);
+
+                // Format phone
+                let formattedPhone = data.phone.replace(/\s+/g, '').replace('+', '');
+                if (formattedPhone.startsWith('0')) formattedPhone = '598' + formattedPhone.substring(1);
+                if (!formattedPhone.startsWith('598')) formattedPhone = '598' + formattedPhone;
+                const chatId = `${formattedPhone}@c.us`;
+
+                await client.sendMessage(chatId, data.message);
+
+                // Update to completed
+                await supabase.from('bot_commands').update({ status: 'completed' }).eq('id', id);
+                console.log('Command completed successfully');
+            } catch (err) {
+                console.error('Command failed:', err);
+                await supabase.from('bot_commands').update({ 
+                    status: 'failed', 
+                    error: err.message 
+                }).eq('id', id);
+            }
+        }
+    })
+    .subscribe();
+
 client.initialize();
 
 // Cron Job: Every day at 09:00 AM

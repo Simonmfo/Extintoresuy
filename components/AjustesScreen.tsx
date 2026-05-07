@@ -373,16 +373,69 @@ const AjustesScreen: React.FC<AjustesScreenProps> = ({ profile, onLogout, onRefr
                                         </div>
                                     </div>
                                 )}
+                            </div>
 
-                                <div className="pt-4 flex justify-end">
-                                    <button 
-                                        onClick={() => window.open('https://dashboard.render.com', '_blank')}
-                                        className="text-xs font-bold text-slate-500 hover:text-white transition-colors flex items-center gap-2"
-                                    >
-                                        <span className="material-symbols-outlined text-sm">settings_input_component</span>
-                                        Gestionar en Render
-                                    </button>
+                            {/* Testing Section */}
+                            <div className="p-8 border-t border-white/5 bg-white/5 space-y-6">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <span className="material-symbols-outlined text-primary text-sm">science</span>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Área de Pruebas</h3>
                                 </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Celular de Prueba</label>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Ej: 099123456"
+                                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-primary outline-none"
+                                            id="test-phone"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tipo de Mensaje</label>
+                                        <select 
+                                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-primary outline-none"
+                                            id="test-msg-type"
+                                        >
+                                            <option value="test">Mensaje de Prueba Simple</option>
+                                            <option value="vencimiento">Aviso de Vencimiento (Demo)</option>
+                                            <option value="bienvenida">Bienvenida al Sistema</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button 
+                                    onClick={async () => {
+                                        const phone = (document.getElementById('test-phone') as HTMLInputElement).value;
+                                        const type = (document.getElementById('test-msg-type') as HTMLSelectElement).value;
+                                        
+                                        if (!phone) {
+                                            alert('Ingresa un número de celular');
+                                            return;
+                                        }
+
+                                        let message = '';
+                                        if (type === 'test') message = '¡Hola! Este es un mensaje de prueba desde el sistema ExtintoresUY. El bot está funcionando correctamente. ✅';
+                                        if (type === 'vencimiento') message = '*AVISO DE PRUEBA*\n\nHola, te informamos que tu Extintor ABC de 5kg está próximo a vencer. Por favor contactanos para coordinar la recarga.';
+                                        if (type === 'bienvenida') message = 'Bienvenido a *ExtintoresUY*. A partir de ahora recibirás avisos automáticos sobre el estado de tus equipos de seguridad.';
+
+                                        const { error } = await supabase.from('bot_commands').insert({
+                                            command: 'send_message',
+                                            payload: { phone, message }
+                                        });
+
+                                        if (error) {
+                                            alert('Error al enviar comando: ' + error.message);
+                                        } else {
+                                            alert('Comando enviado. El bot procesará el mensaje en unos segundos.');
+                                        }
+                                    }}
+                                    className="w-full bg-white/5 hover:bg-white/10 border border-white/10 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-primary transition-all flex items-center justify-center gap-2"
+                                >
+                                    <span className="material-symbols-outlined text-sm">send</span>
+                                    Enviar Mensaje de Prueba
+                                </button>
                             </div>
                         </section>
                     )}
