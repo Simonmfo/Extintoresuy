@@ -146,19 +146,15 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                         extension: factoryProfile.logo_url.toLowerCase().endsWith('.png') ? 'png' : 'jpeg',
                     });
 
-                    // Calculate aspect ratio
-                    const maxW = 200;
-                    const maxH = 80;
-                    let displayW = img.width;
-                    let displayH = img.height;
+                    // Calculate dimensions to fill Row 1 and 2 height (40 + 40 = 80)
+                    const targetHeight = 80;
+                    const ratio = targetHeight / img.height;
+                    const displayW = img.width * ratio;
+                    const displayH = targetHeight;
 
-                    const ratio = Math.min(maxW / displayW, maxH / displayH);
-                    displayW *= ratio;
-                    displayH *= ratio;
-
-                    // Add logo starting from Column D, Row 1
+                    // Add logo starting exactly at Column D (index 3), Row 1 (index 0)
                     worksheet.addImage(imageId, {
-                        tl: { col: 3.1, row: 0.1 }, 
+                        tl: { col: 3, row: 0 }, 
                         ext: { width: displayW, height: displayH }
                     });
                     
