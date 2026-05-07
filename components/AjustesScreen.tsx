@@ -187,6 +187,59 @@ const AjustesScreen: React.FC<AjustesScreenProps> = ({ profile, onLogout, onRefr
                                     </div>
                                 </div>
 
+                                 {profile?.role === 'fabrica' && (
+                                    <div className="space-y-4 pt-4 border-t border-white/5">
+                                        <label className="block text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Logo de la Fábrica</label>
+                                        <div className="flex items-center gap-6">
+                                            <div className="size-24 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                                                {profile?.logo_url ? (
+                                                    <img src={profile.logo_url} alt="Logo" className="w-full h-full object-contain p-2" />
+                                                ) : (
+                                                    <span className="material-symbols-outlined text-3xl text-slate-600">image</span>
+                                                )}
+                                            </div>
+                                            <div className="space-y-2">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={async (e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file && profile) {
+                                                            setLoading(true);
+                                                            const fileName = `${profile.id}/logo_${Date.now()}`;
+                                                            const { data, error } = await supabase.storage
+                                                                .from('logos')
+                                                                .upload(fileName, file, { upsert: true });
+
+                                                            if (error) {
+                                                                setMessage({ type: 'error', text: 'Error al subir el logo. Asegúrese de que el bucket "logos" existe.' });
+                                                            } else {
+                                                                const { data: { publicUrl } } = supabase.storage.from('logos').getPublicUrl(fileName);
+                                                                const success = await db.updateProfile(profile.id, { logo_url: publicUrl });
+                                                                if (success) {
+                                                                    setMessage({ type: 'success', text: 'Logo actualizado' });
+                                                                    onRefreshProfile();
+                                                                }
+                                                            }
+                                                            setLoading(false);
+                                                        }
+                                                    }}
+                                                    className="hidden"
+                                                    id="logo-upload"
+                                                />
+                                                <label
+                                                    htmlFor="logo-upload"
+                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-white cursor-pointer transition-all"
+                                                >
+                                                    <span className="material-symbols-outlined text-lg">upload</span>
+                                                    Subir Nuevo Logo
+                                                </label>
+                                                <p className="text-[10px] text-slate-500">Recomendado: PNG o JPG, fondo transparente, máx 2MB.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="flex justify-end pt-4">
                                     <button
                                         type="submit"

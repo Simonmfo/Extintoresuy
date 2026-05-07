@@ -30,6 +30,8 @@ export interface InspectionAsset {
   lastRecharge?: string;
   lastHydrotest?: string;
   nextHydrotest?: string;
+  capacity?: string;
+  unit?: string;
   assignedTechnicianId?: string;
 }
 
@@ -50,6 +52,7 @@ export interface UserProfile {
   role: 'admin' | 'tecnico' | 'empresa' | 'fabrica';
   company_id: string | null;
   avatar_url?: string;
+  logo_url?: string;
   created_at?: string;
   creatorName?: string;
 }

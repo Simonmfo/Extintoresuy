@@ -1,7 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
+import ExcelJS from 'exceljs';
 import { db } from '../services/db';
-import { Client, InspectionAsset } from '../types';
+import { Client, InspectionAsset, UserProfile } from '../types';
 
 interface ReportesScreenProps {
     companyId?: string;
@@ -13,15 +13,21 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
     const [assets, setAssets] = useState<InspectionAsset[]>([]);
     const [loading, setLoading] = useState(false);
     const [exporting, setExporting] = useState(false);
+    const [factoryProfile, setFactoryProfile] = useState<UserProfile | null>(null);
 
     useEffect(() => {
-        const loadClients = async () => {
+        const loadData = async () => {
             setLoading(true);
-            const data = await db.getClients(companyId);
-            setClients(data);
+            const clientsData = await db.getClients(companyId);
+            setClients(clientsData);
+            
+            if (companyId && companyId !== 'ALL') {
+                const profile = await db.getProfile(companyId);
+                setFactoryProfile(profile);
+            }
             setLoading(false);
         };
-        loadClients();
+        loadData();
     }, [companyId]);
 
     const handleSelectClient = async (client: Client) => {
@@ -29,61 +35,113 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
         setSelectedClient(client);
         const data = await db.getAssetsByClient(client.id);
         setAssets(data);
+        
+        // If companyId was ALL (admin view), we should fetch the factory profile of the client
+        if (companyId === 'ALL' || !companyId) {
+            const profile = await db.getProfile((client as any).company_id);
+            setFactoryProfile(profile);
+        }
         setLoading(false);
     };
 
-    const handleExport = () => {
+    const handleExport = async () => {
         if (!selectedClient || assets.length === 0) return;
         setExporting(true);
 
-        // Create CSV content
-        const headers = [
-            'ID',
-            'Nombre',
-            'Tipo',
-            'Agente',
-            'Clase Fuego',
-            'Estado Op.',
-            'Estado Insp.',
-            'Ubicación',
-            'Vto Carga',
-            'Últ. Insp.',
-            'Próx. Insp.',
-            'Próx. PH'
-        ];
+        try {
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Inventario');
 
-        const rows = assets.map(asset => {
-            const isExpired = asset.expirationDate && asset.expirationDate < today;
-            const statusInsp = isExpired ? 'Vencido' : asset.status === 'ok' ? 'Al día' : asset.status === 'failed' ? 'Rechazado' : 'Pendiente';
-
-            return [
-                asset.id,
-                asset.name || 'Sin nombre',
-                asset.type || 'N/A',
-                asset.agent || 'N/A',
-                asset.fireClass || 'N/A',
-                asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'Activo' : asset.lifecycleStatus === 'maintenance' ? 'Planta' : 'Descarte',
-                statusInsp,
-                asset.description || 'N/A',
-                asset.expirationDate || 'N/A',
-                asset.lastInspection || 'N/A',
-                asset.nextInspection || 'N/A',
-                asset.nextHydrotest || 'N/A'
+            // Set columns based on JUZGADO RECARGADO.xlsx
+            worksheet.columns = [
+                { header: 'Id', key: 'id', width: 15 },
+                { header: 'Establecimiento', key: 'establecimiento', width: 30 },
+                { header: 'Matricula', key: 'matricula', width: 15 },
+                { header: 'UNIT', key: 'unit', width: 10 },
+                { header: 'Recarga', key: 'recarga', width: 15 },
+                { header: 'Vto. Ensayo', key: 'vtoEnsayo', width: 15 },
+                { header: 'Vto. Carga', key: 'vtoCarga', width: 15 },
+                { header: 'Estado', key: 'estado', width: 15 },
+                { header: 'Retirado', key: 'retirado', width: 10 },
+                { header: 'ubicación', key: 'ubicacion', width: 30 },
+                { header: 'TIPO', key: 'tipo', width: 15 },
+                { header: 'CAP', key: 'cap', width: 10 },
             ];
-        });
 
-        const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(e => e.map(cell => `"${(cell || '').toString().replace(/"/g, '""')}"`).join(','))].join("\n");
+            // Add Header Row with styling
+            const headerRow = worksheet.getRow(1);
+            headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
+            headerRow.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: '13EC5B' }
+            };
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", `reporte_${selectedClient.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`);
+            // Add Data Rows
+            assets.forEach(asset => {
+                const isExpired = asset.expirationDate && asset.expirationDate < today;
+                const statusInsp = isExpired ? 'Vencido' : asset.status === 'ok' ? 'OK' : 'ALERTA';
 
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+                worksheet.addRow({
+                    id: asset.id,
+                    establecimiento: selectedClient.name,
+                    matricula: asset.id, // Using ID as matricula if not separate
+                    unit: asset.unit || 'UNIT 507',
+                    recarga: asset.lastRecharge || 'N/A',
+                    vtoEnsayo: asset.nextHydrotest || 'N/A',
+                    vtoCarga: asset.expirationDate || 'N/A',
+                    estado: statusInsp,
+                    retirado: asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI',
+                    ubicacion: asset.description || 'N/A',
+                    tipo: asset.agent || asset.type || 'N/A',
+                    cap: asset.capacity || 'N/A'
+                });
+            });
+
+            // Add Logo if available
+            if (factoryProfile?.logo_url) {
+                try {
+                    const response = await fetch(factoryProfile.logo_url);
+                    const blob = await response.blob();
+                    const arrayBuffer = await blob.arrayBuffer();
+                    
+                    const imageId = workbook.addImage({
+                        buffer: arrayBuffer,
+                        extension: factoryProfile.logo_url.toLowerCase().endsWith('.png') ? 'png' : 'jpeg',
+                    });
+
+                    // Add logo to the top right or a specific area
+                    worksheet.addImage(imageId, {
+                        tl: { col: 10, row: 0 },
+                        ext: { width: 100, height: 60 }
+                    });
+                } catch (imgError) {
+                    console.error('Error adding logo to Excel:', imgError);
+                }
+            }
+
+            // Style data rows
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber > 1) {
+                    row.font = { size: 10 };
+                    row.alignment = { vertical: 'middle', horizontal: 'left' };
+                }
+            });
+
+            // Export
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `reporte_${selectedClient.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error exporting Excel:', error);
+        }
 
         setExporting(false);
     };
@@ -227,6 +285,8 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                                             <tr className="text-[10px] uppercase tracking-widest text-slate-500 border-b border-white/5">
                                                 <th className="pb-3 pl-2">ID</th>
                                                 <th className="pb-3">Tipo / Agente</th>
+                                                <th className="pb-3">Capacidad</th>
+                                                <th className="pb-3">Norma</th>
                                                 <th className="pb-3 text-center">Estado</th>
                                                 <th className="pb-3 text-right pr-2">Próx. Insp.</th>
                                             </tr>
@@ -239,6 +299,8 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                                                         <p className="text-xs font-bold text-white mb-0.5">{asset.type}</p>
                                                         <p className="text-[9px] text-slate-500">{asset.agent || 'Sin agente'}</p>
                                                     </td>
+                                                    <td className="py-4 text-xs text-slate-300">{asset.capacity || '-'}</td>
+                                                    <td className="py-4 text-[10px] text-slate-500 font-mono">{asset.unit || 'UNIT 507'}</td>
                                                     <td className="py-4 text-center">
                                                         <span className={`inline-flex px-1.5 py-0.5 rounded-[4px] text-[8px] font-bold uppercase tracking-wider ${(asset.expirationDate && asset.expirationDate < today) || asset.status === 'failed'
                                                             ? 'bg-status-red/20 text-status-red'

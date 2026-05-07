@@ -31,6 +31,8 @@ const mapAsset = (asset: any): InspectionAsset => ({
   lastRecharge: asset.last_recharge_date,
   lastHydrotest: asset.last_hydrotest_date,
   nextHydrotest: asset.next_hydrotest_date,
+  capacity: asset.capacity,
+  unit: asset.unit,
   assignedTechnicianId: asset.assigned_technician_id
 });
 
@@ -598,6 +600,8 @@ export const db = {
           next_hydrotest_date: assetData.nextHydrotest,
           last_inspection: assetData.lastInspection,
           location_status: assetData.lifecycleStatus || 'active',
+          capacity: assetData.capacity,
+          unit: assetData.unit,
           status: 'pending',
           location_lat: -34.9011,
           location_lng: -56.1645,
