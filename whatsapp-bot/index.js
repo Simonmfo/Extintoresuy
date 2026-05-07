@@ -16,7 +16,7 @@ let latestQR = null;
 app.get('/', (req, res) => res.send('ExtintoresUY WhatsApp Bot Service is running.'));
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
 });
 
