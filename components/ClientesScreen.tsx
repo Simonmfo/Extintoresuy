@@ -55,7 +55,7 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                 <div>
                     <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
                         <span className="material-symbols-outlined text-primary !text-4xl">corporate_fare</span>
-                        Directorio de Empresas
+                        Directorio de Clientes
                     </h1>
                     <p className="text-slate-400 text-sm mt-1">Gestiona los clientes y sus sucursales</p>
                 </div>
@@ -65,7 +65,7 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                         className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0"
                     >
                         <span className="material-symbols-outlined !text-xl">add</span>
-                        Añadir Empresa
+                        Añadir Cliente
                     </button>
                 )}
             </div>
@@ -168,7 +168,7 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                             <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                                 <h3 className="text-xl font-black text-white flex items-center gap-3">
                                     <span className="material-symbols-outlined text-primary">{editClient ? 'edit_note' : 'business_center'}</span>
-                                    {editClient ? 'Editar Empresa' : 'Registrar Nueva Empresa'}
+                                    {editClient ? 'Editar Cliente' : 'Registrar Nuevo Cliente'}
                                 </h3>
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-white">
                                     <span className="material-symbols-outlined">close</span>
@@ -177,7 +177,7 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                             <div className="p-8 space-y-6">
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Nombre de la Empresa / Razón Social</label>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Nombre del Cliente / Razón Social</label>
                                         <input
                                             required
                                             type="text"
@@ -188,7 +188,7 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">RUT de la Empresa</label>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">RUT del Cliente</label>
                                         <input
                                             type="text"
                                             value={formData.rut}
@@ -231,7 +231,7 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                                     type="submit"
                                     className="flex-1 bg-primary text-background-dark font-black py-4 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
                                 >
-                                    {editClient ? 'Guardar Cambios' : 'Registrar Empresa'}
+                                    {editClient ? 'Guardar Cambios' : 'Registrar Cliente'}
                                 </button>
                             </div>
                         </form>
