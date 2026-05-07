@@ -1,7 +1,9 @@
-
+import React, { useState, useEffect } from 'react';
 import ExcelJS from 'exceljs';
 import { db } from '../services/db';
 import { Client, InspectionAsset, UserProfile } from '../types';
+
+const today = new Date().toISOString().split('T')[0];
 
 interface ReportesScreenProps {
     companyId?: string;
@@ -38,7 +40,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
         
         // If companyId was ALL (admin view), we should fetch the factory profile of the client
         if (companyId === 'ALL' || !companyId) {
-            const profile = await db.getProfile((client as any).company_id);
+            const profile = await db.getProfile(client.company_id || '');
             setFactoryProfile(profile);
         }
         setLoading(false);

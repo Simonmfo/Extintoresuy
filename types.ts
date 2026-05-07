@@ -42,6 +42,7 @@ export interface Client {
   contact_email: string;
   rut?: string;
   created_at: string;
+  company_id?: string;
   creatorName?: string;
 }
 

@@ -406,6 +406,8 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             lastRecharge: editingAsset.lastRecharge,
             lastHydrotest: editingAsset.lastHydrotest,
             nextHydrotest: editingAsset.nextHydrotest,
+            capacity: editingAsset.capacity,
+            unit: editingAsset.unit,
             lifecycleStatus: editingAsset.lifecycleStatus
         });
 
@@ -1295,6 +1297,28 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             value={editingAsset.fireClass || ''}
                                             onChange={e => setEditingAsset({ ...editingAsset, fireClass: e.target.value })}
                                             placeholder="Ej. A, B, C"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Capacidad</label>
+                                        <input
+                                            type="text"
+                                            value={editingAsset.capacity || ''}
+                                            onChange={e => setEditingAsset({ ...editingAsset, capacity: e.target.value })}
+                                            placeholder="Ej. 4KG, 8KG"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Norma (UNIT)</label>
+                                        <input
+                                            type="text"
+                                            value={editingAsset.unit || ''}
+                                            onChange={e => setEditingAsset({ ...editingAsset, unit: e.target.value })}
+                                            placeholder="Ej. UNIT 507"
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
                                         />
                                     </div>
