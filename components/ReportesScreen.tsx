@@ -126,7 +126,6 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                 row.font = { size: 10 };
                 row.alignment = { vertical: 'middle', horizontal: 'left' };
             });
- });
 
             // 7. Add Logo if available (Space from D1 onwards)
             if (factoryProfile?.logo_url) {
