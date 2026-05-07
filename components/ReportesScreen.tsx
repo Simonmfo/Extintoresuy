@@ -54,7 +54,23 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('Inventario');
 
-            // Set columns based on JUZGADO RECARGADO.xlsx
+            // 1. Set Row 1 and 2 Heights for space
+            worksheet.getRow(1).height = 30;
+            worksheet.getRow(2).height = 30;
+
+            // 2. Add Client Name (B1) - Uppercase, Red
+            const b1 = worksheet.getCell('B1');
+            b1.value = selectedClient.name.toUpperCase();
+            b1.font = { name: 'Arial Black', size: 14, color: { argb: 'FFFF0000' } }; // Red color
+            b1.alignment = { vertical: 'middle', horizontal: 'left' };
+
+            // 3. Add Date (C1)
+            const c1 = worksheet.getCell('C1');
+            c1.value = new Date().toLocaleDateString('es-UY');
+            c1.font = { bold: true };
+            c1.alignment = { vertical: 'middle', horizontal: 'center' };
+
+            // 4. Set Columns (Start headers at Row 4)
             worksheet.columns = [
                 { header: 'Id', key: 'id', width: 15 },
                 { header: 'Establecimiento', key: 'establecimiento', width: 30 },
@@ -70,24 +86,33 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                 { header: 'CAP', key: 'cap', width: 10 },
             ];
 
-            // Add Header Row with styling
-            const headerRow = worksheet.getRow(1);
+            // 5. Shift Headers to Row 4
+            const headerRow = worksheet.getRow(4);
+            headerRow.values = [
+                'Id', 'Establecimiento', 'Matricula', 'UNIT', 'Recarga', 
+                'Vto. Ensayo', 'Vto. Carga', 'Estado', 'Retirado', 
+                'ubicación', 'TIPO', 'CAP'
+            ];
             headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
             headerRow.fill = {
                 type: 'pattern',
                 pattern: 'solid',
                 fgColor: { argb: '13EC5B' }
             };
+            headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
 
-            // Add Data Rows
-            assets.forEach(asset => {
+            // Clear first row headers (ExcelJS puts them in row 1 by default when columns are defined)
+            worksheet.getRow(1).values = [null, b1.value, c1.value]; 
+
+            // 6. Add Data Rows starting from Row 5
+            assets.forEach((asset, index) => {
                 const isExpired = asset.expirationDate && asset.expirationDate < today;
                 const statusInsp = isExpired ? 'Vencido' : asset.status === 'ok' ? 'OK' : 'ALERTA';
 
-                worksheet.addRow({
+                const row = worksheet.addRow({
                     id: asset.id,
                     establecimiento: selectedClient.name,
-                    matricula: asset.id, // Using ID as matricula if not separate
+                    matricula: asset.id,
                     unit: asset.unit || 'UNIT 507',
                     recarga: asset.lastRecharge || 'N/A',
                     vtoEnsayo: asset.nextHydrotest || 'N/A',
@@ -98,9 +123,13 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                     tipo: asset.agent || asset.type || 'N/A',
                     cap: asset.capacity || 'N/A'
                 });
+                
+                // Styling data row
+                row.font = { size: 10 };
+                row.alignment = { vertical: 'middle', horizontal: 'left' };
             });
 
-            // Add Logo if available
+            // 7. Add Logo if available (Space from D1 onwards)
             if (factoryProfile?.logo_url) {
                 try {
                     const response = await fetch(factoryProfile.logo_url);
@@ -112,23 +141,16 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                         extension: factoryProfile.logo_url.toLowerCase().endsWith('.png') ? 'png' : 'jpeg',
                     });
 
-                    // Add logo to the top right or a specific area
+                    // Add logo starting from Column D, Row 1
                     worksheet.addImage(imageId, {
-                        tl: { col: 10, row: 0 },
-                        ext: { width: 100, height: 60 }
+                        tl: { col: 3.2, row: 0.1 }, // Column D is index 3
+                        ext: { width: 150, height: 80 }
                     });
                 } catch (imgError) {
                     console.error('Error adding logo to Excel:', imgError);
                 }
             }
 
-            // Style data rows
-            worksheet.eachRow((row, rowNumber) => {
-                if (rowNumber > 1) {
-                    row.font = { size: 10 };
-                    row.alignment = { vertical: 'middle', horizontal: 'left' };
-                }
-            });
 
             // Export
             const buffer = await workbook.xlsx.writeBuffer();
