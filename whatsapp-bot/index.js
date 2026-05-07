@@ -1,5 +1,6 @@
 const { Client, RemoteAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+const qrcodeTerminal = require('qrcode-terminal');
+const QRCode = require('qrcode');
 const { supabase } = require('./supabase');
 const SupabaseStore = require('./SupabaseStore');
 const cron = require('node-cron');
@@ -10,7 +11,26 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Express setup to keep the service alive
-app.get('/', (req, res) => res.send('ExtintoresUY WhatsApp Bot is running!'));
+let latestQR = null;
+
+app.get('/', (req, res) => {
+    if (latestQR) {
+        QRCode.toDataURL(latestQR, (err, url) => {
+            res.send(`
+                <html>
+                    <body style="background: #111; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif;">
+                        <h2>Escanea el código para conectar ExtintoresUY</h2>
+                        <img src="${url}" style="border: 10px solid white; border-radius: 10px;" />
+                        <p style="margin-top: 20px;">El código se actualiza automáticamente.</p>
+                        <script>setTimeout(() => location.reload(), 30000);</script>
+                    </body>
+                </html>
+            `);
+        });
+    } else {
+        res.send('El bot ya está conectado o esperando un nuevo código QR. Revisa los logs de Render.');
+    }
+});
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
 app.listen(port, () => {
@@ -42,12 +62,14 @@ const client = new Client({
 });
 
 client.on('qr', (qr) => {
-    console.log('QR RECEIVED', qr);
-    qrcode.generate(qr, { small: true });
+    console.log('QR RECEIVED');
+    latestQR = qr;
+    qrcodeTerminal.generate(qr, { small: true });
 });
 
 client.on('ready', () => {
     console.log('WhatsApp Client is ready!');
+    latestQR = null;
 });
 
 client.on('remote_session_saved', () => {
