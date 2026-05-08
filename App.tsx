@@ -177,7 +177,7 @@ const App: FC = () => {
       case 'inspecciones':
         return <InspeccionesScreen onBack={() => setCurrentScreen('home')} profile={profile} onStartInspection={(id) => handleStartInspection(id)} />;
       case 'mapa':
-        return <MapScreen onStartInspection={() => handleStartInspection('#UY-9921-24')} />;
+        return <MapScreen onStartInspection={() => handleStartInspection('#UY-9921-24')} companyId={companyId} />;
       case 'inspeccion':
         return <InspectionScreen onBack={() => setCurrentScreen('home')} onSave={handleSaveInspection} assetId={selectedAssetId || ''} />;
       case 'validacion':

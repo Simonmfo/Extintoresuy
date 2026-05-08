@@ -1,158 +1,214 @@
 
-import { type FC } from 'react';
+import { type FC, useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import { db } from '../services/db';
+import { Client } from '../types';
+
+// Fix Leaflet marker icon issue
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapScreenProps {
   onStartInspection: () => void;
+  companyId?: string;
 }
 
-const MapScreen: FC<MapScreenProps> = ({ onStartInspection }) => {
+const LocationPicker: FC<{ onLocationPicked: (lat: number, lng: number) => void }> = ({ onLocationPicked }) => {
+    useMapEvents({
+        click(e) {
+            onLocationPicked(e.latlng.lat, e.latlng.lng);
+        },
+    });
+    return null;
+};
+
+const MapScreen: FC<MapScreenProps> = ({ onStartInspection, companyId }) => {
+  const [clients, setClients] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedClientForLocation, setSelectedClientForLocation] = useState<string | null>(null);
+  const [isSettingLocation, setIsSettingLocation] = useState(false);
+
+  useEffect(() => {
+    loadClients();
+  }, [companyId]);
+
+  const loadClients = async () => {
+    if (!companyId) return;
+    setLoading(true);
+    const data = await db.getClients(companyId);
+    setClients(data);
+    setLoading(false);
+  };
+
+  const handleLocationPicked = async (lat: number, lng: number) => {
+    if (selectedClientForLocation) {
+        const ok = await db.updateClientLocation(selectedClientForLocation, lat, lng);
+        if (ok) {
+            setSelectedClientForLocation(null);
+            setIsSettingLocation(false);
+            loadClients();
+        }
+    }
+  };
+
+  const clientsWithLocation = clients.filter(c => c.latitude && c.longitude);
+  const clientsWithoutLocation = clients.filter(c => !c.latitude || !c.longitude);
+
   return (
-    <div className="relative h-[calc(100vh-80px)] overflow-hidden flex flex-col bg-[#0a140d]">
-      {/* Header Overlay */}
-      <header className="absolute top-0 inset-x-0 z-20 bg-background-dark/95 backdrop-blur-md border-b border-white/10 px-4 pt-12 pb-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-full bg-white/10 active:bg-white/20 transition-colors">
-              <span className="material-symbols-outlined text-white">arrow_back</span>
-            </div>
-            <div>
-              <h1 className="text-white text-base font-bold leading-tight">Mapa de Inspección</h1>
-              <p className="text-white/60 text-[10px] font-bold uppercase tracking-wider">Decreto 372/023 • Montevideo</p>
-            </div>
+    <div className="relative h-[calc(100vh-80px)] overflow-hidden flex flex-col bg-[#102216]">
+      {/* Header */}
+      <header className="bg-background-dark/95 backdrop-blur-md border-b border-white/10 px-6 py-4 z-[1000]">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-black text-white flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">map</span>
+                Ubicación de Clientes
+            </h1>
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                Geolocalización del Parque de Extintores
+            </p>
           </div>
           <div className="flex gap-2">
-            <button className="flex size-10 items-center justify-center rounded-full bg-white/10">
-              <span className="material-symbols-outlined text-white">search</span>
-            </button>
-            <button className="flex size-10 items-center justify-center rounded-full bg-white/10">
-              <span className="material-symbols-outlined text-primary fill-1">cloud_done</span>
-            </button>
+              <div className="bg-primary/10 border border-primary/20 px-3 py-1 rounded-full text-primary text-[10px] font-black uppercase">
+                  {clientsWithLocation.length} Ubicados
+              </div>
+              {clientsWithoutLocation.length > 0 && (
+                <div className="bg-status-yellow/10 border border-status-yellow/20 px-3 py-1 rounded-full text-status-yellow text-[10px] font-black uppercase">
+                    {clientsWithoutLocation.length} Sin Ubicación
+                </div>
+              )}
           </div>
-        </div>
-
-        {/* Filters */}
-        <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
-          {[
-            { id: 'all', label: 'Todos (40)', icon: 'filter_list', color: 'primary', active: true },
-            { id: 'ok', label: '15 Al día', icon: 'check_circle', color: 'primary' },
-            { id: 'pending', label: '20 Pendientes', icon: 'pending', color: 'status-yellow' },
-            { id: 'expired', label: '5 Vencidos', icon: 'warning', color: 'status-red' }
-          ].map(filter => (
-            <div
-              key={filter.id}
-              className={`flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-xl px-4 border transition-colors ${filter.active
-                  ? 'bg-primary/20 border-primary/30'
-                  : 'bg-white/5 border-white/10'
-                }`}
-            >
-              <span className={`material-symbols-outlined text-${filter.color} !text-sm`}>{filter.icon}</span>
-              <p className="text-white text-xs font-bold">{filter.label}</p>
-            </div>
-          ))}
         </div>
       </header>
 
-      {/* Map Implementation Mock */}
-      <main className="relative flex-1">
-        {/* Placeholder Map Pattern */}
-        <div className="absolute inset-0 opacity-40 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-        <div className="absolute inset-0 w-full h-full bg-center bg-no-repeat bg-cover opacity-60 grayscale-[0.2]"
-          style={{ backgroundImage: `url('https://picsum.photos/seed/map1/800/1200')` }}>
-        </div>
-
-        {/* GPS Pulse */}
-        <div className="absolute top-1/2 left-1/3 flex items-center justify-center -translate-x-1/2 -translate-y-1/2">
-          <div className="absolute w-12 h-12 bg-blue-500/30 rounded-full animate-ping"></div>
-          <div className="w-5 h-5 bg-blue-500 border-2 border-white rounded-full shadow-2xl z-10"></div>
-        </div>
-
-        {/* Markers */}
-        {/* Green */}
-        <div className="absolute top-[28%] right-[22%] flex flex-col items-center gap-1">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center border-2 border-white/20 shadow-[0_0_15px_rgba(19,236,91,0.4)]">
-            <span className="material-symbols-outlined text-background-dark font-black !text-lg">check</span>
-          </div>
-          <span className="bg-background-dark/90 px-2 py-0.5 rounded text-[10px] text-white font-bold">EXT-001</span>
-        </div>
-
-        {/* Yellow */}
-        <div className="absolute bottom-[40%] left-[28%] flex flex-col items-center gap-1">
-          <div className="w-10 h-10 rounded-full bg-status-yellow flex items-center justify-center border-2 border-white/20 shadow-[0_0_15px_rgba(255,193,7,0.4)]">
-            <span className="material-symbols-outlined text-background-dark font-black !text-lg">schedule</span>
-          </div>
-          <span className="bg-background-dark/90 px-2 py-0.5 rounded text-[10px] text-white font-bold">EXT-024</span>
-        </div>
-
-        {/* Red */}
-        <div className="absolute top-[42%] left-[52%] flex flex-col items-center gap-1" onClick={onStartInspection}>
-          <div className="w-11 h-11 rounded-full bg-status-red flex items-center justify-center border-2 border-white/30 shadow-[0_0_20px_rgba(255,77,77,0.5)] cursor-pointer active:scale-90 transition-transform">
-            <span className="material-symbols-outlined text-white font-black !text-lg">priority_high</span>
-          </div>
-          <span className="bg-background-dark/90 px-2 py-1 rounded text-[10px] text-white font-black border border-white/10">EXT-012</span>
-        </div>
-
-        {/* Controls */}
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-3">
-          <button className="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl flex items-center justify-center active:bg-white/20">
-            <span className="material-symbols-outlined text-white">add</span>
-          </button>
-          <button className="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl flex items-center justify-center active:bg-white/20">
-            <span className="material-symbols-outlined text-white">remove</span>
-          </button>
-          <button className="w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl flex items-center justify-center active:bg-white/20">
-            <span className="material-symbols-outlined text-primary">my_location</span>
-          </button>
-        </div>
-
-        {/* Floating Action */}
-        <div className="absolute bottom-[240px] right-4">
-          <button onClick={onStartInspection} className="flex items-center justify-center gap-3 bg-primary text-background-dark h-14 px-6 rounded-2xl shadow-2xl shadow-primary/40 font-black transform active:scale-95 transition-all">
-            <span className="material-symbols-outlined !text-2xl fill-1">qr_code_scanner</span>
-            <span className="uppercase tracking-tight text-sm">Escanear QR</span>
-          </button>
-        </div>
-      </main>
-
-      {/* Bottom Sheet */}
-      <section className="relative z-30 bg-background-dark border-t border-white/10 rounded-t-[2.5rem] px-6 pt-3 pb-6 shadow-[0_-20px_50px_rgba(0,0,0,0.8)]">
-        <div className="flex justify-center mb-5">
-          <div className="w-12 h-1.5 rounded-full bg-white/20"></div>
-        </div>
-
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-white text-lg font-black leading-tight tracking-tight">Ruta: Planta Industrial A</h3>
-            <p className="text-white/50 text-xs font-medium">Progreso de inspección actual</p>
-          </div>
-          <div className="text-right">
-            <span className="text-primary text-2xl font-black italic">38%</span>
-            <p className="text-white/30 text-[9px] font-black uppercase tracking-widest">Completado</p>
-          </div>
-        </div>
-
-        {/* Progress */}
-        <div className="relative w-full h-3 bg-white/5 rounded-full overflow-hidden mb-8">
-          <div className="absolute top-0 left-0 h-full bg-primary w-[38%] rounded-full shadow-[0_0_10px_rgba(19,236,91,0.5)]"></div>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div className="flex flex-col">
-              <span className="text-white font-black text-xl tracking-tighter">15/40</span>
-              <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Inspeccionados</span>
+      <div className="flex-1 flex flex-col lg:flex-row relative">
+        {/* Sidebar for clients without location */}
+        {clientsWithoutLocation.length > 0 && (
+            <div className="w-full lg:w-80 bg-background-dark/80 backdrop-blur-xl border-r border-white/10 overflow-y-auto p-4 absolute lg:relative z-[1000] bottom-0 lg:bottom-auto max-h-[40%] lg:max-h-full">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined !text-sm">not_listed_location</span>
+                    Pendientes de Ubicar
+                </h3>
+                <div className="space-y-2">
+                    {clientsWithoutLocation.map(client => (
+                        <button
+                            key={client.id}
+                            onClick={() => {
+                                setSelectedClientForLocation(client.id);
+                                setIsSettingLocation(true);
+                            }}
+                            className={`w-full text-left p-4 rounded-2xl border transition-all ${
+                                selectedClientForLocation === client.id 
+                                ? 'bg-primary/20 border-primary shadow-lg shadow-primary/20' 
+                                : 'bg-white/5 border-white/10 hover:border-white/20'
+                            }`}
+                        >
+                            <p className="text-sm font-black text-white">{client.name}</p>
+                            <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold">{client.address || 'Sin dirección'}</p>
+                            {selectedClientForLocation === client.id && (
+                                <div className="mt-2 text-[10px] text-primary font-black uppercase flex items-center gap-1 animate-pulse">
+                                    <span className="material-symbols-outlined !text-xs">touch_app</span>
+                                    Toca el mapa para ubicar
+                                </div>
+                            )}
+                        </button>
+                    ))}
+                </div>
             </div>
-            <div className="w-px h-8 bg-white/10"></div>
-            <div className="flex flex-col">
-              <span className="text-status-red font-black text-xl tracking-tighter">05</span>
-              <span className="text-white/40 text-[10px] font-bold uppercase tracking-wider">Alertas</span>
-            </div>
-          </div>
-          <button className="flex items-center gap-2 text-primary font-black text-xs bg-primary/10 border border-primary/20 px-5 py-3 rounded-2xl hover:bg-primary/20 transition-colors uppercase tracking-widest">
-            <span className="material-symbols-outlined !text-lg">list_alt</span>
-            Ver Listado
-          </button>
+        )}
+
+        {/* Map Container */}
+        <div className="flex-1 relative">
+            {loading ? (
+                <div className="absolute inset-0 z-[2000] bg-background-dark/50 backdrop-blur-sm flex items-center justify-center">
+                    <span className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></span>
+                </div>
+            ) : (
+                <MapContainer 
+                    center={[-34.9011, -56.1645]} // Montevideo center
+                    zoom={13} 
+                    className="w-full h-full z-0"
+                    style={{ background: '#102216' }}
+                >
+                    <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    />
+                    
+                    {clientsWithLocation.map(client => (
+                        <Marker key={client.id} position={[client.latitude, client.longitude]}>
+                            <Popup className="custom-popup">
+                                <div className="p-2 min-w-[200px]">
+                                    <h4 className="font-black text-slate-900 text-lg mb-1">{client.name}</h4>
+                                    <p className="text-xs text-slate-600 mb-3">{client.address}</p>
+                                    <div className="flex flex-col gap-2">
+                                        <button 
+                                            onClick={onStartInspection}
+                                            className="w-full bg-primary text-background-dark font-black py-2 rounded-xl text-xs uppercase tracking-tight flex items-center justify-center gap-2"
+                                        >
+                                            <span className="material-symbols-outlined !text-sm">qr_code_scanner</span>
+                                            Nueva Inspección
+                                        </button>
+                                        <button 
+                                            onClick={() => {
+                                                setSelectedClientForLocation(client.id);
+                                                setIsSettingLocation(true);
+                                            }}
+                                            className="w-full bg-slate-100 text-slate-600 font-bold py-2 rounded-xl text-[10px] uppercase tracking-tight"
+                                        >
+                                            Cambiar Ubicación
+                                        </button>
+                                    </div>
+                                </div>
+                            </Popup>
+                        </Marker>
+                    ))}
+
+                    {isSettingLocation && (
+                        <LocationPicker onLocationPicked={handleLocationPicked} />
+                    )}
+                </MapContainer>
+            )}
+
+            {isSettingLocation && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none">
+                    <div className="bg-primary text-background-dark px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest shadow-2xl animate-bounce flex items-center gap-3 border-2 border-white/20">
+                        <span className="material-symbols-outlined !text-lg">location_on</span>
+                        Selecciona el punto en el mapa
+                    </div>
+                </div>
+            )}
         </div>
-      </section>
+      </div>
+
+      <style>{`
+        .leaflet-container {
+            width: 100%;
+            height: 100%;
+        }
+        .custom-popup .leaflet-popup-content-wrapper {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            overflow: hidden;
+        }
+        .custom-popup .leaflet-popup-content {
+            margin: 0;
+        }
+        .leaflet-popup-tip-container {
+            display: none;
+        }
+      `}</style>
     </div>
   );
 };

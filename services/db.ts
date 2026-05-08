@@ -335,7 +335,22 @@ export const db = {
     }));
   },
 
-  addClient: async (clientData: { name: string; address: string; contact_email: string; phone?: string; rut?: string }) => {
+  updateClientLocation: async (id: string, lat: number, lng: number): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .update({ latitude: lat, longitude: lng } as any)
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error updating client location:', error);
+      return false;
+    }
+  },
+
+  addClient: async (clientData: { name: string; address: string; contact_email: string; phone?: string; rut?: string; company_id?: string }) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
