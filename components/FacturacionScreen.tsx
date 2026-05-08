@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../services/db';
 import { supabase } from '../services/supabase';
 import { Client, UserProfile } from '../types';
+import { generateInvoicePDF } from '../utils/pdfGenerator';
 
 interface Invoice {
     id: string;
@@ -11,10 +12,10 @@ interface Invoice {
     invoice_date: string;
     due_date: string;
     items: any[];
-    clients?: { name: string };
+    equipment_count?: number;
+    clients?: { name: string, address?: string, rut?: string };
 }
 
-import { Client, UserProfile } from '../types';
 
 interface FacturacionScreenProps {
     companyId: string;
@@ -29,6 +30,7 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
     const [newInvoice, setNewInvoice] = useState({
         client_id: '',
         amount: 0,
+        equipment_count: 0,
         due_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         items: [{ description: 'Mantenimiento de extintores', qty: 1, price: 0 }]
     });
@@ -102,6 +104,7 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
         const res = await db.createInvoice({
             client_id: targetClientId,
             amount: newInvoice.amount,
+            equipment_count: newInvoice.equipment_count,
             status: 'pending',
             due_date: newInvoice.due_date,
             items: newInvoice.items
@@ -182,6 +185,7 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                 <tr className="text-[10px] uppercase tracking-widest text-slate-500 border-b border-white/5">
                                     <th className="p-6">Factura ID</th>
                                     <th className="p-6">Cliente</th>
+                                    <th className="p-6">Equipos</th>
                                     <th className="p-6">Fecha / Vto</th>
                                     <th className="p-6">Monto</th>
                                     <th className="p-6 text-center">Estado</th>
@@ -198,6 +202,9 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                             <p className="text-sm font-bold text-white">{invoice.clients?.name}</p>
                                         </td>
                                         <td className="p-6">
+                                            <p className="text-sm font-bold text-slate-300">{invoice.equipment_count || 0}</p>
+                                        </td>
+                                        <td className="p-6">
                                             <p className="text-xs text-slate-300 font-medium">{invoice.invoice_date}</p>
                                             <p className="text-[10px] text-slate-500">Vto: {invoice.due_date}</p>
                                         </td>
@@ -210,6 +217,13 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                             </span>
                                         </td>
                                         <td className="p-6 text-right space-x-2">
+                                            <button 
+                                                onClick={() => generateInvoicePDF(invoice)}
+                                                className="size-8 rounded-lg bg-white/5 text-primary border border-white/10 hover:bg-primary/20 transition-all"
+                                                title="Descargar PDF"
+                                            >
+                                                <span className="material-symbols-outlined !text-lg">picture_as_pdf</span>
+                                            </button>
                                             {invoice.status === 'pending' && (
                                                 <button
                                                     onClick={() => handleStatusChange(invoice.id, 'paid')}
@@ -268,6 +282,18 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                             placeholder="0.00"
                                         />
                                     </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Cant. Equipos</label>
+                                        <input
+                                            type="number"
+                                            value={newInvoice.equipment_count}
+                                            onChange={(e) => setNewInvoice({ ...newInvoice, equipment_count: Number(e.target.value) })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
                                     <div>
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Vencimiento</label>
                                         <input
