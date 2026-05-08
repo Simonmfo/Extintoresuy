@@ -710,6 +710,38 @@ export const db = {
     }
   },
 
+  updateInvoice: async (id: string, updates: any) => {
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+      await db.logActivity('update', 'invoice', id, `Factura editada`, updates);
+      return true;
+    } catch (error) {
+      console.error('Error updating invoice:', error);
+      return false;
+    }
+  },
+
+  deleteInvoice: async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      await db.logActivity('delete', 'invoice', id, `Factura eliminada`);
+      return true;
+    } catch (error) {
+      console.error('Error deleting invoice:', error);
+      return false;
+    }
+  },
+
   updateInvoiceStatus: async (id: string, status: string) => {
     try {
       const { error } = await supabase

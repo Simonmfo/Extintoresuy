@@ -27,6 +27,7 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
     const [clients, setClients] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
     const [newInvoice, setNewInvoice] = useState({
         client_id: '',
         amount: 0,
@@ -122,6 +123,22 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
             }
         }
 
+        if (editingInvoiceId) {
+            const ok = await db.updateInvoice(editingInvoiceId, {
+                client_id: targetClientId,
+                amount: newInvoice.amount,
+                equipment_count: newInvoice.equipment_count,
+                due_date: newInvoice.due_date,
+                items: newInvoice.items
+            });
+            if (ok) {
+                setShowCreateModal(false);
+                setEditingInvoiceId(null);
+                loadData();
+            }
+            return;
+        }
+
         const res = await db.createInvoice({
             client_id: targetClientId,
             amount: newInvoice.amount,
@@ -135,6 +152,28 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
             setShowCreateModal(false);
             loadData();
         }
+    };
+
+    const handleDeleteInvoice = async (id: string) => {
+        if (!window.confirm('¿Estás seguro de eliminar esta factura? Esta acción no se puede deshacer.')) return;
+        const ok = await db.deleteInvoice(id);
+        if (ok) loadData();
+    };
+
+    const openEditModal = (invoice: Invoice) => {
+        setEditingInvoiceId(invoice.id);
+        const firstItem = invoice.items?.[0] || {};
+        setNewInvoice({
+            client_id: invoice.client_id,
+            amount: Number(invoice.amount),
+            equipment_count: invoice.equipment_count || 0,
+            unit_price: firstItem.price || (invoice.equipment_count ? Number(invoice.amount) / invoice.equipment_count : 0),
+            description: firstItem.description || '',
+            due_date: invoice.due_date,
+            items: invoice.items
+        });
+        setIsManualDescription(true);
+        setShowCreateModal(true);
     };
 
     const handleStatusChange = async (id: string, newStatus: string) => {
@@ -254,8 +293,19 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                                     <span className="material-symbols-outlined !text-lg">check</span>
                                                 </button>
                                             )}
-                                            <button className="size-8 rounded-lg bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10 transition-all">
-                                                <span className="material-symbols-outlined !text-lg">visibility</span>
+                                            <button 
+                                                onClick={() => openEditModal(invoice)}
+                                                className="size-8 rounded-lg bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10 transition-all"
+                                                title="Editar"
+                                            >
+                                                <span className="material-symbols-outlined !text-lg">edit</span>
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDeleteInvoice(invoice.id)}
+                                                className="size-8 rounded-lg bg-white/5 text-red-500 border border-white/10 hover:bg-red-500/10 transition-all"
+                                                title="Eliminar"
+                                            >
+                                                <span className="material-symbols-outlined !text-lg">delete</span>
                                             </button>
                                         </td>
                                     </tr>
@@ -272,8 +322,8 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                     <div className="bg-[#1a1c1e] border border-white/10 rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl">
                         <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                             <h3 className="text-xl font-black text-white flex items-center gap-3">
-                                <span className="material-symbols-outlined text-primary">add_card</span>
-                                Generar Factura
+                                <span className="material-symbols-outlined text-primary">{editingInvoiceId ? 'edit_document' : 'add_card'}</span>
+                                {editingInvoiceId ? 'Editar Factura' : 'Generar Factura'}
                             </h3>
                             <button onClick={() => setShowCreateModal(false)} className="text-slate-500 hover:text-white">
                                 <span className="material-symbols-outlined">close</span>
@@ -348,7 +398,7 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                         </div>
                         <div className="p-6 bg-white/[0.02] flex gap-4">
                             <button
-                                onClick={() => setShowCreateModal(false)}
+                                onClick={() => { setShowCreateModal(false); setEditingInvoiceId(null); }}
                                 className="flex-1 bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-2xl transition-all"
                             >
                                 Cancelar
@@ -357,7 +407,7 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                 onClick={handleCreateInvoice}
                                 className="flex-1 bg-primary text-background-dark font-black py-4 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
                             >
-                                Crear Factura
+                                {editingInvoiceId ? 'Guardar Cambios' : 'Crear Factura'}
                             </button>
                         </div>
                     </div>
