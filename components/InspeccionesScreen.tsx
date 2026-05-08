@@ -129,6 +129,7 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                             Historial
                         </button>
                     </div>
+                </div>
             </div>
 
             {loading ? (
