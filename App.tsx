@@ -39,10 +39,18 @@ const App: FC = () => {
   const [pendingInspections, setPendingInspections] = useState<InspectionRecord[]>([]);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
 
-  const handleScan = (decodedText: string) => {
+  const handleScan = async (decodedText: string) => {
     let assetId = decodedText;
     if (decodedText.includes('asset/')) {
       assetId = decodedText.split('asset/')[1];
+    }
+
+    // Check if asset belongs to technician's company
+    const asset = await db.getAsset(assetId);
+    if (!asset || asset.companyId !== profile?.company_id) {
+      alert('Este equipo no pertenece a tu empresa o no existe.');
+      setIsScannerOpen(false);
+      return;
     }
 
     // Prevent duplicate scans in the same session
