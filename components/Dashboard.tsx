@@ -1,29 +1,53 @@
-
-import { type FC } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import { Screen } from '../types';
 import ComplianceGauge from './ComplianceGauge';
+import { db } from '../services/db';
 
 interface DashboardProps {
   onStartInspection: () => void;
   onNavigate: (screen: Screen) => void;
+  pendingCount: number;
+  companyId: string;
 }
 
-const Dashboard: FC<DashboardProps> = ({ onStartInspection, onNavigate }) => {
+const Dashboard: FC<DashboardProps> = ({ onStartInspection, onNavigate, pendingCount, companyId }) => {
+  const [stats, setStats] = useState({ total: 0, expired: 0, pending: 0, compliance: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadStats();
+  }, [companyId]);
+
+  const loadStats = async () => {
+    setLoading(true);
+    const data = await db.getStats(companyId);
+    setStats(data);
+    setLoading(false);
+  };
+
   return (
     <div className="p-4 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
       {/* Risk Metric Section */}
       <section className="bg-white/5 rounded-xl p-6 border border-white/10">
         <div className="flex flex-col items-center">
-          <h2 className="text-sm font-medium text-slate-400 mb-6">Riesgo Punitivo (Dec. 372/023)</h2>
+          <h2 className="text-sm font-medium text-slate-400 mb-6 font-black uppercase tracking-widest">Cumplimiento Global</h2>
 
-          <ComplianceGauge percentage={82} />
+          {loading ? (
+            <div className="h-32 flex items-center justify-center">
+              <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+            </div>
+          ) : (
+            <ComplianceGauge percentage={stats.compliance} />
+          )}
 
           <div className="flex justify-between w-full mt-6 items-center">
             <div className="flex items-center gap-2">
-              <div className="size-2 rounded-full bg-primary animate-pulse"></div>
-              <span className="text-xs font-medium text-primary">Estado: Bajo Riesgo</span>
+              <div className={`size-2 rounded-full animate-pulse ${stats.compliance > 80 ? 'bg-primary' : stats.compliance > 50 ? 'bg-orange-500' : 'bg-red-500'}`}></div>
+              <span className={`text-xs font-black uppercase tracking-tight ${stats.compliance > 80 ? 'text-primary' : stats.compliance > 50 ? 'text-orange-500' : 'text-red-500'}`}>
+                {stats.compliance > 80 ? 'Estado: Bajo Riesgo' : stats.compliance > 50 ? 'Estado: Riesgo Medio' : 'Estado: Riesgo Crítico'}
+              </span>
             </div>
-            <span className="text-xs text-slate-400">Próxima auditoría: 12 Oct</span>
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{stats.total} Equipos Totales</span>
           </div>
         </div>
       </section>
@@ -63,12 +87,12 @@ const Dashboard: FC<DashboardProps> = ({ onStartInspection, onNavigate }) => {
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-white/5 border border-white/10 p-6 rounded-xl flex flex-col justify-center h-full">
             <span className="material-symbols-outlined text-orange-500 mb-2">event_busy</span>
-            <span className="block text-3xl lg:text-4xl font-black mt-2">04</span>
+            <span className="block text-3xl lg:text-4xl font-black mt-2">{String(stats.expired).padStart(2, '0')}</span>
             <p className="text-xs font-bold text-slate-400 uppercase leading-tight mt-1">Vencimientos<br />(30 días)</p>
           </div>
           <div className="bg-white/5 border border-white/10 p-6 rounded-xl flex flex-col justify-center h-full">
             <span className="material-symbols-outlined text-primary mb-2 !text-3xl">inventory_2</span>
-            <span className="block text-3xl lg:text-4xl font-black mt-2">12</span>
+            <span className="block text-3xl lg:text-4xl font-black mt-2">{String(stats.pending).padStart(2, '0')}</span>
             <p className="text-xs font-bold text-slate-400 uppercase leading-tight mt-1">Equipos<br />Pendientes</p>
           </div>
         </div>
@@ -98,6 +122,19 @@ const Dashboard: FC<DashboardProps> = ({ onStartInspection, onNavigate }) => {
           ))}
         </div>
       </div>
+
+      {/* Floating Finalize Session Button */}
+      {pendingCount > 0 && (
+        <div className="fixed bottom-24 right-4 left-4 lg:left-auto lg:right-8 z-40 animate-bounce-slow">
+          <button
+            onClick={() => onNavigate('validacion')}
+            className="w-full lg:w-auto bg-primary text-black px-8 py-5 rounded-2xl font-black shadow-2xl flex items-center justify-center gap-3 active:scale-95 transition-all"
+          >
+            <span className="material-symbols-outlined !text-2xl fill-1">draw</span>
+            <span>Finalizar Visita ({pendingCount})</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

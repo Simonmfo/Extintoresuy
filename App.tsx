@@ -2,7 +2,7 @@
 import { useState, useEffect, type FC } from 'react';
 import { supabase } from './services/supabase';
 import { db } from './services/db';
-import { Screen, UserProfile } from './types';
+import { Screen, UserProfile, InspectionRecord } from './types';
 import Dashboard from './components/Dashboard';
 import AdminDashboard from './components/AdminDashboard';
 import UsuariosScreen from './components/UsuariosScreen';
@@ -16,6 +16,7 @@ import InspeccionesScreen from './components/InspeccionesScreen';
 import FabricasScreen from './components/FabricasScreen';
 import MapScreen from './components/MapScreen';
 import InspectionScreen from './components/InspectionScreen';
+import ValidationScreen from './components/ValidationScreen';
 import BottomNav from './components/BottomNav';
 import Header from './components/Header';
 import LandingPage from './components/LandingPage';
@@ -34,6 +35,7 @@ const App: FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [pendingInspections, setPendingInspections] = useState<InspectionRecord[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -114,13 +116,46 @@ const App: FC = () => {
     setCurrentScreen('inspeccion');
   };
 
+  const handleSaveInspection = (record: InspectionRecord) => {
+    setPendingInspections(prev => [...prev, record]);
+    setCurrentScreen('home');
+    setSelectedAssetId(null);
+  };
+
+  const handleFinalizeSession = async (signerData: { name: string, document: string, signatureUrl: string }) => {
+    setIsLoading(true);
+    try {
+      // Update all pending inspections with the signature data
+      const finalInspections = pendingInspections.map(insp => ({
+        ...insp,
+        signerName: signerData.name,
+        signerDocument: signerData.document,
+        signatureUrl: signerData.signatureUrl
+      }));
+
+      // Send all to DB
+      for (const record of finalInspections) {
+        await db.addInspection(record);
+      }
+
+      setPendingInspections([]);
+      setCurrentScreen('home');
+      alert('Todas las inspecciones han sido guardadas y firmadas.');
+    } catch (error) {
+      console.error('Error finalizando sesión:', error);
+      alert('Error al guardar la sesión.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const renderScreen = () => {
     switch (currentScreen) {
       case 'home':
         return (
           <>
             <div className="hidden lg:block h-full"><AdminDashboard onNavigate={handleNavigate} companyId={companyId} /></div>
-            <div className="block lg:hidden h-full"><Dashboard onStartInspection={() => handleStartInspection('#UY-9921-24')} onNavigate={handleNavigate} /></div>
+            <div className="block lg:hidden h-full"><Dashboard onStartInspection={() => handleStartInspection('#UY-9921-24')} onNavigate={handleNavigate} pendingCount={pendingInspections.length} /></div>
           </>
         );
       case 'usuarios':
@@ -144,7 +179,9 @@ const App: FC = () => {
       case 'mapa':
         return <MapScreen onStartInspection={() => handleStartInspection('#UY-9921-24')} />;
       case 'inspeccion':
-        return <InspectionScreen onBack={() => setCurrentScreen('home')} assetId={selectedAssetId || ''} />;
+        return <InspectionScreen onBack={() => setCurrentScreen('home')} onSave={handleSaveInspection} assetId={selectedAssetId || ''} />;
+      case 'validacion':
+        return <ValidationScreen onBack={() => setCurrentScreen('home')} onFinalize={handleFinalizeSession} inspectionCount={pendingInspections.length} />;
       default:
         return (
           <div className="flex flex-col items-center justify-center h-[70vh] text-slate-500">

@@ -25,14 +25,27 @@ class SupabaseStore {
 
     async save(options) {
         const sessionId = options.clientId || options.session;
-        const sessionPath = path.join(process.cwd(), `.wwebjs_auth/session-${sessionId}`);
-        if (!await fs.pathExists(sessionPath)) return;
+        // The library creates folders with "RemoteAuth-" prefix in recent versions
+        let sessionPath = path.join(process.cwd(), `.wwebjs_auth/RemoteAuth-${sessionId}`);
+        
+        if (!await fs.pathExists(sessionPath)) {
+            // Fallback to the other common pattern
+            sessionPath = path.join(process.cwd(), `.wwebjs_auth/session-${sessionId}`);
+        }
+
+        console.log(`💾 Intentando guardar sesión desde: ${sessionPath}`);
+        if (!await fs.pathExists(sessionPath)) {
+            console.error(`❌ No existe la carpeta de sesión en: ${sessionPath}`);
+            return;
+        }
 
         const zip = new JSZip();
         await this._addFolderToZip(zip, sessionPath, '');
         
-        const content = await zip.generateAsync({ type: 'base64' });
-
+        console.log(`💾 Comprimiendo sesión para subir a Supabase...`);
+        const content = await zip.generateAsync({ type: 'base64', compression: 'STORE' });
+        
+        console.log(`🚀 Subiendo ${Math.round(content.length / 1024)}KB a Supabase...`);
         const { error } = await this.supabase
             .from('bot_sessions')
             .upsert({
@@ -40,6 +53,12 @@ class SupabaseStore {
                 data: { zip: content },
                 updated_at: new Date().toISOString()
             });
+
+        if (error) {
+            console.error('❌ Error al guardar sesión en Supabase:', error);
+        } else {
+            console.log('✅ Sesión guardada exitosamente en Supabase.');
+        }
 
         if (!error) {
             console.log('✅ Sesión guardada en Supabase correctamente.');
@@ -60,11 +79,13 @@ class SupabaseStore {
             .single();
 
         if (error || !data) {
-            console.error('Error fetching session from Supabase:', error);
+            console.error('❌ Error al obtener sesión de Supabase:', error);
             return;
         }
 
-        const sessionPath = path.join(process.cwd(), `.wwebjs_auth/session-${sessionId}`);
+        let sessionPath = path.join(process.cwd(), `.wwebjs_auth/RemoteAuth-${sessionId}`);
+        // During extraction, we always use the new pattern but we can check if the other one exists
+        console.log(`📦 Extrayendo sesión en: ${sessionPath}`);
         await fs.ensureDir(sessionPath);
 
         const zip = await JSZip.loadAsync(data.data.zip, { base64: true });
@@ -96,16 +117,21 @@ class SupabaseStore {
     async _addFolderToZip(zip, folderPath, zipPath) {
         const files = await fs.readdir(folderPath);
         for (const file of files) {
-            const filePath = path.join(folderPath, file);
-            const relativeZipPath = path.join(zipPath, file);
-            const stats = await fs.stat(filePath);
+            try {
+                const filePath = path.join(folderPath, file);
+                const relativeZipPath = path.join(zipPath, file);
+                const stats = await fs.stat(filePath);
 
-            if (stats.isDirectory()) {
-                const folder = zip.folder(relativeZipPath);
-                await this._addFolderToZip(folder, filePath, '');
-            } else {
-                const content = await fs.readFile(filePath);
-                zip.file(relativeZipPath, content);
+                if (stats.isDirectory()) {
+                    const folder = zip.folder(relativeZipPath);
+                    await this._addFolderToZip(folder, filePath, '');
+                } else {
+                    const content = await fs.readFile(filePath);
+                    zip.file(relativeZipPath, content);
+                }
+            } catch (err) {
+                // Ignore files that disappear during zipping (like temporary lock files)
+                console.warn(`⚠️ Ignorando archivo en el zip: ${file} (posiblemente bloqueado o temporal)`);
             }
         }
     }

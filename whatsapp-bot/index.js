@@ -1,4 +1,4 @@
-const { Client, RemoteAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcodeTerminal = require('qrcode-terminal');
 const QRCode = require('qrcode');
 const { supabase } = require('./supabase');
@@ -20,17 +20,16 @@ app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
 });
 
-// Initialize WhatsApp Client with Supabase Remote Auth
+// Initialize WhatsApp Client with LOCAL Auth for testing
 const store = new SupabaseStore(supabase);
 const client = new Client({
-    authStrategy: new RemoteAuth({
-        store: store,
-        backupSyncIntervalMs: 300000, // Sync every 5 minutes
+    authStrategy: new LocalAuth({
         clientId: 'extintoresuy-session'
     }),
+    authTimeoutMs: 90000,
     puppeteer: {
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
-        headless: true,
+        headless: false, // Set to false to see what's happening
         handleSIGINT: false,
         args: [
             '--no-sandbox',
@@ -39,12 +38,12 @@ const client = new Client({
             '--disable-accelerated-2d-canvas',
             '--no-first-run',
             '--no-zygote',
-            '--single-process',
             '--disable-gpu',
             '--disable-canvas-aa',
             '--disable-2d-canvas-clip-aa',
             '--disable-gl-drawing-for-tests',
-            '--font-render-hinting=none'
+            '--font-render-hinting=none',
+            '--js-flags="--max-old-space-size=512"' // Limit memory
         ],
     }
 });
@@ -64,17 +63,17 @@ client.on('qr', async (qr) => {
         });
 });
 
+client.on('loading_screen', (percent, message) => {
+    console.log(`LOADING SCREEN: ${percent}% - ${message}`);
+});
+
+client.on('authenticated', () => {
+    console.log('AUTHENTICATED: Session is valid.');
+});
+
 client.on('ready', async () => {
     console.log('WhatsApp Client is ready!');
     
-    // Force save session to Supabase immediately
-    console.log('Forzando guardado de sesión en Supabase...');
-    try {
-        await store.save({ session: 'extintoresuy-session' });
-    } catch (saveErr) {
-        console.error('Error al forzar guardado:', saveErr);
-    }
-
     await supabase
         .from('bot_status')
         .upsert({ 
@@ -86,11 +85,11 @@ client.on('ready', async () => {
 });
 
 client.on('remote_session_saved', () => {
-    console.log('Session saved to Supabase!');
+    console.log('✅ Session successfully saved to Supabase!');
 });
 
 client.on('auth_failure', msg => {
-    console.error('AUTHENTICATION FAILURE', msg);
+    console.error('❌ AUTHENTICATION FAILURE:', msg);
 });
 
 // Realtime command listener

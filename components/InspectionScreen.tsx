@@ -1,18 +1,23 @@
 
-import { useState, useEffect, type FC } from 'react';
+import { useState, useEffect, useRef, type FC } from 'react';
 import { db } from '../services/db';
 import { offlineService } from '../services/offline';
+import SignatureCanvas from 'react-signature-canvas';
 import { InspectionAsset, InspectionRecord } from '../types';
 
 interface InspectionScreenProps {
   onBack: () => void;
+  onSave: (record: InspectionRecord) => void;
   assetId: string;
 }
 
-const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, assetId }) => {
+const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }) => {
   const [asset, setAsset] = useState<InspectionAsset | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [checklist, setChecklist] = useState({
     manometro: true,
     precinto: true,
@@ -36,9 +41,26 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, assetId }) => {
     setChecklist(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleFinish = async () => {
     setIsSubmitting(true);
     
+    let uploadedImageUrl = undefined;
+    if (imageFile) {
+      uploadedImageUrl = await db.uploadInspectionPhoto(imageFile) || undefined;
+    }
+
     // Determine overall status
     const allOk = Object.values(checklist).every(v => v);
     
@@ -48,27 +70,11 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, assetId }) => {
       date: new Date().toISOString(),
       inspector: 'Técnico Actual', // In a real app, get from auth profile
       status: allOk ? 'passed' : 'failed',
-      details: checklist
+      details: checklist,
+      imageUrl: uploadedImageUrl
     };
 
-    const isOnline = await offlineService.isOnline();
-
-    if (isOnline) {
-      const res = await db.addInspection(record);
-      if (res.success) {
-        alert('Inspección guardada y sincronizada correctamente.');
-        onBack();
-      } else {
-        alert('Error al sincronizar: ' + res.message + '. Se guardará localmente.');
-        await offlineService.saveToQueue(record);
-        onBack();
-      }
-    } else {
-      await offlineService.saveToQueue(record);
-      alert('Sin conexión. La inspección se guardó localmente y se sincronizará cuando recuperes internet.');
-      onBack();
-    }
-    
+    onSave(record);
     setIsSubmitting(false);
   };
 
@@ -186,14 +192,38 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, assetId }) => {
           </div>
         </div>
 
-        {/* Evidence Button */}
         <div className="pt-6">
-          <button className="w-full h-20 bg-white/5 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center gap-2 text-slate-400 active:bg-white/10 transition-all">
-            <span className="material-symbols-outlined !text-3xl">photo_camera</span>
-            <span className="font-black text-[10px] uppercase tracking-widest">Tomar Foto de Evidencia</span>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleImageChange} 
+            accept="image/*" 
+            capture="environment" 
+            className="hidden" 
+          />
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full h-32 bg-white/5 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center gap-2 text-slate-400 active:bg-white/10 transition-all overflow-hidden relative"
+          >
+            {imagePreview ? (
+              <>
+                <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
+                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-1">
+                  <span className="material-symbols-outlined !text-2xl text-white">cached</span>
+                  <span className="text-[9px] text-white uppercase font-black">Cambiar Foto</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="material-symbols-outlined !text-3xl">photo_camera</span>
+                <span className="font-black text-[10px] uppercase tracking-widest">Tomar Foto de Evidencia</span>
+              </>
+            )}
           </button>
           <p className="text-center text-[9px] text-slate-600 mt-3 uppercase font-black tracking-[0.2em]">Requerido por normativa UNIT 549</p>
         </div>
+
+        {/* Signature and Signer Info Section - REMOVED, now in ValidationScreen */}
       </div>
 
       {/* Action Footer */}
@@ -204,8 +234,8 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, assetId }) => {
             disabled={isSubmitting}
             className={`w-full py-5 rounded-2xl bg-primary text-black font-black text-lg shadow-[0_15px_30px_rgba(19,236,91,0.3)] active:scale-[0.97] transition-all flex items-center justify-center gap-3 uppercase tracking-tighter ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <span className="material-symbols-outlined !text-2xl fill-1">draw</span>
-            {isSubmitting ? 'Sincronizando...' : 'Finalizar y Firmar'}
+            <span className="material-symbols-outlined !text-2xl fill-1">save</span>
+            {isSubmitting ? 'Procesando...' : 'Guardar y Continuar'}
           </button>
           <div className="w-32 h-1.5 bg-white/10 rounded-full mx-auto"></div>
         </div>
@@ -215,4 +245,3 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, assetId }) => {
 };
 
 export default InspectionScreen;
-

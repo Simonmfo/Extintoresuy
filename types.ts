@@ -1,5 +1,5 @@
 
-export type Screen = 'home' | 'equipos' | 'clientes' | 'mapa' | 'reportes' | 'ajustes' | 'inspeccion' | 'usuarios' | 'facturacion' | 'tecnicos' | 'inspecciones' | 'fabricas';
+export type Screen = 'home' | 'equipos' | 'clientes' | 'mapa' | 'reportes' | 'ajustes' | 'inspeccion' | 'usuarios' | 'facturacion' | 'tecnicos' | 'inspecciones' | 'fabricas' | 'validacion';
 
 export interface LocationItem {
   id: string;
@@ -66,4 +66,8 @@ export interface InspectionRecord {
   inspector: string;
   status: 'passed' | 'failed';
   details: any;
+  imageUrl?: string;
+  signatureUrl?: string;
+  signerName?: string;
+  signerDocument?: string;
 }

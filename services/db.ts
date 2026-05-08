@@ -479,7 +479,11 @@ export const db = {
         status: 'completed',
         result: record.status === 'passed' ? 'pass' : 'fail',
         notes: JSON.stringify(record.details),
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
+        image_url: record.imageUrl,
+        signature_url: record.signatureUrl,
+        signer_name: record.signerName,
+        signer_document: record.signerDocument
       });
 
       if (inspError) {
@@ -719,5 +723,36 @@ export const db = {
       console.error('Error updating invoice status:', error);
       return false;
     }
+  },
+
+  uploadFile: async (file: File | Blob, bucket: string, folder: string): Promise<string | null> => {
+    try {
+      const fileExt = file instanceof File ? file.name.split('.').pop() : 'png';
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const filePath = `${folder}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error(`Error uploading to ${bucket}:`, error);
+      return null;
+    }
+  },
+
+  uploadInspectionPhoto: async (file: File): Promise<string | null> => {
+    return db.uploadFile(file, 'inspection-photos', 'inspections');
+  },
+
+  uploadSignature: async (blob: Blob): Promise<string | null> => {
+    return db.uploadFile(blob, 'inspection-photos', 'signatures');
   }
 };
