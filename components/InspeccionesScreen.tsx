@@ -11,9 +11,11 @@ interface InspeccionesScreenProps {
     onStartInspection: (assetId?: string) => void;
     pendingInspections?: any[];
     onFinalize?: () => void;
+    onRemoveInspection?: (assetId: string) => void;
+    onCancelSession?: () => void;
 }
 
-const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile, onStartInspection, pendingInspections = [], onFinalize }) => {
+const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile, onStartInspection, pendingInspections = [], onFinalize, onRemoveInspection, onCancelSession }) => {
     const [inspections, setInspections] = useState<any[]>([]);
     const [assignedAssets, setAssignedAssets] = useState<InspectionAsset[]>([]);
     const [loading, setLoading] = useState(true);
@@ -99,8 +101,18 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                         className="bg-primary text-background-dark px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
                     >
                         <span className="material-symbols-outlined !text-lg">qr_code_scanner</span>
-                        Iniciar Inspección
+                        {pendingInspections.length > 0 ? 'Siguiente Inspección' : 'Iniciar Inspección'}
                     </button>
+
+                    {pendingInspections.length > 0 && (
+                        <button
+                            onClick={onCancelSession}
+                            className="bg-white/5 text-status-red border border-status-red/20 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-status-red/10 active:scale-95 transition-all"
+                        >
+                            <span className="material-symbols-outlined !text-lg">cancel</span>
+                            Cancelar
+                        </button>
+                    )}
 
                     <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 w-fit">
                         {pendingInspections.length > 0 && (
@@ -147,9 +159,17 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                                 <div className="size-12 rounded-2xl bg-status-yellow/10 flex items-center justify-center text-status-yellow border border-status-yellow/20">
                                     <span className="material-symbols-outlined !text-2xl">verified</span>
                                 </div>
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${insp.status === 'passed' ? 'bg-primary/20 text-primary' : 'bg-status-red/20 text-status-red'}`}>
-                                    {insp.status === 'passed' ? 'aprobado' : 'rechazado'}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${insp.status === 'passed' ? 'bg-primary/20 text-primary' : 'bg-status-red/20 text-status-red'}`}>
+                                        {insp.status === 'passed' ? 'aprobado' : 'rechazado'}
+                                    </span>
+                                    <button 
+                                        onClick={() => onRemoveInspection?.(insp.assetId)}
+                                        className="size-8 rounded-lg bg-status-red/10 text-status-red flex items-center justify-center hover:bg-status-red/20 transition-colors"
+                                    >
+                                        <span className="material-symbols-outlined !text-lg">delete</span>
+                                    </button>
+                                </div>
                             </div>
                             <h3 className="text-lg font-bold text-white mb-1">Equipo: {insp.assetId}</h3>
                             <p className="text-xs text-slate-500 font-mono mb-4">Inspeccionado hoy</p>

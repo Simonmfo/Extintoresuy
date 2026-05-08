@@ -142,6 +142,16 @@ const App: FC = () => {
     setSelectedAssetId(null);
   };
 
+  const handleRemovePendingInspection = (assetId: string) => {
+    setPendingInspections(prev => prev.filter(insp => insp.assetId !== assetId));
+  };
+
+  const handleCancelSession = () => {
+    if (confirm('¿Estás seguro de cancelar la inspección? Se perderán todos los equipos escaneados en esta sesión.')) {
+      setPendingInspections([]);
+    }
+  };
+
   const handleFinalizeSession = async (signerData: { name: string, document: string, signatureUrl: string }) => {
     setIsLoading(true);
     try {
@@ -216,6 +226,8 @@ const App: FC = () => {
             onStartInspection={() => setIsScannerOpen(true)} 
             pendingInspections={pendingInspections}
             onFinalize={() => setCurrentScreen('validacion')}
+            onRemoveInspection={handleRemovePendingInspection}
+            onCancelSession={handleCancelSession}
           />
         );
       case 'mapa':
