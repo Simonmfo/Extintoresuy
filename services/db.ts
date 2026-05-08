@@ -331,7 +331,7 @@ export const db = {
     const fabricas = await db.getFabricasMap();
     return data.map((client: any) => ({
       ...client,
-      creatorName: fabricas[client.company_id] || 'Administrador'
+      creatorName: client.company_id ? (fabricas[client.company_id] || 'Taller') : 'Administrador'
     }));
   },
 
