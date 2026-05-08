@@ -1,7 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { db } from '../services/db';
-import { Client } from '../types';
+import { supabase } from '../services/supabase';
+import { Client, UserProfile } from '../types';
 
 interface Invoice {
     id: string;
@@ -14,9 +14,16 @@ interface Invoice {
     clients?: { name: string };
 }
 
-const FacturacionScreen: React.FC = () => {
+import { Client, UserProfile } from '../types';
+
+interface FacturacionScreenProps {
+    companyId: string;
+    profile: UserProfile | null;
+}
+
+const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profile }) => {
     const [invoices, setInvoices] = useState<Invoice[]>([]);
-    const [clients, setClients] = useState<Client[]>([]);
+    const [clients, setClients] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newInvoice, setNewInvoice] = useState({
@@ -33,19 +40,67 @@ const FacturacionScreen: React.FC = () => {
     const loadData = async () => {
         setLoading(true);
         const [invData, clientData] = await Promise.all([
-            db.getInvoices(),
-            db.getClients()
+            db.getInvoices(companyId),
+            db.getClients(companyId)
         ]);
+
+        let finalEntities = [...clientData];
+        
+        // If admin, also fetch fabricas to allow invoicing them
+        if (profile?.role === 'admin') {
+            const fabricas = await db.getFabricasWithStats();
+            const fabricaEntities = fabricas.map(f => ({
+                id: f.id, // Warning: this is a profile ID, not a client ID.
+                name: `🏭 ${f.full_name || 'Taller'}`,
+                isFabrica: true
+            }));
+            finalEntities = [...fabricaEntities, ...finalEntities];
+        }
+
         setInvoices(invData);
-        setClients(clientData);
+        setClients(finalEntities);
         setLoading(false);
     };
 
     const handleCreateInvoice = async () => {
         if (!newInvoice.client_id || newInvoice.amount <= 0) return;
 
+        let targetClientId = newInvoice.client_id;
+
+        // If it's a fabrica (detected by the prefix or state)
+        const selectedEntity = clients.find(c => c.id === newInvoice.client_id);
+        if (selectedEntity?.isFabrica) {
+            // We need to ensure this fabrica exists in the 'clients' table to satisfy foreign keys
+            // Search for a client with the same name or a special marker
+            const cleanName = selectedEntity.name.replace('🏭 ', '');
+            const { data: existingClient } = await supabase
+                .from('clients')
+                .select('id')
+                .eq('name', cleanName)
+                .single();
+
+            if (existingClient) {
+                targetClientId = existingClient.id;
+            } else {
+                // Create a shadow client for this workshop
+                const newClient = await db.addClient({
+                    name: cleanName,
+                    address: 'Taller Interno',
+                    contact_email: '',
+                    phone: '',
+                    rut: ''
+                });
+                if (newClient) {
+                    targetClientId = newClient.id;
+                } else {
+                    alert('Error al vincular el taller como cliente.');
+                    return;
+                }
+            }
+        }
+
         const res = await db.createInvoice({
-            client_id: newInvoice.client_id,
+            client_id: targetClientId,
             amount: newInvoice.amount,
             status: 'pending',
             due_date: newInvoice.due_date,
