@@ -303,10 +303,10 @@ export const db = {
     // No-op for now
   },
 
-  getFabricasMap: async (): Promise<Record<string, string>> => {
-    const { data } = await supabase.from('profiles').select('id, full_name').eq('role', 'fabrica');
+  getProfilesMap: async (): Promise<Record<string, string>> => {
+    const { data } = await supabase.from('profiles').select('id, full_name');
     if (!data) return {};
-    return data.reduce((acc, curr) => ({ ...acc, [curr.id]: curr.full_name }), {});
+    return data.reduce((acc, curr) => ({ ...acc, [curr.id]: curr.full_name || 'Usuario' }), {});
   },
 
   getClients: async (companyId?: string): Promise<any[]> => {
@@ -328,10 +328,10 @@ export const db = {
       return [];
     }
 
-    const fabricas = await db.getFabricasMap();
+    const profiles = await db.getProfilesMap();
     return data.map((client: any) => ({
       ...client,
-      creatorName: client.company_id ? (fabricas[client.company_id] || 'Taller') : 'Administrador'
+      creatorName: profiles[client.company_id] || 'Administrador'
     }));
   },
 
