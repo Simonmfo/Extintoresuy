@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../services/db';
 import { supabase } from '../services/supabase';
 import { InspectionAsset, UserProfile } from '../types';
+import QRScannerModal from './QRScannerModal';
 
 interface InspeccionesScreenProps {
     onBack: () => void;
