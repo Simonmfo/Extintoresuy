@@ -239,7 +239,7 @@ const App: FC = () => {
       )}
 
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${currentScreen !== 'inspeccion' && currentScreen !== 'mapa' ? 'lg:pl-20' : ''}`}>
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${currentScreen !== 'inspeccion' ? 'lg:pl-20' : ''}`}>
         {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
           <div className="lg:hidden fixed top-0 left-0 right-0 z-50">
             <Header onMenuClick={() => setIsSidebarOpen(true)} />
@@ -259,7 +259,7 @@ const App: FC = () => {
         )}
 
         <main className="flex-1 w-full max-w-full overflow-x-hidden">
-          <div className={`min-h-full pb-20 lg:pb-8 ${currentScreen !== 'inspeccion' && currentScreen !== 'mapa' ? 'pt-16 lg:pt-0' : ''}`}>
+          <div className={`min-h-full ${currentScreen !== 'inspeccion' && currentScreen !== 'mapa' ? 'pt-16 lg:pt-0 pb-20 lg:pb-8' : ''}`}>
             {renderScreen()}
           </div>
         </main>

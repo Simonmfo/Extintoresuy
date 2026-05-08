@@ -35,6 +35,7 @@ const LocationPicker: FC<{ onLocationPicked: (lat: number, lng: number) => void 
 const MapScreen: FC<MapScreenProps> = ({ onStartInspection, companyId }) => {
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAllClients, setShowAllClients] = useState(false);
   const [selectedClientForLocation, setSelectedClientForLocation] = useState<string | null>(null);
   const [isSettingLocation, setIsSettingLocation] = useState(false);
 
@@ -63,27 +64,36 @@ const MapScreen: FC<MapScreenProps> = ({ onStartInspection, companyId }) => {
 
   const clientsWithLocation = clients.filter(c => c.latitude && c.longitude);
   const clientsWithoutLocation = clients.filter(c => !c.latitude || !c.longitude);
+  const displayedClients = showAllClients ? clients : clientsWithoutLocation;
 
   return (
-    <div className="relative h-[calc(100vh-80px)] overflow-hidden flex flex-col bg-[#102216]">
+    <div className="relative h-screen overflow-hidden flex flex-col bg-[#102216]">
       {/* Header */}
       <header className="bg-background-dark/95 backdrop-blur-md border-b border-white/10 px-6 py-4 z-[1000]">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-black text-white flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary">map</span>
-                Ubicación de Clientes
-            </h1>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                Geolocalización del Parque de Extintores
-            </p>
+          <div className="flex items-center gap-4">
+            <button 
+                onClick={() => window.location.reload()} // Quick way to go home if handleNavigate not passed
+                className="size-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all"
+            >
+                <span className="material-symbols-outlined text-white">arrow_back</span>
+            </button>
+            <div>
+                <h1 className="text-xl font-black text-white flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary">map</span>
+                    Ubicación de Clientes
+                </h1>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Geolocalización del Parque de Extintores
+                </p>
+            </div>
           </div>
           <div className="flex gap-2">
-              <div className="bg-primary/10 border border-primary/20 px-3 py-1 rounded-full text-primary text-[10px] font-black uppercase">
+              <div className="hidden sm:flex bg-primary/10 border border-primary/20 px-3 py-1 rounded-full text-primary text-[10px] font-black uppercase items-center">
                   {clientsWithLocation.length} Ubicados
               </div>
               {clientsWithoutLocation.length > 0 && (
-                <div className="bg-status-yellow/10 border border-status-yellow/20 px-3 py-1 rounded-full text-status-yellow text-[10px] font-black uppercase">
+                <div className="hidden sm:flex bg-status-yellow/10 border border-status-yellow/20 px-3 py-1 rounded-full text-status-yellow text-[10px] font-black uppercase items-center">
                     {clientsWithoutLocation.length} Sin Ubicación
                 </div>
               )}
@@ -92,15 +102,28 @@ const MapScreen: FC<MapScreenProps> = ({ onStartInspection, companyId }) => {
       </header>
 
       <div className="flex-1 flex flex-col lg:flex-row relative">
-        {/* Sidebar for clients without location */}
-        {clientsWithoutLocation.length > 0 && (
-            <div className="w-full lg:w-80 bg-background-dark/80 backdrop-blur-xl border-r border-white/10 overflow-y-auto p-4 absolute lg:relative z-[1000] bottom-0 lg:bottom-auto max-h-[40%] lg:max-h-full">
-                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined !text-sm">not_listed_location</span>
-                    Pendientes de Ubicar
+        {/* Sidebar for clients */}
+        <div className="w-full lg:w-80 bg-background-dark/80 backdrop-blur-xl border-r border-white/10 overflow-y-auto p-4 absolute lg:relative z-[1000] bottom-0 lg:bottom-auto max-h-[40%] lg:max-h-full">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <span className="material-symbols-outlined !text-sm">list_alt</span>
+                    {showAllClients ? 'Todos los Clientes' : 'Pendientes de Ubicar'}
                 </h3>
-                <div className="space-y-2">
-                    {clientsWithoutLocation.map(client => (
+                <button 
+                    onClick={() => setShowAllClients(!showAllClients)}
+                    className="text-[10px] font-black text-primary uppercase hover:underline"
+                >
+                    {showAllClients ? 'Ver Pendientes' : 'Ver Todos'}
+                </button>
+            </div>
+            <div className="space-y-2">
+                {displayedClients.length === 0 ? (
+                    <div className="text-center py-8">
+                        <span className="material-symbols-outlined text-slate-600 text-4xl mb-2">check_circle</span>
+                        <p className="text-slate-500 text-xs font-bold uppercase">Todo ubicado</p>
+                    </div>
+                ) : (
+                    displayedClients.map(client => (
                         <button
                             key={client.id}
                             onClick={() => {
@@ -113,8 +136,11 @@ const MapScreen: FC<MapScreenProps> = ({ onStartInspection, companyId }) => {
                                 : 'bg-white/5 border-white/10 hover:border-white/20'
                             }`}
                         >
-                            <p className="text-sm font-black text-white">{client.name}</p>
-                            <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold">{client.address || 'Sin dirección'}</p>
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm font-black text-white">{client.name}</p>
+                                {client.latitude && <span className="material-symbols-outlined text-primary !text-sm">location_on</span>}
+                            </div>
+                            <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold truncate">{client.address || 'Sin dirección'}</p>
                             {selectedClientForLocation === client.id && (
                                 <div className="mt-2 text-[10px] text-primary font-black uppercase flex items-center gap-1 animate-pulse">
                                     <span className="material-symbols-outlined !text-xs">touch_app</span>
@@ -122,10 +148,10 @@ const MapScreen: FC<MapScreenProps> = ({ onStartInspection, companyId }) => {
                                 </div>
                             )}
                         </button>
-                    ))}
-                </div>
+                    )
+                ))}
             </div>
-        )}
+        </div>
 
         {/* Map Container */}
         <div className="flex-1 relative">
