@@ -31,9 +31,26 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
         client_id: '',
         amount: 0,
         equipment_count: 0,
+        unit_price: 0,
         due_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        items: [{ description: 'Mantenimiento de extintores', qty: 1, price: 0 }]
+        items: [] as any[]
     });
+
+    // Auto-calculate amount and items when equipment_count or unit_price changes
+    useEffect(() => {
+        const total = newInvoice.equipment_count * newInvoice.unit_price;
+        if (total !== newInvoice.amount) {
+            setNewInvoice(prev => ({
+                ...prev,
+                amount: total,
+                items: [{
+                    description: `Mantenimiento de ${prev.equipment_count} extintores`,
+                    qty: prev.equipment_count,
+                    price: prev.unit_price
+                }]
+            }));
+        }
+    }, [newInvoice.equipment_count, newInvoice.unit_price]);
 
     useEffect(() => {
         loadData();
@@ -273,16 +290,6 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Monto Total</label>
-                                        <input
-                                            type="number"
-                                            value={newInvoice.amount}
-                                            onChange={(e) => setNewInvoice({ ...newInvoice, amount: Number(e.target.value) })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none"
-                                            placeholder="0.00"
-                                        />
-                                    </div>
-                                    <div>
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Cant. Equipos</label>
                                         <input
                                             type="number"
@@ -292,8 +299,24 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                             placeholder="0"
                                         />
                                     </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Valor Unitario ($)</label>
+                                        <input
+                                            type="number"
+                                            value={newInvoice.unit_price}
+                                            onChange={(e) => setNewInvoice({ ...newInvoice, unit_price: Number(e.target.value) })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none"
+                                            placeholder="0.00"
+                                        />
+                                    </div>
                                 </div>
-                                <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Total Calculado</label>
+                                        <div className="w-full bg-primary/10 border border-primary/20 rounded-2xl p-4 text-primary font-black text-xl">
+                                            $ {newInvoice.amount.toLocaleString()}
+                                        </div>
+                                    </div>
                                     <div>
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Vencimiento</label>
                                         <input
