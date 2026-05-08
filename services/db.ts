@@ -197,26 +197,22 @@ export const db = {
       const { data: fabricas } = await supabase.from('profiles').select('*').eq('role', 'fabrica');
       if (!fabricas) return [];
 
-      const startOfMonth = new Date();
-      startOfMonth.setDate(1);
-      startOfMonth.setHours(0, 0, 0, 0);
-
-      // Fetch all inspections of the current month
-      const { data: inspections } = await supabase
-        .from('inspections')
-        .select('inspector_id, profiles!inspector_id(company_id)')
-        .gte('date', startOfMonth.toISOString());
+      const { data: allClients } = await supabase.from('clients').select('id, company_id' as any);
+      const { data: allAssets } = await supabase.from('assets').select('id, client_id' as any);
 
       return fabricas.map(fabrica => {
-        const count = inspections?.filter(i => (i as any).profiles?.company_id === fabrica.id).length || 0;
+        const fabricaClients = allClients?.filter(c => (c as any).company_id === fabrica.id) || [];
+        const clientIds = fabricaClients.map(c => (c as any).id);
+        const assetsCount = allAssets?.filter(a => clientIds.includes((a as any).client_id)).length || 0;
+
         return {
           fabricaId: fabrica.id,
           fabricaName: fabrica.full_name || 'Taller',
-          count,
+          count: assetsCount,
           suggestedUnitPrice: 50, // Default price per managed equipment
-          total: count * 50
+          total: assetsCount * 50
         };
-      }).filter(s => s.count > 0); // Only suggest if there's activity
+      }).filter(s => s.count > 0); // Only suggest if they have assets
     } catch (error) {
       console.error('Error getting billing suggestions:', error);
       return [];
