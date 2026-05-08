@@ -6,10 +6,13 @@ import { Screen } from '../types';
 
 interface AdminDashboardProps {
     onNavigate: (screen: Screen) => void;
+    onStartInspection: () => void;
     companyId: string;
+    profile: UserProfile | null;
 }
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, companyId }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, onStartInspection, companyId, profile }) => {
+    const isTecnico = profile?.role === 'tecnico';
     const [stats, setStats] = useState({ totalAssets: 0, totalClients: 0, totalInvoices: 0, globalCompliance: 0 });
     const [recentLogs, setRecentLogs] = useState<any[]>([]);
 
@@ -48,11 +51,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, companyId }
             {/* Admin Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-black text-white tracking-tight">Panel Administrativo</h1>
-                    <p className="text-slate-500 font-medium">Control total de la infraestructura ExtintoresUY</p>
+                    <h1 className="text-3xl font-black text-white tracking-tight">
+                        {isTecnico ? 'Panel Técnico' : 'Panel Administrativo'}
+                    </h1>
+                    <p className="text-slate-500 font-medium">
+                        {isTecnico ? 'Gestión y control de mantenimiento de campo' : 'Control total de la infraestructura ExtintoresUY'}
+                    </p>
                 </div>
-                <div className="flex gap-2">
-                    <div className="bg-primary/10 border border-primary/20 px-4 py-2 rounded-2xl">
+                <div className="flex gap-3">
+                    {isTecnico && (
+                        <button
+                            onClick={onStartInspection}
+                            className="bg-primary text-background-dark px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                        >
+                            <span className="material-symbols-outlined !text-xl">qr_code_scanner</span>
+                            Iniciar Inspección
+                        </button>
+                    )}
+                    <div className="bg-primary/10 border border-primary/20 px-4 py-2 rounded-2xl hidden sm:block">
                         <span className="text-[10px] font-black text-primary uppercase tracking-widest block">Sistema</span>
                         <span className="text-sm font-bold text-white">Online / Estable</span>
                     </div>

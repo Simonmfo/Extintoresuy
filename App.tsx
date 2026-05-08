@@ -165,8 +165,22 @@ const App: FC = () => {
       case 'home':
         return (
           <>
-            <div className="hidden lg:block h-full"><AdminDashboard onNavigate={handleNavigate} companyId={companyId} /></div>
-            <div className="block lg:hidden h-full"><Dashboard onStartInspection={() => setIsScannerOpen(true)} onNavigate={handleNavigate} pendingCount={pendingInspections.length} companyId={companyId} /></div>
+            <div className="hidden lg:block h-full">
+              <AdminDashboard 
+                onNavigate={handleNavigate} 
+                onStartInspection={() => setIsScannerOpen(true)} 
+                companyId={companyId} 
+                profile={profile}
+              />
+            </div>
+            <div className="block lg:hidden h-full">
+              <Dashboard 
+                onStartInspection={() => setIsScannerOpen(true)} 
+                onNavigate={handleNavigate} 
+                pendingCount={pendingInspections.length} 
+                companyId={companyId} 
+              />
+            </div>
           </>
         );
       case 'usuarios':
