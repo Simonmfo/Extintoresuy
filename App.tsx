@@ -118,7 +118,7 @@ const App: FC = () => {
 
   const handleSaveInspection = (record: InspectionRecord) => {
     setPendingInspections(prev => [...prev, record]);
-    setCurrentScreen('home');
+    setCurrentScreen('inspecciones');
     setSelectedAssetId(null);
   };
 
@@ -175,7 +175,15 @@ const App: FC = () => {
       case 'fabricas':
         return <FabricasScreen />;
       case 'inspecciones':
-        return <InspeccionesScreen onBack={() => setCurrentScreen('home')} profile={profile} onStartInspection={(id) => handleStartInspection(id)} />;
+        return (
+          <InspeccionesScreen 
+            onBack={() => setCurrentScreen('home')} 
+            profile={profile} 
+            onStartInspection={(id) => handleStartInspection(id)} 
+            pendingCount={pendingInspections.length}
+            onFinalize={() => setCurrentScreen('validacion')}
+          />
+        );
       case 'mapa':
         return <MapScreen onStartInspection={() => handleStartInspection('#UY-9921-24')} companyId={companyId} />;
       case 'inspeccion':

@@ -9,9 +9,11 @@ interface InspeccionesScreenProps {
     onBack: () => void;
     profile: UserProfile | null;
     onStartInspection: (assetId: string) => void;
+    pendingCount?: number;
+    onFinalize?: () => void;
 }
 
-const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile, onStartInspection }) => {
+const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile, onStartInspection, pendingCount = 0, onFinalize }) => {
     const [inspections, setInspections] = useState<any[]>([]);
     const [assignedAssets, setAssignedAssets] = useState<InspectionAsset[]>([]);
     const [loading, setLoading] = useState(true);
@@ -95,7 +97,17 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                    {pendingCount > 0 && (
+                        <button
+                            onClick={onFinalize}
+                            className="bg-status-yellow text-background-dark px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-status-yellow/20 hover:scale-105 active:scale-95 transition-all"
+                        >
+                            <span className="material-symbols-outlined !text-lg">draw</span>
+                            Finalizar ({pendingCount})
+                        </button>
+                    )}
+
                     <button
                         onClick={() => setIsScannerOpen(true)}
                         className="bg-primary text-background-dark px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
