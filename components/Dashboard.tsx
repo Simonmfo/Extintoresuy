@@ -64,7 +64,7 @@ const Dashboard: FC<DashboardProps> = ({ onStartInspection, onNavigate, pendingC
               <span className="material-symbols-outlined !text-[32px] fill-1">qr_code_scanner</span>
             </div>
             <div className="text-left">
-              <span className="block text-lg font-bold">Nueva Inspección</span>
+              <span className="block text-lg font-bold">Iniciar Inspección</span>
               <span className="block text-xs font-medium opacity-80 uppercase tracking-tight">Escanear código QR del equipo</span>
             </div>
           </button>

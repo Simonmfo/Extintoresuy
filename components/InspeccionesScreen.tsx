@@ -19,8 +19,6 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'assigned' | 'history'>(profile?.role === 'tecnico' ? 'assigned' : 'history');
 
-    const [isScannerOpen, setIsScannerOpen] = useState(false);
-
     const loadData = async () => {
         setLoading(true);
         try {
@@ -56,23 +54,9 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
         loadData();
     }, [profile]);
 
-    const handleScan = (decodedText: string) => {
-        setIsScannerOpen(false);
-        // Extract ID if it's a URL
-        let assetId = decodedText;
-        if (decodedText.includes('asset/')) {
-            assetId = decodedText.split('asset/')[1];
-        }
-        onStartInspection(assetId);
-    };
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto p-4 lg:p-8">
-            <QRScannerModal 
-                isOpen={isScannerOpen} 
-                onClose={() => setIsScannerOpen(false)} 
-                onScan={handleScan} 
-            />
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
                 <div className="flex items-center gap-4">
@@ -108,12 +92,13 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                         </button>
                     )}
 
+
                     <button
-                        onClick={() => setIsScannerOpen(true)}
+                        onClick={() => onStartInspection()}
                         className="bg-primary text-background-dark px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
                     >
                         <span className="material-symbols-outlined !text-lg">qr_code_scanner</span>
-                        Escanear QR
+                        Iniciar Inspección
                     </button>
 
                     {profile?.role === 'tecnico' && (

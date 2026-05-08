@@ -25,6 +25,7 @@ import Sidebar from './components/Sidebar';
 import SupportScreen from './components/SupportScreen';
 import TermsScreen from './components/TermsScreen';
 import PrivacyScreen from './components/PrivacyScreen';
+import QRScannerModal from './components/QRScannerModal';
 import { offlineService } from './services/offline';
 
 const App: FC = () => {
@@ -36,6 +37,16 @@ const App: FC = () => {
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [pendingInspections, setPendingInspections] = useState<InspectionRecord[]>([]);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+
+  const handleScan = (decodedText: string) => {
+    setIsScannerOpen(false);
+    let assetId = decodedText;
+    if (decodedText.includes('asset/')) {
+        assetId = decodedText.split('asset/')[1];
+    }
+    handleStartInspection(assetId);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -155,7 +166,7 @@ const App: FC = () => {
         return (
           <>
             <div className="hidden lg:block h-full"><AdminDashboard onNavigate={handleNavigate} companyId={companyId} /></div>
-            <div className="block lg:hidden h-full"><Dashboard onStartInspection={() => handleStartInspection('#UY-9921-24')} onNavigate={handleNavigate} pendingCount={pendingInspections.length} /></div>
+            <div className="block lg:hidden h-full"><Dashboard onStartInspection={() => setIsScannerOpen(true)} onNavigate={handleNavigate} pendingCount={pendingInspections.length} companyId={companyId} /></div>
           </>
         );
       case 'usuarios':
@@ -179,7 +190,7 @@ const App: FC = () => {
           <InspeccionesScreen 
             onBack={() => setCurrentScreen('home')} 
             profile={profile} 
-            onStartInspection={(id) => handleStartInspection(id)} 
+            onStartInspection={() => setIsScannerOpen(true)} 
             pendingCount={pendingInspections.length}
             onFinalize={() => setCurrentScreen('validacion')}
           />
@@ -233,6 +244,11 @@ const App: FC = () => {
 
   return (
     <div className="min-h-screen bg-background-dark text-white font-sans flex flex-col lg:flex-row">
+      <QRScannerModal 
+        isOpen={isScannerOpen} 
+        onClose={() => setIsScannerOpen(false)} 
+        onScan={handleScan} 
+      />
       {/* Sidebar (Fixed/Hidden on mobile) */}
       {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
         <Sidebar 
