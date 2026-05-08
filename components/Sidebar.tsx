@@ -41,6 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, 
                     { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
                     { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
                     { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
+                    { id: 'mapa', label: 'Mapa', icon: 'location_on' },
                     { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
                 ]
                 : [
