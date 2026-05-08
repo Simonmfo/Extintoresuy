@@ -192,6 +192,37 @@ export const db = {
     });
   },
 
+  getBillingSuggestions: async (): Promise<any[]> => {
+    try {
+      const { data: fabricas } = await supabase.from('profiles').select('*').eq('role', 'fabrica');
+      if (!fabricas) return [];
+
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      // Fetch all inspections of the current month
+      const { data: inspections } = await supabase
+        .from('inspections')
+        .select('inspector_id, profiles!inspector_id(company_id)')
+        .gte('date', startOfMonth.toISOString());
+
+      return fabricas.map(fabrica => {
+        const count = inspections?.filter(i => (i as any).profiles?.company_id === fabrica.id).length || 0;
+        return {
+          fabricaId: fabrica.id,
+          fabricaName: fabrica.full_name || 'Taller',
+          count,
+          suggestedUnitPrice: 50, // Default price per managed equipment
+          total: count * 50
+        };
+      }).filter(s => s.count > 0); // Only suggest if there's activity
+    } catch (error) {
+      console.error('Error getting billing suggestions:', error);
+      return [];
+    }
+  },
+
   getFabricasWithStats: async (): Promise<any[]> => {
     const { data: fabricas, error: fabricasError } = await supabase
       .from('profiles')

@@ -39,6 +39,8 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
     });
 
     const [isManualDescription, setIsManualDescription] = useState(false);
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
     // Auto-calculate amount and items when equipment_count or unit_price changes
     useEffect(() => {
@@ -83,6 +85,11 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
 
         setInvoices(invData);
         setClients(finalEntities);
+
+        if (profile?.role === 'admin') {
+            const sugData = await db.getBillingSuggestions();
+            setSuggestions(sugData);
+        }
         setLoading(false);
     };
 
@@ -200,13 +207,24 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                     </h1>
                     <p className="text-slate-400 text-sm mt-1">Gestione las facturas de mantenimiento enviadas a los clientes.</p>
                 </div>
-                <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="bg-primary text-background-dark font-black px-6 py-3 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 uppercase text-xs tracking-wider"
-                >
-                    <span className="material-symbols-outlined !text-lg">add</span>
-                    Nueva Factura
-                </button>
+                <div className="flex gap-3">
+                    {profile?.role === 'admin' && suggestions.length > 0 && (
+                        <button
+                            onClick={() => setShowSuggestions(true)}
+                            className="bg-amber-500/10 text-amber-500 border border-amber-500/20 font-black px-6 py-3 rounded-2xl hover:bg-amber-500 hover:text-background-dark transition-all flex items-center gap-2 uppercase text-xs tracking-wider animate-pulse"
+                        >
+                            <span className="material-symbols-outlined !text-lg">notifications_active</span>
+                            Sugerencias ({suggestions.length})
+                        </button>
+                    )}
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="bg-primary text-background-dark font-black px-6 py-3 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 uppercase text-xs tracking-wider"
+                    >
+                        <span className="material-symbols-outlined !text-lg">add</span>
+                        Nueva Factura
+                    </button>
+                </div>
             </div>
 
             {/* Stats Summary */}
@@ -335,7 +353,16 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Cliente</label>
                                     <select
                                         value={newInvoice.client_id}
-                                        onChange={(e) => setNewInvoice({ ...newInvoice, client_id: e.target.value })}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            const sug = suggestions.find(s => s.fabricaId === val);
+                                            setNewInvoice({ 
+                                                ...newInvoice, 
+                                                client_id: val,
+                                                equipment_count: sug ? sug.count : newInvoice.equipment_count,
+                                                unit_price: sug ? sug.suggestedUnitPrice : newInvoice.unit_price
+                                            });
+                                        }}
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none"
                                     >
                                         <option value="">Seleccionar empresa...</option>
@@ -409,6 +436,63 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                             >
                                 {editingInvoiceId ? 'Guardar Cambios' : 'Crear Factura'}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showSuggestions && (
+                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+                    <div className="bg-[#1a1c1e] border border-white/10 rounded-[32px] w-full max-w-2xl overflow-hidden shadow-2xl">
+                        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                            <h3 className="text-xl font-black text-white flex items-center gap-3">
+                                <span className="material-symbols-outlined text-amber-500">notifications_active</span>
+                                Sugerencias de Facturación Mensual
+                            </h3>
+                            <button onClick={() => setShowSuggestions(false)} className="text-slate-500 hover:text-white">
+                                <span className="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <div className="p-8 max-h-[60vh] overflow-auto custom-scrollbar">
+                            <div className="grid gap-4">
+                                {suggestions.map(sug => (
+                                    <div key={sug.fabricaId} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex items-center justify-between hover:border-primary/30 transition-all">
+                                        <div>
+                                            <p className="text-sm font-black text-white">{sug.fabricaName}</p>
+                                            <p className="text-xs text-slate-400 mt-1">
+                                                <span className="text-primary font-bold">{sug.count} equipos</span> gestionados este mes
+                                            </p>
+                                        </div>
+                                        <div className="text-right flex items-center gap-6">
+                                            <div>
+                                                <p className="text-[10px] text-slate-500 uppercase font-bold">Total Sugerido</p>
+                                                <p className="text-lg font-black text-white">$ {sug.total.toLocaleString()}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    setNewInvoice({
+                                                        ...newInvoice,
+                                                        client_id: sug.fabricaId,
+                                                        equipment_count: sug.count,
+                                                        unit_price: sug.suggestedUnitPrice,
+                                                        description: `Gestión digital de ${sug.count} equipos`
+                                                    });
+                                                    setIsManualDescription(false);
+                                                    setShowSuggestions(false);
+                                                    setShowCreateModal(true);
+                                                }}
+                                                className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-background-dark font-black px-4 py-2 rounded-xl transition-all text-xs"
+                                            >
+                                                FACTURAR
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="p-6 bg-white/[0.02] text-center border-t border-white/5">
+                            <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">
+                                Estas sugerencias se basan en las inspecciones realizadas este mes
+                            </p>
                         </div>
                     </div>
                 </div>
