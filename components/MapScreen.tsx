@@ -39,9 +39,30 @@ const MapScreen: FC<MapScreenProps> = ({ onStartInspection, companyId }) => {
   const [selectedClientForLocation, setSelectedClientForLocation] = useState<string | null>(null);
   const [isSettingLocation, setIsSettingLocation] = useState(false);
 
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+
   useEffect(() => {
     loadClients();
+    getUserLocation();
   }, [companyId]);
+
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.error('Error getting user location:', error);
+          // Default to Montevideo if error
+          setUserLocation([-34.9011, -56.1645]);
+        }
+      );
+    } else {
+      // Default to Montevideo if not supported
+      setUserLocation([-34.9011, -56.1645]);
+    }
+  };
 
   const loadClients = async () => {
     if (!companyId) return;
@@ -155,14 +176,14 @@ const MapScreen: FC<MapScreenProps> = ({ onStartInspection, companyId }) => {
 
         {/* Map Container */}
         <div className="flex-1 relative">
-            {loading ? (
+            {loading || !userLocation ? (
                 <div className="absolute inset-0 z-[2000] bg-background-dark/50 backdrop-blur-sm flex items-center justify-center">
                     <span className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></span>
                 </div>
             ) : (
                 <MapContainer 
-                    center={[-34.9011, -56.1645]} // Montevideo center
-                    zoom={13} 
+                    center={userLocation} 
+                    zoom={15} 
                     className="w-full h-full z-0"
                     style={{ background: '#102216' }}
                 >
