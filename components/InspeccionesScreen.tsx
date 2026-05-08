@@ -8,16 +8,18 @@ import QRScannerModal from './QRScannerModal';
 interface InspeccionesScreenProps {
     onBack: () => void;
     profile: UserProfile | null;
-    onStartInspection: (assetId: string) => void;
-    pendingCount?: number;
+    onStartInspection: (assetId?: string) => void;
+    pendingInspections?: any[];
     onFinalize?: () => void;
 }
 
-const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile, onStartInspection, pendingCount = 0, onFinalize }) => {
+const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile, onStartInspection, pendingInspections = [], onFinalize }) => {
     const [inspections, setInspections] = useState<any[]>([]);
     const [assignedAssets, setAssignedAssets] = useState<InspectionAsset[]>([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'assigned' | 'history'>(profile?.role === 'tecnico' ? 'assigned' : 'history');
+    const [activeTab, setActiveTab] = useState<'assigned' | 'history' | 'session'>(
+        pendingInspections.length > 0 ? 'session' : (profile?.role === 'tecnico' ? 'assigned' : 'history')
+    );
 
     const loadData = async () => {
         setLoading(true);
@@ -82,16 +84,15 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    {pendingCount > 0 && (
+                    {pendingInspections.length > 0 && (
                         <button
                             onClick={onFinalize}
                             className="bg-status-yellow text-background-dark px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-status-yellow/20 hover:scale-105 active:scale-95 transition-all"
                         >
                             <span className="material-symbols-outlined !text-lg">draw</span>
-                            Finalizar ({pendingCount})
+                            Finalizar ({pendingInspections.length})
                         </button>
                     )}
-
 
                     <button
                         onClick={() => onStartInspection()}
@@ -101,8 +102,17 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                         Iniciar Inspección
                     </button>
 
-                    {profile?.role === 'tecnico' && (
-                        <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 w-fit">
+                    <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 w-fit">
+                        {pendingInspections.length > 0 && (
+                            <button
+                                onClick={() => setActiveTab('session')}
+                                className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'session' ? 'bg-status-yellow text-background-dark shadow-lg shadow-status-yellow/20' : 'text-slate-400 hover:text-white'
+                                    }`}
+                            >
+                                Sesión ({pendingInspections.length})
+                            </button>
+                        )}
+                        {profile?.role === 'tecnico' && (
                             <button
                                 onClick={() => setActiveTab('assigned')}
                                 className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'assigned' ? 'bg-primary text-background-dark shadow-lg shadow-primary/20' : 'text-slate-400 hover:text-white'
@@ -110,21 +120,45 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                             >
                                 Mis Equipos
                             </button>
-                            <button
-                                onClick={() => setActiveTab('history')}
-                                className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-primary text-background-dark shadow-lg shadow-primary/20' : 'text-slate-400 hover:text-white'
-                                    }`}
-                            >
-                                Historial
-                            </button>
-                        </div>
-                    )}
-                </div>
+                        )}
+                        <button
+                            onClick={() => setActiveTab('history')}
+                            className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-primary text-background-dark shadow-lg shadow-primary/20' : 'text-slate-400 hover:text-white'
+                                }`}
+                        >
+                            Historial
+                        </button>
+                    </div>
             </div>
 
             {loading ? (
                 <div className="flex justify-center py-20">
                     <span className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></span>
+                </div>
+            ) : activeTab === 'session' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {pendingInspections.map((insp) => (
+                        <div
+                            key={insp.id}
+                            className="bg-white/5 border border-white/10 rounded-3xl p-6 border-l-4 border-l-status-yellow"
+                        >
+                            <div className="flex items-start justify-between mb-4">
+                                <div className="size-12 rounded-2xl bg-status-yellow/10 flex items-center justify-center text-status-yellow border border-status-yellow/20">
+                                    <span className="material-symbols-outlined !text-2xl">verified</span>
+                                </div>
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${insp.status === 'passed' ? 'bg-primary/20 text-primary' : 'bg-status-red/20 text-status-red'}`}>
+                                    {insp.status === 'passed' ? 'aprobado' : 'rechazado'}
+                                </span>
+                            </div>
+                            <h3 className="text-lg font-bold text-white mb-1">Equipo: {insp.assetId}</h3>
+                            <p className="text-xs text-slate-500 font-mono mb-4">Inspeccionado hoy</p>
+                            
+                            <div className="flex items-center gap-2 text-xs text-slate-400">
+                                <span className="material-symbols-outlined !text-sm">schedule</span>
+                                <span>{new Date(insp.date).toLocaleTimeString()}</span>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             ) : activeTab === 'assigned' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -191,7 +191,7 @@ const App: FC = () => {
             onBack={() => setCurrentScreen('home')} 
             profile={profile} 
             onStartInspection={() => setIsScannerOpen(true)} 
-            pendingCount={pendingInspections.length}
+            pendingInspections={pendingInspections}
             onFinalize={() => setCurrentScreen('validacion')}
           />
         );
