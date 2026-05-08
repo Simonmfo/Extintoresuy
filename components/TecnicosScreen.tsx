@@ -16,7 +16,7 @@ const TecnicosScreen: React.FC<TecnicosScreenProps> = ({ companyId, readOnly = f
 
     useEffect(() => {
         loadTechnicians();
-    }, []);
+    }, [companyId]);
 
     const loadTechnicians = async () => {
         if (!companyId) return;

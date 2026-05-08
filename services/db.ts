@@ -179,7 +179,7 @@ export const db = {
     }
 
     // Map counts to profiles
-    const fabricas = await db.getFabricasMap();
+    const profilesMap = await db.getProfilesMap();
     return profiles.map(profile => {
       const performedCount = performedInspections?.filter(i => i.inspector_id === profile.id).length || 0;
       const pendingCount = (pendingAssets as any[])?.filter(a => a.assigned_technician_id === profile.id).length || 0;
@@ -187,7 +187,7 @@ export const db = {
         ...profile, 
         performedCount, 
         pendingCount,
-        creatorName: fabricas[profile.company_id] || 'Administrador'
+        creatorName: profilesMap[profile.company_id] || 'Administrador'
       };
     });
   },
