@@ -39,6 +39,15 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        /* Hide number input spinners */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body class="font-sans antialiased">

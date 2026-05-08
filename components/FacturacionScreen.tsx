@@ -387,9 +387,10 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Cant. Equipos</label>
                                         <input
                                             type="number"
+                                            inputMode="numeric"
                                             value={newInvoice.equipment_count}
                                             onChange={(e) => setNewInvoice({ ...newInvoice, equipment_count: Number(e.target.value) })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none"
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none appearance-none"
                                             placeholder="0"
                                         />
                                     </div>
@@ -397,9 +398,11 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Valor Unitario ($)</label>
                                         <input
                                             type="number"
+                                            inputMode="decimal"
+                                            step="0.01"
                                             value={newInvoice.unit_price}
                                             onChange={(e) => setNewInvoice({ ...newInvoice, unit_price: Number(e.target.value) })}
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none"
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none appearance-none"
                                             placeholder="0.00"
                                         />
                                     </div>
