@@ -32,25 +32,29 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
         amount: 0,
         equipment_count: 0,
         unit_price: 0,
+        description: '',
         due_date: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         items: [] as any[]
     });
 
+    const [isManualDescription, setIsManualDescription] = useState(false);
+
     // Auto-calculate amount and items when equipment_count or unit_price changes
     useEffect(() => {
         const total = newInvoice.equipment_count * newInvoice.unit_price;
-        if (total !== newInvoice.amount) {
-            setNewInvoice(prev => ({
-                ...prev,
-                amount: total,
-                items: [{
-                    description: `Mantenimiento de ${prev.equipment_count} extintores`,
-                    qty: prev.equipment_count,
-                    price: prev.unit_price
-                }]
-            }));
-        }
-    }, [newInvoice.equipment_count, newInvoice.unit_price]);
+        const defaultDesc = `Gestión digital de ${newInvoice.equipment_count} equipos`;
+        
+        setNewInvoice(prev => ({
+            ...prev,
+            amount: total,
+            description: isManualDescription ? prev.description : defaultDesc,
+            items: [{
+                description: isManualDescription ? prev.description : defaultDesc,
+                qty: prev.equipment_count,
+                price: prev.unit_price
+            }]
+        }));
+    }, [newInvoice.equipment_count, newInvoice.unit_price, newInvoice.description, isManualDescription]);
 
     useEffect(() => {
         loadData();
@@ -287,6 +291,19 @@ const FacturacionScreen: React.FC<FacturacionScreenProps> = ({ companyId, profil
                                         <option value="">Seleccionar empresa...</option>
                                         {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                     </select>
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Descripción del Servicio</label>
+                                    <input
+                                        type="text"
+                                        value={newInvoice.description}
+                                        onChange={(e) => {
+                                            setIsManualDescription(true);
+                                            setNewInvoice({ ...newInvoice, description: e.target.value });
+                                        }}
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none"
+                                        placeholder="Ej: Gestión digital de equipos"
+                                    />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
