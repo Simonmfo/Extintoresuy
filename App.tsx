@@ -40,11 +40,20 @@ const App: FC = () => {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   const handleScan = (decodedText: string) => {
-    setIsScannerOpen(false);
     let assetId = decodedText;
     if (decodedText.includes('asset/')) {
-        assetId = decodedText.split('asset/')[1];
+      assetId = decodedText.split('asset/')[1];
     }
+
+    // Prevent duplicate scans in the same session
+    const alreadyInspected = pendingInspections.some(insp => insp.assetId === assetId);
+    if (alreadyInspected) {
+      alert('Este equipo ya fue inspeccionado en esta sesión.');
+      setIsScannerOpen(false);
+      return;
+    }
+
+    setIsScannerOpen(false);
     handleStartInspection(assetId);
   };
 
