@@ -83,15 +83,25 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
       uploadedImageUrl = await db.uploadInspectionPhoto(imageFile) || undefined;
     }
 
-    // Determine overall status
-    const allOk = Object.values(checklist).every(v => v);
+    // Build detailed notes if checklist items are failed
+    const failedItems = Object.entries(checklist)
+      .filter(([_, value]) => !value)
+      .map(([key]) => key.charAt(0).toUpperCase() + key.slice(1));
+    
+    let finalNotes = editedAsset.description || '';
+    if (failedItems.length > 0) {
+      const failureText = `Fallas detectadas: ${failedItems.join(', ')}.`;
+      finalNotes = finalNotes ? `${finalNotes}\n${failureText}` : failureText;
+    }
+    
+    const allOk = failedItems.length === 0;
     
     const record: InspectionRecord = {
       assetId,
       status: allOk ? 'ok' : 'failed',
       technicianId: 'current-user', // This should be the actual user ID
       date: new Date().toISOString(),
-      notes: editedAsset.description || '',
+      notes: finalNotes,
       imageUrl: uploadedImageUrl
     };
 
