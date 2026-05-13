@@ -61,18 +61,20 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
 
             // 2. Define Columns (Widths and Keys only, no auto-headers)
             worksheet.columns = [
+                { key: 'lugar', width: 25 },
+                { key: 'tipoCap', width: 20 },
+                { key: 'unit', width: 15 },
+                { key: 'sello', width: 15 },
+                { key: 'fechaCarga', width: 15 },
+                { key: 'fechaEnsayo', width: 15 },
+                { key: 'inspeccion', width: 15 },
+                { key: 'retirado', width: 15 },
+                { key: 'observaciones', width: 30 },
                 { key: 'id', width: 15 },
                 { key: 'establecimiento', width: 30 },
-                { key: 'ubicacion', width: 25 },
-                { key: 'tipo', width: 15 },
-                { key: 'cap', width: 10 },
-                { key: 'matricula', width: 15 },
-                { key: 'unit', width: 10 },
-                { key: 'recarga', width: 15 },
                 { key: 'vtoCarga', width: 15 },
                 { key: 'vtoEnsayo', width: 15 },
                 { key: 'estado', width: 15 },
-                { key: 'retirado', width: 10 },
             ];
 
             // 3. Set B1 to Client Name (Real name, Uppercase, Red)
@@ -90,9 +92,10 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             // 5. Add Table Headers at Row 4
             const headerRow = worksheet.getRow(4);
             headerRow.values = [
-                'Id', 'Establecimiento', 'ubicación', 'TIPO', 'CAP', 
-                'Matricula', 'UNIT', 'Recarga', 'Vto. Carga', 
-                'Vto. Ensayo', 'Estado', 'Retirado'
+                'Lugar', 'Tipo / Cap', 'UNIT de fábrica', 'Sello de recarga',
+                'Fecha de carga', 'Fecha de ensayo', 'Inspección SI/NO', 'Retirado SI/NO',
+                'Observaciones', 'ID', 'Establecimiento', 'Vto. Carga',
+                'Vto. Ensayo', 'Estado'
             ];
             headerRow.height = 25;
             headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
@@ -109,18 +112,20 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                 const statusInsp = isExpired ? 'Vencido' : asset.status === 'ok' ? 'OK' : 'ALERTA';
 
                 const row = worksheet.addRow({
+                    lugar: asset.name || 'N/A',
+                    tipoCap: `${asset.type || ''} ${asset.capacity || ''}`.trim() || 'N/A',
+                    unit: asset.unit || 'N/A',
+                    sello: asset.matricula || 'N/A',
+                    fechaCarga: asset.lastRecharge || 'N/A',
+                    fechaEnsayo: asset.lastHydrotest || 'N/A',
+                    inspeccion: asset.lastInspection ? 'SI' : 'NO',
+                    retirado: asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI',
+                    observaciones: asset.description || '',
                     id: asset.id,
                     establecimiento: selectedClient.name,
-                    ubicacion: asset.name || 'N/A', // Using asset name for "NOMBRE REF"
-                    tipo: asset.agent || asset.type || 'N/A',
-                    cap: asset.capacity || 'N/A',
-                    matricula: asset.matricula || 'N/A',
-                    unit: asset.unit || 'N/A',
-                    recarga: asset.lastRecharge || 'N/A',
                     vtoCarga: asset.expirationDate || 'N/A',
                     vtoEnsayo: asset.nextHydrotest || 'N/A',
-                    estado: statusInsp,
-                    retirado: asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI'
+                    estado: statusInsp
                 });
 
                 

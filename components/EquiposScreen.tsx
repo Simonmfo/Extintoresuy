@@ -85,20 +85,31 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
         if (!selectedClient || assets.length === 0) return;
 
         // Create CSV content
-        const headers = ['ID', 'Nombre', 'Categoría', 'Tipo', 'Estado', 'Última Inspección', 'Ubicación'];
+        const headers = [
+            'Lugar', 'Tipo / Cap', 'UNIT de fábrica', 'Sello de recarga', 
+            'Fecha de carga', 'Fecha de ensayo', 'Inspección SI/NO', 'Retirado SI/NO', 
+            'Observaciones', 'ID', 'Establecimiento', 'Vto. Carga', 'Vto. Ensayo', 'Estado'
+        ];
         const today = new Date().toISOString().split('T')[0];
         const rows = assets.map(asset => {
             const isExpired = asset.expirationDate && asset.expirationDate < today;
             const statusText = isExpired ? 'Vencido' : asset.status === 'ok' ? 'Al día' : asset.status === 'failed' ? 'Rechazado' : 'Pendiente';
 
             return [
+                asset.name || 'N/A', // Lugar
+                `${asset.type || ''} ${asset.capacity || ''}`.trim() || 'N/A', // Tipo / Cap
+                asset.unit || 'N/A', // UNIT
+                asset.matricula || 'N/A', // Sello
+                asset.lastRecharge || 'N/A', // Fecha de carga
+                asset.lastHydrotest || 'N/A', // Fecha de ensayo
+                asset.lastInspection ? 'SI' : 'NO', // Inspección SI/NO
+                asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI', // Retirado SI/NO
+                asset.description || '', // Observaciones
                 asset.id,
-                asset.name || 'Sin nombre',
-                asset.equipmentCategory || 'N/A',
-                asset.type || 'N/A',
-                statusText,
-                asset.lastInspection || 'Nunca',
-                asset.description || 'N/A'
+                selectedClient.name,
+                asset.expirationDate || 'N/A',
+                asset.nextHydrotest || 'N/A',
+                statusText
             ];
         });
 
@@ -952,7 +963,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
                         <form onSubmit={handleAddAsset} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nombre Ref.</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Lugar</label>
                                 <input
                                     type="text"
                                     required
@@ -980,7 +991,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tipo / Detalles</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tipo / Cap</label>
                                 {newAsset.equipmentCategory === 'Extintor' ? (
                                     <select
                                         value={newAsset.type}
@@ -989,24 +1000,33 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             let agent = '';
                                             let fireClass = '';
 
-                                            if (type.includes('PQS')) { agent = 'Polvo Químico ABC'; fireClass = 'A, B, C'; }
+                                            if (type.includes('PQS') || type.includes('PABC')) { agent = 'Polvo Químico ABC'; fireClass = 'A, B, C'; }
                                             else if (type.includes('CO2')) { agent = 'CO2'; fireClass = 'B, C'; }
                                             else if (type.includes('Agua')) { agent = 'Agua'; fireClass = 'A'; }
-                                            else if (type.includes('Espuma')) { agent = 'Espuma AFFF'; fireClass = 'A, B'; }
+                                            else if (type.includes('Espuma') || type.includes('Espumigeno')) { agent = 'Espuma AFFF'; fireClass = 'A, B'; }
+                                            else if (type.includes('Hallotron')) { agent = 'Hallotron ABC'; fireClass = 'A, B, C'; }
+                                            else if (type.toLowerCase().includes('acetato') || type.toLowerCase().includes('clase k')) { agent = 'Acetato de Potasio'; fireClass = 'K'; }
 
                                             setNewAsset({ ...newAsset, type, agent, fireClass });
                                         }}
                                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
                                     >
                                         <option value="" disabled>Seleccionar Tipo</option>
-                                        <option value="PQS 4kg">PQS 4kg</option>
-                                        <option value="PQS 8kg">PQS 8kg</option>
-                                        <option value="CO2 2kg">CO2 2kg</option>
-                                        <option value="CO2 5kg">CO2 5kg</option>
-                                        <option value="Agua 10L">Agua 10L</option>
-                                        <option value="Espuma AFFF">Espuma AFFF</option>
-                                        <option value="Acetato de Potasio">Acetato de Potasio (Clase K)</option>
-                                        <option value="Clase D">Clase D (Metales)</option>
+                                        <option value="1 PABC">1 PABC</option>
+                                        <option value="2 PABC">2 PABC</option>
+                                        <option value="4 PABC">4 PABC</option>
+                                        <option value="8 PABC">8 PABC</option>
+                                        <option value="25 PABC">25 PABC</option>
+                                        <option value="50 PABC">50 PABC</option>
+                                        <option value="CO2 3.5 kg">CO2 3.5 kg</option>
+                                        <option value="CO2 7.5kg">CO2 7.5kg</option>
+                                        <option value="CO2 10kg">CO2 10kg</option>
+                                        <option value="Espumigeno 10L">Espumigeno 10L</option>
+                                        <option value="Hallotron ABC 2kg">Hallotron ABC 2kg</option>
+                                        <option value="Hallotron ABC 4kg">Hallotron ABC 4kg</option>
+                                        <option value="Hallotron ABC 8kg">Hallotron ABC 8kg</option>
+                                        <option value="Clase K acetato de potasio 6L">Clase K acetato de potasio 6L</option>
+                                        <option value="Clase k acetato de potasio 10L">Clase k acetato de potasio 10L</option>
                                     </select>
                                 ) : (
                                     <input
@@ -1040,7 +1060,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Matrícula</label>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de recarga</label>
                                             <input
                                                 type="text"
                                                 value={newAsset.matricula}
@@ -1052,7 +1072,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT</label>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT de fábrica</label>
                                             <input
                                                 type="text"
                                                 value={newAsset.unit}
@@ -1090,7 +1110,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última Inspección</label>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Inspección SI/NO (Fecha)</label>
                                     <input
                                         type="date"
                                         value={newAsset.lastInspection || ''}
@@ -1115,7 +1135,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             <div className="grid grid-cols-2 gap-4">
                                 {newAsset.equipmentCategory === 'Extintor' && (
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última Recarga</label>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Fecha de carga</label>
                                         <input
                                             type="date"
                                             value={newAsset.lastRecharge}
@@ -1143,7 +1163,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             {['Extintor', 'Manguera / Nicho'].includes(newAsset.equipmentCategory) && (
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última PH</label>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Fecha de ensayo</label>
                                         <input
                                             type="date"
                                             value={newAsset.lastHydrotest || ''}
@@ -1167,20 +1187,20 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             )}
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Estado Operativo</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Retirado SI/NO</label>
                                 <select
                                     value={newAsset.lifecycleStatus || 'active'}
                                     onChange={e => setNewAsset({ ...newAsset, lifecycleStatus: e.target.value as any })}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
                                 >
-                                    <option value="active">Activo (En Servicio)</option>
-                                    <option value="maintenance">En Planta / Taller</option>
-                                    <option value="discarded">Descartado / Fuera de Uso</option>
+                                    <option value="active">NO (Activo en Servicio)</option>
+                                    <option value="maintenance">SI (En Taller)</option>
+                                    <option value="discarded">SI (Descartado)</option>
                                 </select>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Ubicación / Descripción</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Observaciones</label>
                                 <textarea
                                     value={newAsset.description}
                                     onChange={e => setNewAsset({ ...newAsset, description: e.target.value })}
@@ -1222,7 +1242,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
                         <form onSubmit={handleUpdateAsset} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nombre Ref.</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Lugar</label>
                                 <input
                                     type="text"
                                     required
@@ -1249,7 +1269,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tipo / Detalles</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tipo / Cap</label>
                                 {editingAsset.equipmentCategory === 'Extintor' ? (
                                     <select
                                         value={editingAsset.type}
@@ -1258,24 +1278,33 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             let agent = '';
                                             let fireClass = '';
 
-                                            if (type.includes('PQS')) { agent = 'Polvo Químico ABC'; fireClass = 'A, B, C'; }
+                                            if (type.includes('PQS') || type.includes('PABC')) { agent = 'Polvo Químico ABC'; fireClass = 'A, B, C'; }
                                             else if (type.includes('CO2')) { agent = 'CO2'; fireClass = 'B, C'; }
                                             else if (type.includes('Agua')) { agent = 'Agua'; fireClass = 'A'; }
-                                            else if (type.includes('Espuma')) { agent = 'Espuma AFFF'; fireClass = 'A, B'; }
+                                            else if (type.includes('Espuma') || type.includes('Espumigeno')) { agent = 'Espuma AFFF'; fireClass = 'A, B'; }
+                                            else if (type.includes('Hallotron')) { agent = 'Hallotron ABC'; fireClass = 'A, B, C'; }
+                                            else if (type.toLowerCase().includes('acetato') || type.toLowerCase().includes('clase k')) { agent = 'Acetato de Potasio'; fireClass = 'K'; }
 
                                             setEditingAsset({ ...editingAsset, type, agent, fireClass });
                                         }}
                                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
                                     >
                                         <option value="" disabled>Seleccionar Tipo</option>
-                                        <option value="PQS 4kg">PQS 4kg</option>
-                                        <option value="PQS 8kg">PQS 8kg</option>
-                                        <option value="CO2 2kg">CO2 2kg</option>
-                                        <option value="CO2 5kg">CO2 5kg</option>
-                                        <option value="Agua 10L">Agua 10L</option>
-                                        <option value="Espuma AFFF">Espuma AFFF</option>
-                                        <option value="Acetato de Potasio">Acetato de Potasio (Clase K)</option>
-                                        <option value="Clase D">Clase D (Metales)</option>
+                                        <option value="1 PABC">1 PABC</option>
+                                        <option value="2 PABC">2 PABC</option>
+                                        <option value="4 PABC">4 PABC</option>
+                                        <option value="8 PABC">8 PABC</option>
+                                        <option value="25 PABC">25 PABC</option>
+                                        <option value="50 PABC">50 PABC</option>
+                                        <option value="CO2 3.5 kg">CO2 3.5 kg</option>
+                                        <option value="CO2 7.5kg">CO2 7.5kg</option>
+                                        <option value="CO2 10kg">CO2 10kg</option>
+                                        <option value="Espumigeno 10L">Espumigeno 10L</option>
+                                        <option value="Hallotron ABC 2kg">Hallotron ABC 2kg</option>
+                                        <option value="Hallotron ABC 4kg">Hallotron ABC 4kg</option>
+                                        <option value="Hallotron ABC 8kg">Hallotron ABC 8kg</option>
+                                        <option value="Clase K acetato de potasio 6L">Clase K acetato de potasio 6L</option>
+                                        <option value="Clase k acetato de potasio 10L">Clase k acetato de potasio 10L</option>
                                     </select>
                                 ) : (
                                     <input
@@ -1331,7 +1360,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Norma (UNIT)</label>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT de fábrica</label>
                                             <input
                                                 type="text"
                                                 value={editingAsset.unit || ''}
@@ -1346,7 +1375,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última Inspección</label>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Inspección SI/NO (Fecha)</label>
                                     <input
                                         type="date"
                                         value={editingAsset.lastInspection || ''}
@@ -1371,7 +1400,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             <div className="grid grid-cols-2 gap-4">
                                 {editingAsset.equipmentCategory === 'Extintor' && (
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última Recarga</label>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Fecha de carga</label>
                                         <input
                                             type="date"
                                             value={editingAsset.lastRecharge || ''}
@@ -1399,7 +1428,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             {['Extintor', 'Manguera / Nicho'].includes(editingAsset.equipmentCategory || 'Extintor') && (
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Última PH</label>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Fecha de ensayo</label>
                                         <input
                                             type="date"
                                             value={editingAsset.lastHydrotest || ''}
@@ -1423,15 +1452,15 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             )}
 
                             <div>
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Estado Operativo</label>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Retirado SI/NO</label>
                                 <select
                                     value={editingAsset.lifecycleStatus || 'active'}
                                     onChange={e => setEditingAsset({ ...editingAsset, lifecycleStatus: e.target.value as any })}
                                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
                                 >
-                                    <option value="active">Activo (En Servicio)</option>
-                                    <option value="maintenance">En Planta / Taller</option>
-                                    <option value="discarded">Descartado / Fuera de Uso</option>
+                                    <option value="active">NO (Activo en Servicio)</option>
+                                    <option value="maintenance">SI (En Taller)</option>
+                                    <option value="discarded">SI (Descartado)</option>
                                 </select>
                             </div>
 

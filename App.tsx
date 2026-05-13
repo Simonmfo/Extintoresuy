@@ -1,4 +1,4 @@
-
+import { Capacitor } from '@capacitor/core';
 import { useState, useEffect, type FC } from 'react';
 import { supabase } from './services/supabase';
 import { db } from './services/db';
@@ -18,6 +18,7 @@ import MapScreen from './components/MapScreen';
 import InspectionScreen from './components/InspectionScreen';
 import ValidationScreen from './components/ValidationScreen';
 import BottomNav from './components/BottomNav';
+import MobileTechnicianLayout from './components/MobileTechnicianLayout';
 import Header from './components/Header';
 import LandingPage from './components/LandingPage';
 import LoginScreen from './components/LoginScreen';
@@ -29,9 +30,10 @@ import QRScannerModal from './components/QRScannerModal';
 import { offlineService } from './services/offline';
 
 const App: FC = () => {
+  const isNative = Capacitor.isNativePlatform();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [publicScreen, setPublicScreen] = useState<'landing' | 'login' | 'soporte' | 'terminos' | 'privacidad'>('landing');
+  const [publicScreen, setPublicScreen] = useState<'landing' | 'login' | 'soporte' | 'terminos' | 'privacidad'>(isNative ? 'login' : 'landing');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
@@ -270,9 +272,12 @@ const App: FC = () => {
   }
 
   if (!isAuthenticated) {
+    if (isNative) {
+      return <LoginScreen onLoginSuccess={() => setIsAuthenticated(true)} />;
+    }
     switch (publicScreen) {
       case 'login':
-        return <LoginScreen onLoginSuccess={() => setIsAuthenticated(true)} />; // LoginScreen might need onBack if supported later, but for now we'll just render it
+        return <LoginScreen onLoginSuccess={() => setIsAuthenticated(true)} />;
       case 'soporte':
         return <SupportScreen onBack={() => setPublicScreen('landing')} />;
       case 'terminos':
@@ -283,6 +288,19 @@ const App: FC = () => {
       default:
         return <LandingPage onLogin={() => setPublicScreen('login')} onNavigateTo={(page) => setPublicScreen(page)} />;
     }
+  }
+
+  // Native Technician Flow - COMPLETELY SEPARATE FROM WEB UI
+  if (isNative && profile?.role === 'tecnico') {
+    return (
+      <MobileTechnicianLayout 
+        profile={profile}
+        onLogout={handleLogout}
+        pendingInspections={pendingInspections}
+        setPendingInspections={setPendingInspections}
+        onFinalize={handleFinalizeSession}
+      />
+    );
   }
 
   return (
