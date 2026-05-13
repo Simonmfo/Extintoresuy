@@ -100,11 +100,22 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
         .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value ? 'OK' : 'FALLA'}`)
         .join(', ');
       
-      let finalNotes = editedAsset.description || '';
+      // Clean existing description from previous checklist tags to avoid duplication
+      let baseDescription = (editedAsset.description || '')
+        .replace(/\[Checklist:.*?\]/g, '')
+        .replace(/ACEPTABLE CON OBSERVACIONES:/g, '')
+        .trim();
+
       const checklistText = `[Checklist: ${checklistStatus}]`;
-      finalNotes = finalNotes ? `${finalNotes}\n${checklistText}` : checklistText;
-      
       const failedCount = Object.values(checklist).filter(v => !v).length;
+      
+      let finalNotes = baseDescription;
+      if (failedCount > 0) {
+        finalNotes = `ACEPTABLE CON OBSERVACIONES: ${baseDescription} ${checklistText}`.trim();
+      } else {
+        finalNotes = `${baseDescription} ${checklistText}`.trim();
+      }
+      
       let finalStatus: 'passed' | 'failed' = 'passed'; // Always pass as per user request ("Aceptable")
       
       if (failedCount > 0) {
