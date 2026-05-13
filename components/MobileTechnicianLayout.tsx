@@ -60,7 +60,11 @@ const MobileTechnicianLayout: React.FC<MobileTechnicianLayoutProps> = ({
         );
 
         if (!asset || !isOwner) {
-            alert(`Error: ${!asset ? 'El equipo no existe.' : 'Este equipo no pertenece a tu empresa.'}`);
+            const debugMsg = asset 
+                ? `Permisos denegados para el rol "${profile?.role}".\nID Usuario: ${profile?.id}\nID Empresa: ${profile?.company_id}\nDueño Equipo: ${asset.companyId}`
+                : 'El equipo no existe en la base de datos.';
+            
+            alert(`No se puede escanear:\n\n${debugMsg}`);
             setIsScannerOpen(false);
             return;
         }
