@@ -49,8 +49,11 @@ const MobileTechnicianLayout: React.FC<MobileTechnicianLayoutProps> = ({
         }
 
         const asset = await db.getAsset(assetId);
-        if (!asset || asset.companyId !== profile.company_id) {
-            alert('Equipo no pertenece a tu empresa.');
+        // SECURITY: Allow admins to scan everything, but restrict technicians to their company
+        const isOwner = asset && (asset.companyId === profile.company_id || profile.role === 'admin');
+
+        if (!asset || !isOwner) {
+            alert('Equipo no pertenece a tu empresa o no tienes permisos.');
             setIsScannerOpen(false);
             return;
         }
