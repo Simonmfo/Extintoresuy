@@ -437,16 +437,31 @@ export const db = {
   },
 
   getAsset: async (id: string): Promise<InspectionAsset | null> => {
-    const { data, error } = await supabase
+    // Try searching by ID first
+    let { data, error } = await supabase
       .from('assets')
       .select('*, clients(company_id)')
       .eq('id', id)
-      .single();
+      .maybeSingle();
+
+    // If not found, try searching by matricula (Sello)
+    if (!data && !error) {
+      const { data: dataByMatricula, error: errorByMatricula } = await supabase
+        .from('assets')
+        .select('*, clients(company_id)')
+        .eq('matricula', id)
+        .maybeSingle();
+      
+      data = dataByMatricula;
+      error = errorByMatricula;
+    }
 
     if (error) {
       console.error('Error fetching asset:', error);
       return null;
     }
+
+    if (!data) return null;
 
     const asset = mapAsset(data);
     const clientsData = (data as any).clients;
