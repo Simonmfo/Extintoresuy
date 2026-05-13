@@ -387,14 +387,6 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
               </div>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Observaciones</label>
-              <textarea
-                value={editedAsset.description || ''}
-                onChange={e => setEditedAsset({ ...editedAsset, description: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors h-20 resize-none"
-                placeholder="Notas adicionales..."
-              />
             </div>
           </div>
         </section>
