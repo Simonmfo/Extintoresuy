@@ -108,6 +108,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             { key: 'vtoCarga', width: 15 },
             { key: 'vtoEnsayo', width: 15 },
             { key: 'estado', width: 15 },
+            { key: 'fotoUrl', width: 30 },
         ];
 
         const b1 = worksheet.getCell('B1');
@@ -151,7 +152,8 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                 establecimiento: client.name,
                 vtoCarga: asset.expirationDate || 'N/A',
                 vtoEnsayo: asset.nextHydrotest || 'N/A',
-                estado: statusInsp
+                estado: statusInsp,
+                fotoUrl: asset.imageUrl || ''
             }).font = { size: 10 };
         });
 
@@ -240,7 +242,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             const targetWidth = img.width * ratio;
 
             worksheet.addImage(imageId, {
-                tl: { col: 0, row: 0 }, // Place in top left
+                tl: { col: 3, row: 0 }, // Place in Column D
                 ext: { width: targetWidth, height: targetHeight }
             });
 
