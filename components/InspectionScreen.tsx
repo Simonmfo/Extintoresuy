@@ -95,11 +95,16 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
     }
     
     const allOk = failedItems.length === 0;
+    let finalStatus: 'passed' | 'failed' = 'passed'; // Always pass as per user request ("Aceptable")
     
+    if (failedItems.length > 0) {
+      finalNotes = `ACEPTABLE CON OBSERVACIONES: ${finalNotes}`;
+    }
+
     const record: InspectionRecord = {
       assetId,
-      status: allOk ? 'ok' : 'failed',
-      technicianId: 'current-user', // This should be the actual user ID
+      status: finalStatus,
+      technicianId: 'current-user', 
       date: new Date().toISOString(),
       notes: finalNotes,
       imageUrl: uploadedImageUrl
@@ -107,6 +112,12 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
 
     // Compare and log changes if any
     const changes: any[] = [];
+    
+    // Update asset description to include these observations so they show in reports
+    if (failedItems.length > 0) {
+      editedAsset.description = finalNotes;
+    }
+
     const fieldsToCompare: (keyof InspectionAsset)[] = [
       'name', 'type', 'unit', 'matricula', 'lastRecharge', 
       'lastHydrotest', 'expirationDate', 'nextHydrotest', 

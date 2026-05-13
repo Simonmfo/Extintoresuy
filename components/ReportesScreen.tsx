@@ -134,7 +134,8 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
 
         assetsData.forEach((asset) => {
             const isExpired = asset.expirationDate && asset.expirationDate < today;
-            const statusInsp = isExpired ? 'Vencido' : asset.status === 'ok' ? 'OK' : 'ALERTA';
+            const hasObservations = asset.description && asset.description.includes('ACEPTABLE CON OBSERVACIONES');
+            const statusInsp = isExpired ? 'Vencido' : hasObservations ? 'ACEPTABLE C/ OBS' : asset.status === 'ok' ? 'OK' : 'ALERTA';
 
             worksheet.addRow({
                 lugar: asset.name || 'N/A',

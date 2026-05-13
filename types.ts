@@ -62,6 +62,7 @@ export interface InspectionRecord {
   date: string;
   inspector: string;
   status: 'passed' | 'failed';
+  notes?: string;
   details: any;
   imageUrl?: string;
   signatureUrl?: string;

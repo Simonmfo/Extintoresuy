@@ -534,7 +534,7 @@ export const db = {
         asset_id: record.assetId,
         status: 'completed',
         result: record.status === 'passed' ? 'pass' : 'fail',
-        notes: JSON.stringify(record.details),
+        notes: record.notes || JSON.stringify(record.details),
         date: new Date().toISOString(),
         image_url: record.imageUrl,
         signature_url: record.signatureUrl,
