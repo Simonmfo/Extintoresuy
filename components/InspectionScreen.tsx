@@ -243,10 +243,6 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
             </div>
           </div>
 
-          {/* Description */}
-          <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-            <span className="text-[9px] uppercase font-black text-slate-500 block mb-1 tracking-widest">Ubicación / Notas</span>
-            <p className="text-xs text-slate-300">{asset?.description || 'Sin descripción de ubicación registrada.'}</p>
           </div>
         </section>
 
