@@ -116,8 +116,11 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
       // Compare and log changes if any
       const changes: any[] = [];
       
-      // Update asset description to include these observations so they show in reports
-      editedAsset.description = finalNotes;
+      // Create a final version of the asset with the updated notes
+      const finalAssetToUpdate = {
+        ...editedAsset,
+        description: finalNotes
+      };
 
       const fieldsToCompare: (keyof InspectionAsset)[] = [
         'name', 'type', 'unit', 'matricula', 'lastRecharge', 
@@ -127,7 +130,7 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
 
       fieldsToCompare.forEach(field => {
         const oldValue = asset ? asset[field] : undefined;
-        const newValue = editedAsset[field as keyof typeof editedAsset];
+        const newValue = finalAssetToUpdate[field as keyof typeof finalAssetToUpdate];
         if (oldValue !== newValue) {
           changes.push({
             field,
@@ -139,20 +142,28 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
 
       if (changes.length > 0 && asset) {
         console.log('Saving audit log and updating asset...', changes);
-        await db.saveAuditLog({
+        const logSuccess = await db.saveAuditLog({
           assetId: asset.id,
           changes,
           context: 'Modificación durante inspección'
         });
+        
+        if (!logSuccess) {
+          console.warn('Audit log could not be saved, but continuing...');
+        }
+
         // Update the asset itself
-        await db.updateAsset(asset.id, editedAsset);
+        const updateSuccess = await db.updateAsset(asset.id, finalAssetToUpdate);
+        if (!updateSuccess) {
+          throw new Error('No se pudo actualizar la información del equipo en la base de datos.');
+        }
       }
 
       console.log('Inspection saved successfully, calling onSave...');
       onSave(record);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving inspection:', error);
-      alert('Error al guardar la inspección. Por favor intenta de nuevo.');
+      alert(`Error al guardar la inspección: ${error.message || 'Error desconocido'}`);
     } finally {
       setIsSubmitting(false);
     }
