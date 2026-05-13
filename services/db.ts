@@ -437,11 +437,11 @@ export const db = {
   },
 
   getAsset: async (id: string): Promise<InspectionAsset | null> => {
-    // Try searching by ID first
+    // Try searching by ID first (case-insensitive)
     let { data, error } = await supabase
       .from('assets')
       .select('*, clients(company_id)')
-      .eq('id', id)
+      .ilike('id', id)
       .maybeSingle();
 
     // If not found, try searching by matricula (Sello)

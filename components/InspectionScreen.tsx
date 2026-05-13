@@ -103,7 +103,7 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
 
       const record: InspectionRecord = {
         id: Math.random().toString(36).substr(2, 9), // Temporary ID for session
-        assetId,
+        assetId: asset.id,
         status: finalStatus,
         inspector: profile?.full_name || 'Técnico',
         technicianId: profile?.id || 'current-user', 
@@ -137,15 +137,15 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
         }
       });
 
-      if (changes.length > 0) {
+      if (changes.length > 0 && asset) {
         console.log('Saving audit log and updating asset...', changes);
         await db.saveAuditLog({
-          assetId: assetId,
+          assetId: asset.id,
           changes,
           context: 'Modificación durante inspección'
         });
         // Update the asset itself
-        await db.updateAsset(assetId, editedAsset);
+        await db.updateAsset(asset.id, editedAsset);
       }
 
       console.log('Inspection saved successfully, calling onSave...');
