@@ -95,31 +95,34 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
         uploadedImageUrl = await db.uploadInspectionPhoto(imageFile) || undefined;
       }
 
-      // Build detailed notes with all checklist items status
-      const checklistStatus = Object.entries(checklist)
-        .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value ? 'OK' : 'FALLA'}`)
-        .join(', ');
+      // Build compact checklist status (M, P, A, C)
+      const compactStatus = [
+        `M:${checklist.manometro ? 'OK' : 'FALLA'}`,
+        `P:${checklist.precinto ? 'OK' : 'FALLA'}`,
+        `A:${checklist.acceso ? 'OK' : 'FALLA'}`,
+        `C:${checklist.carteleria ? 'OK' : 'FALLA'}`
+      ].join(', ');
       
       // Clean existing description and name from previous checklist tags to avoid duplication/leaks
       let baseDescription = (editedAsset.description || '')
         .replace(/\[Checklist:.*?\]/g, '')
+        .replace(/M:.*?, P:.*?, A:.*?, C:.*?/g, '') // Clean new format too
         .replace(/ACEPTABLE CON OBSERVACIONES:/g, '')
         .trim();
 
       let cleanName = (editedAsset.name || '')
         .replace(/\[Checklist:.*?\]/g, '')
+        .replace(/M:.*?, P:.*?, A:.*?, C:.*?/g, '')
         .replace(/ACEPTABLE CON OBSERVACIONES:/g, '')
         .trim();
 
-      const checklistText = `[Checklist: ${checklistStatus}]`;
       const failedCount = Object.values(checklist).filter(v => !v).length;
       
       // Generate the notes for the inspection record
-      let finalNotes = baseDescription;
+      let finalNotes = baseDescription ? `${baseDescription} | ${compactStatus}` : compactStatus;
+      
       if (failedCount > 0) {
-        finalNotes = `ACEPTABLE CON OBSERVACIONES: ${baseDescription} ${checklistText}`.trim();
-      } else {
-        finalNotes = `${baseDescription} ${checklistText}`.trim();
+        finalNotes = `ACEPTABLE CON OBSERVACIONES: ${finalNotes}`;
       }
       
       let finalStatus: 'passed' | 'failed' = 'passed'; // Always pass as per user request ("Aceptable")
