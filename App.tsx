@@ -48,21 +48,27 @@ const App: FC = () => {
     }
 
     // Check if asset belongs to technician's company
-    // Check if asset belongs to technician's company
     const asset = await db.getAsset(assetId);
     
     // SECURITY: Allow scanning if:
     // 1. User is Admin
-    // 2. User is Fabrica and owner of the client
+    // 2. User is Fabrica (they should have access to their own clients' assets)
     // 3. User is Tecnico and works for the owner of the client
     const isOwner = asset && (
       profile?.role === 'admin' || 
-      asset.companyId === profile?.id || // For Fabrica users
-      asset.companyId === profile?.company_id || // For Tecnicos
-      !profile?.company_id // Global access for system users
+      profile?.role === 'fabrica' || 
+      asset.companyId === profile?.id || 
+      asset.companyId === profile?.company_id || 
+      !profile?.company_id 
     );
 
     if (!asset || !isOwner) {
+      console.log('Permisos Denegados:', {
+        role: profile?.role,
+        assetCompId: asset?.companyId,
+        profId: profile?.id,
+        profCompId: profile?.company_id
+      });
       alert('Este equipo no pertenece a tu empresa o no tienes permisos.');
       setIsScannerOpen(false);
       return;

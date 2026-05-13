@@ -449,8 +449,9 @@ export const db = {
     }
 
     const asset = mapAsset(data);
-    if ((data as any).clients) {
-      asset.companyId = (data as any).clients.company_id;
+    const clientsData = (data as any).clients;
+    if (clientsData) {
+      asset.companyId = Array.isArray(clientsData) ? clientsData[0]?.company_id : clientsData.company_id;
     }
     return asset;
   },
