@@ -231,7 +231,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
             const ratio = targetHeight / img.height;
 
             worksheet.addImage(imageId, {
-                tl: { col: 3, row: 0 }, 
+                tl: { col: 4, row: 0 }, 
                 ext: { width: img.width * ratio, height: targetHeight }
             });
             
