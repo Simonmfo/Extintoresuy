@@ -11,6 +11,10 @@ interface ReportesScreenProps {
 
 const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
     const [clients, setClients] = useState<Client[]>([]);
+    const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+    const [assets, setAssets] = useState<InspectionAsset[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [exporting, setExporting] = useState(false);
     const [factoryProfile, setFactoryProfile] = useState<UserProfile | null>(null);
     const [activeTab, setActiveTab] = useState<'inventory' | 'audit'>('inventory');
     const [auditLogs, setAuditLogs] = useState<any[]>([]);
