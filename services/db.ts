@@ -61,6 +61,12 @@ export const db = {
     return data;
   },
 
+  getCurrentProfile: async (): Promise<any> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    return db.getProfile(user.id);
+  },
+
   updateProfile: async (id: string, updates: any): Promise<boolean> => {
     try {
       const { error } = await supabase

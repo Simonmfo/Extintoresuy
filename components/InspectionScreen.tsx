@@ -25,6 +25,7 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
     carteleria: true
   });
   const [editedAsset, setEditedAsset] = useState<Partial<InspectionAsset>>({});
+  const [profile, setProfile] = useState<any>(null);
 
   const addYears = (dateStr: string, years: number) => {
     if (!dateStr) return '';
@@ -56,6 +57,15 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
         lifecycleStatus: data.lifecycleStatus
       });
     }
+
+    // Also load profile info
+    try {
+      const p = await db.getCurrentProfile();
+      if (p) setProfile(p);
+    } catch (e) {
+      console.error('Error loading profile in InspectionScreen:', e);
+    }
+
     setLoading(false);
   };
 
