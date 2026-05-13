@@ -44,6 +44,17 @@ const MobileTechnicianLayout: React.FC<MobileTechnicianLayoutProps> = ({
 
     const handleScan = async (decodedText: string) => {
         let assetId = decodedText;
+
+        // Check if it's a JSON string (like {"id":"..."})
+        if (decodedText.startsWith('{') && decodedText.endsWith('}')) {
+            try {
+                const parsed = JSON.parse(decodedText);
+                if (parsed.id) assetId = parsed.id;
+            } catch (e) {
+                console.error('Error parsing QR JSON:', e);
+            }
+        }
+
         if (decodedText.includes('asset/')) {
             assetId = decodedText.split('asset/')[1];
         }
