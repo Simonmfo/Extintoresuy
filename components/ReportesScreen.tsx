@@ -212,44 +212,32 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
 
     const addLogoToWorksheet = async (worksheet: any, logoUrl: string) => {
         try {
-            console.log('Fetching logo from:', logoUrl);
             const response = await fetch(logoUrl);
-            if (!response.ok) throw new Error(`Failed to fetch logo: ${response.statusText}`);
-            
             const blob = await response.blob();
             const arrayBuffer = await blob.arrayBuffer();
             
-            // Detect extension from MIME type
-            const mimeType = blob.type;
-            const extension = mimeType.split('/')[1] === 'png' ? 'png' : 'jpeg';
+            const extension = blob.type.split('/')[1] === 'png' ? 'png' : 'jpeg';
             
             const img = new Image();
-            const objectUrl = URL.createObjectURL(blob);
-            
-            await new Promise((resolve, reject) => {
-                img.onload = resolve;
-                img.onerror = reject;
-                img.src = objectUrl;
-            });
+            img.src = URL.createObjectURL(blob);
+            await new Promise((resolve) => { img.onload = resolve; });
 
             const imageId = worksheet.workbook.addImage({
                 buffer: arrayBuffer,
                 extension: extension,
             });
 
-            const targetHeight = 80; // Slightly smaller for better fit
+            const targetHeight = 120;
             const ratio = targetHeight / img.height;
-            const targetWidth = img.width * ratio;
 
             worksheet.addImage(imageId, {
-                tl: { col: 3, row: 0 }, // Place in Column D
-                ext: { width: targetWidth, height: targetHeight }
+                tl: { col: 3, row: 0 }, 
+                ext: { width: img.width * ratio, height: targetHeight }
             });
-
-            URL.revokeObjectURL(objectUrl);
-            console.log('Logo added successfully');
+            
+            URL.revokeObjectURL(img.src);
         } catch (e) {
-            console.error('Error adding logo to Excel:', e);
+            console.error('Error adding logo:', e);
         }
     };
 
