@@ -34,6 +34,13 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
     return date.toISOString().split('T')[0];
   };
 
+  const addMonths = (dateStr: string, months: number) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    date.setMonth(date.getMonth() + months);
+    return date.toISOString().split('T')[0];
+  };
+
   useEffect(() => {
     loadAsset();
   }, [assetId]);
@@ -139,26 +146,30 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
         imageUrl: uploadedImageUrl
       };
 
-      // Compare and log changes if any
-      const changes: any[] = [];
+      const todayStr = new Date().toISOString().split('T')[0];
       
-      // Create a final version of the asset with the updated notes
+      // Create a final version of the asset with the updated notes and dates
       // IMPORTANT: name (Location) should stay CLEAN, only description gets the checklist
       const finalAssetToUpdate = {
         ...editedAsset,
         name: cleanName,
-        description: finalNotes
+        description: finalNotes,
+        lastInspection: todayStr,
+        nextInspection: addMonths(todayStr, 1)
       };
 
+      // Compare and log changes if any
+      const changes: any[] = [];
       const fieldsToCompare: (keyof InspectionAsset)[] = [
         'name', 'type', 'unit', 'matricula', 'lastRecharge', 
         'lastHydrotest', 'expirationDate', 'nextHydrotest', 
-        'description', 'lifecycleStatus'
+        'description', 'lifecycleStatus', 'lastInspection', 'nextInspection'
       ];
 
       fieldsToCompare.forEach(field => {
         const oldValue = asset ? asset[field] : undefined;
-        const newValue = finalAssetToUpdate[field as keyof typeof finalAssetToUpdate];
+        const newValue = (finalAssetToUpdate as any)[field];
+        
         if (oldValue !== newValue) {
           changes.push({
             field,
@@ -168,16 +179,19 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
         }
       });
 
-      if (changes.length > 0 && asset) {
+      // ALWAYS update the asset to ensure lastInspection and description are saved
+      if (asset) {
         console.log('Saving audit log and updating asset...', changes);
-        const logSuccess = await db.saveAuditLog({
-          assetId: asset.id,
-          changes,
-          context: 'Modificación durante inspección'
-        });
-        
-        if (!logSuccess) {
-          console.warn('Audit log could not be saved, but continuing...');
+        if (changes.length > 0) {
+          const logSuccess = await db.saveAuditLog({
+            assetId: asset.id,
+            changes,
+            context: 'Modificación durante inspección'
+          });
+          
+          if (!logSuccess) {
+            console.warn('Audit log could not be saved, but continuing...');
+          }
         }
 
         // Update the asset itself
