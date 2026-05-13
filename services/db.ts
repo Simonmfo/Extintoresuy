@@ -560,7 +560,8 @@ export const db = {
       const { data: updatedAsset, error: assetError } = await supabase.from('assets').update({
         last_inspection: record.date,
         next_inspection_date: nextDate.toISOString().split('T')[0],
-        status: record.status === 'passed' ? 'ok' : 'failed'
+        status: record.status === 'passed' ? 'ok' : 'failed',
+        description: record.notes // Sync inspection notes to asset description for reports
       } as any)
         .eq('id', record.assetId)
         .select();
