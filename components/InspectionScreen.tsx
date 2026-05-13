@@ -83,21 +83,20 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
       uploadedImageUrl = await db.uploadInspectionPhoto(imageFile) || undefined;
     }
 
-    // Build detailed notes if checklist items are failed
-    const failedItems = Object.entries(checklist)
-      .filter(([_, value]) => !value)
-      .map(([key]) => key.charAt(0).toUpperCase() + key.slice(1));
+    // Build detailed notes with all checklist items status
+    const checklistStatus = Object.entries(checklist)
+      .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value ? 'OK' : 'FALLA'}`)
+      .join(', ');
     
     let finalNotes = editedAsset.description || '';
-    if (failedItems.length > 0) {
-      const failureText = `Fallas detectadas: ${failedItems.join(', ')}.`;
-      finalNotes = finalNotes ? `${finalNotes}\n${failureText}` : failureText;
-    }
+    const checklistText = `[Checklist: ${checklistStatus}]`;
+    finalNotes = finalNotes ? `${finalNotes}\n${checklistText}` : checklistText;
     
-    const allOk = failedItems.length === 0;
+    const failedCount = Object.values(checklist).filter(v => !v).length;
+    const allOk = failedCount === 0;
     let finalStatus: 'passed' | 'failed' = 'passed'; // Always pass as per user request ("Aceptable")
     
-    if (failedItems.length > 0) {
+    if (failedCount > 0) {
       finalNotes = `ACEPTABLE CON OBSERVACIONES: ${finalNotes}`;
     }
 
@@ -114,9 +113,7 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
     const changes: any[] = [];
     
     // Update asset description to include these observations so they show in reports
-    if (failedItems.length > 0) {
-      editedAsset.description = finalNotes;
-    }
+    editedAsset.description = finalNotes;
 
     const fieldsToCompare: (keyof InspectionAsset)[] = [
       'name', 'type', 'unit', 'matricula', 'lastRecharge', 
