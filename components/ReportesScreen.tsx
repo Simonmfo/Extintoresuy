@@ -456,7 +456,6 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
                                         </div>
                                     )}
                                 </div>
-                            </div>/div>
                             </div>
                         )
                     )}
