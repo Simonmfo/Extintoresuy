@@ -16,16 +16,14 @@ const mapAsset = (asset: any): InspectionAsset => ({
   status: asset.status,
   imageUrl: asset.image_url,
   clientId: asset.client_id,
-  agent: asset.agent,
-  fireClass: asset.fire_class,
   expirationDate: asset.expiration_date,
   lifecycleStatus: asset.location_status,
   nextInspection: asset.next_inspection_date,
   lastRecharge: asset.last_recharge_date,
   lastHydrotest: asset.last_hydrotest_date,
   nextHydrotest: asset.next_hydrotest_date,
-  capacity: asset.capacity,
   unit: asset.unit,
+  matricula: asset.matricula,
   assignedTechnicianId: asset.assigned_technician_id
 });
 
@@ -611,8 +609,6 @@ export const db = {
     type: string;
     description: string;
     clientId: string;
-    agent?: string;
-    fireClass?: string;
     expirationDate?: string;
     nextInspection?: string;
     lastRecharge?: string;
@@ -620,7 +616,6 @@ export const db = {
     nextHydrotest?: string;
     lastInspection?: string;
     lifecycleStatus?: 'active' | 'maintenance' | 'discarded';
-    capacity?: string;
     unit?: string;
     matricula?: string;
   }) => {
@@ -633,8 +628,6 @@ export const db = {
           type: assetData.type,
           description: assetData.description,
           client_id: assetData.clientId,
-          agent: assetData.agent,
-          fire_class: assetData.fireClass,
           expiration_date: assetData.expirationDate,
           next_inspection_date: assetData.nextInspection,
           last_recharge_date: assetData.lastRecharge,
@@ -642,7 +635,6 @@ export const db = {
           next_hydrotest_date: assetData.nextHydrotest,
           last_inspection: assetData.lastInspection,
           location_status: assetData.lifecycleStatus || 'active',
-          capacity: assetData.capacity,
           unit: assetData.unit,
           matricula: assetData.matricula,
           status: 'pending',
@@ -674,8 +666,6 @@ export const db = {
           type: updates.type,
           description: updates.description,
           status: updates.status,
-          agent: updates.agent,
-          fire_class: updates.fireClass,
           expiration_date: updates.expirationDate,
           location_status: updates.lifecycleStatus,
           last_inspection: updates.lastInspection,
@@ -683,7 +673,6 @@ export const db = {
           last_recharge_date: updates.lastRecharge,
           last_hydrotest_date: updates.lastHydrotest,
           next_hydrotest_date: updates.nextHydrotest,
-          capacity: updates.capacity,
           unit: updates.unit,
           matricula: updates.matricula
         } as any)
@@ -828,5 +817,71 @@ export const db = {
 
   uploadSignature: async (blob: Blob): Promise<string | null> => {
     return db.uploadFile(blob, 'inspection-photos', 'signatures');
+  },
+
+  saveAuditLog: async (logData: { assetId: string; changes: any[]; context?: string }) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user?.id).single();
+
+      const { error } = await supabase.from('asset_audit_logs').insert({
+        asset_id: logData.assetId,
+        user_id: user?.id,
+        user_name: profile?.full_name || 'Técnico',
+        changes: logData.changes,
+        context: logData.context
+      });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error saving audit log:', error);
+      return false;
+    }
+  },
+
+  getAuditLogs: async (assetId?: string): Promise<any[]> => {
+    let query = supabase
+      .from('asset_audit_logs')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (assetId) {
+      query = query.eq('asset_id', assetId);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.error('Error fetching audit logs:', error);
+      return [];
+    }
+    return data;
+  },
+
+  getAuditLogsByClient: async (clientId: string): Promise<any[]> => {
+    try {
+      // First get all asset IDs for this client
+      const { data: assets } = await supabase
+        .from('assets')
+        .select('id')
+        .eq('client_id', clientId);
+
+      if (!assets || assets.length === 0) return [];
+
+      const assetIds = assets.map(a => a.id);
+
+      // Then get logs for these assets
+      const { data, error } = await supabase
+        .from('asset_audit_logs')
+        .select('*')
+        .in('asset_id', assetIds)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching audit logs by client:', error);
+      return [];
+    }
   }
 };

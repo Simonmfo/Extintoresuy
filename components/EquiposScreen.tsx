@@ -18,7 +18,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
     const [assets, setAssets] = useState<InspectionAsset[]>([]);
     const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [newAsset, setNewAsset] = useState({ name: '', equipmentCategory: 'Extintor', type: '', description: '', agent: '', fireClass: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', capacity: '', unit: '', matricula: '' });
+    const [newAsset, setNewAsset] = useState({ name: '', equipmentCategory: 'Extintor', type: '', description: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', unit: '', matricula: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<InspectionAsset | null>(null);
     const [editingAsset, setEditingAsset] = useState<InspectionAsset | null>(null);
@@ -97,7 +97,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
             return [
                 asset.name || 'N/A', // Lugar
-                `${asset.type || ''} ${asset.capacity || ''}`.trim() || 'N/A', // Tipo / Cap
+                `${asset.type || ''}`.trim() || 'N/A', // Tipo / Cap
                 asset.unit || 'N/A', // UNIT
                 asset.matricula || 'N/A', // Sello
                 asset.lastRecharge || 'N/A', // Fecha de carga
@@ -366,15 +366,12 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             type: newAsset.type,
             description: newAsset.description,
             clientId: selectedClient.id,
-            agent: newAsset.agent,
-            fireClass: newAsset.fireClass,
             expirationDate: newAsset.expirationDate,
             lastInspection: newAsset.lastInspection,
             nextInspection: newAsset.nextInspection,
             lastRecharge: newAsset.lastRecharge,
             lastHydrotest: newAsset.lastHydrotest,
             nextHydrotest: newAsset.nextHydrotest,
-            capacity: newAsset.capacity,
             unit: newAsset.unit,
             matricula: newAsset.matricula,
             lifecycleStatus: newAsset.lifecycleStatus as any
@@ -385,7 +382,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             const updatedAssets = await db.getAssetsByClient(selectedClient.id);
             setAssets(updatedAssets);
             setIsAddModalOpen(false);
-            setNewAsset({ name: '', equipmentCategory: 'Extintor', type: '', description: '', agent: '', fireClass: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', capacity: '', unit: '', matricula: '' });
+            setNewAsset({ name: '', equipmentCategory: 'Extintor', type: '', description: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', unit: '', matricula: '' });
         }
         setIsSubmitting(false);
     };
@@ -410,15 +407,12 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             name: editingAsset.name,
             type: editingAsset.type,
             description: editingAsset.description,
-            agent: editingAsset.agent,
-            fireClass: editingAsset.fireClass,
             expirationDate: editingAsset.expirationDate,
             lastInspection: editingAsset.lastInspection,
             nextInspection: editingAsset.nextInspection,
             lastRecharge: editingAsset.lastRecharge,
             lastHydrotest: editingAsset.lastHydrotest,
             nextHydrotest: editingAsset.nextHydrotest,
-            capacity: editingAsset.capacity,
             unit: editingAsset.unit,
             matricula: editingAsset.matricula,
             lifecycleStatus: editingAsset.lifecycleStatus
@@ -881,14 +875,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Tipo de Equipo</p>
                                     <p className="text-white font-bold">{viewingAsset.type}</p>
                                 </div>
-                                <div>
-                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Agente Extintor</p>
-                                    <p className="text-white font-bold">{viewingAsset.agent || 'N/A'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Clase de Fuego</p>
-                                    <p className="text-white font-bold">{viewingAsset.fireClass || 'N/A'}</p>
-                                </div>
+
                                 <div>
                                     <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Ubicación</p>
                                     <p className="text-white font-bold text-sm leading-tight">{viewingAsset.description || 'Sin descripción'}</p>
@@ -995,20 +982,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                 {newAsset.equipmentCategory === 'Extintor' ? (
                                     <select
                                         value={newAsset.type}
-                                        onChange={e => {
-                                            const type = e.target.value;
-                                            let agent = '';
-                                            let fireClass = '';
-
-                                            if (type.includes('PQS') || type.includes('PABC')) { agent = 'Polvo Químico ABC'; fireClass = 'A, B, C'; }
-                                            else if (type.includes('CO2')) { agent = 'CO2'; fireClass = 'B, C'; }
-                                            else if (type.includes('Agua')) { agent = 'Agua'; fireClass = 'A'; }
-                                            else if (type.includes('Espuma') || type.includes('Espumigeno')) { agent = 'Espuma AFFF'; fireClass = 'A, B'; }
-                                            else if (type.includes('Hallotron')) { agent = 'Hallotron ABC'; fireClass = 'A, B, C'; }
-                                            else if (type.toLowerCase().includes('acetato') || type.toLowerCase().includes('clase k')) { agent = 'Acetato de Potasio'; fireClass = 'K'; }
-
-                                            setNewAsset({ ...newAsset, type, agent, fireClass });
-                                        }}
+                                        onChange={e => setNewAsset({ ...newAsset, type: e.target.value })}
                                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
                                     >
                                         <option value="" disabled>Seleccionar Tipo</option>
@@ -1040,71 +1014,28 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             {newAsset.equipmentCategory === 'Extintor' && (
-                                <>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Agente Extintor</label>
-                                            <select
-                                                value={newAsset.agent}
-                                                onChange={e => setNewAsset({ ...newAsset, agent: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none text-xs"
-                                            >
-                                                <option value="">Seleccionar...</option>
-                                                <option value="Agua">Agua</option>
-                                                <option value="Agua Pulverizada">Agua Pulverizada</option>
-                                                <option value="Polvo Químico ABC">Polvo Químico ABC</option>
-                                                <option value="CO2">CO2 (Dióxido de Carbono)</option>
-                                                <option value="Espuma AFFF">Espuma AFFF</option>
-                                                <option value="Clase D">Agentes Especiales (Clase D)</option>
-                                                <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de recarga</label>
-                                            <input
-                                                type="text"
-                                                value={newAsset.matricula}
-                                                onChange={e => setNewAsset({ ...newAsset, matricula: e.target.value })}
-                                                placeholder="Ej. 123456"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                            />
-                                        </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de recarga</label>
+                                        <input
+                                            type="text"
+                                            value={newAsset.matricula}
+                                            onChange={e => setNewAsset({ ...newAsset, matricula: e.target.value })}
+                                            placeholder="Ej. 123456"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                        />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT de fábrica</label>
-                                            <input
-                                                type="text"
-                                                value={newAsset.unit}
-                                                onChange={e => setNewAsset({ ...newAsset, unit: e.target.value })}
-                                                placeholder="Ej. 507"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Capacidad</label>
-                                            <input
-                                                type="text"
-                                                value={newAsset.capacity}
-                                                onChange={e => setNewAsset({ ...newAsset, capacity: e.target.value })}
-                                                placeholder="Ej. 4KG, 8KG"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                            />
-                                        </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT de fábrica</label>
+                                        <input
+                                            type="text"
+                                            value={newAsset.unit}
+                                            onChange={e => setNewAsset({ ...newAsset, unit: e.target.value })}
+                                            placeholder="Ej. 507"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                        />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
-                                            <input
-                                                type="text"
-                                                value={newAsset.fireClass}
-                                                onChange={e => setNewAsset({ ...newAsset, fireClass: e.target.value })}
-                                                placeholder="Ej. A, B, C"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                            />
-                                        </div>
-                                    </div>
-                                </>
+                                </div>
                             )}
 
 
@@ -1273,20 +1204,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                 {editingAsset.equipmentCategory === 'Extintor' ? (
                                     <select
                                         value={editingAsset.type}
-                                        onChange={e => {
-                                            const type = e.target.value;
-                                            let agent = '';
-                                            let fireClass = '';
-
-                                            if (type.includes('PQS') || type.includes('PABC')) { agent = 'Polvo Químico ABC'; fireClass = 'A, B, C'; }
-                                            else if (type.includes('CO2')) { agent = 'CO2'; fireClass = 'B, C'; }
-                                            else if (type.includes('Agua')) { agent = 'Agua'; fireClass = 'A'; }
-                                            else if (type.includes('Espuma') || type.includes('Espumigeno')) { agent = 'Espuma AFFF'; fireClass = 'A, B'; }
-                                            else if (type.includes('Hallotron')) { agent = 'Hallotron ABC'; fireClass = 'A, B, C'; }
-                                            else if (type.toLowerCase().includes('acetato') || type.toLowerCase().includes('clase k')) { agent = 'Acetato de Potasio'; fireClass = 'K'; }
-
-                                            setEditingAsset({ ...editingAsset, type, agent, fireClass });
-                                        }}
+                                        onChange={e => setEditingAsset({ ...editingAsset, type: e.target.value })}
                                         className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none"
                                     >
                                         <option value="" disabled>Seleccionar Tipo</option>
@@ -1318,59 +1236,28 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             {editingAsset.equipmentCategory === 'Extintor' && (
-                                <>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Agente Extintor</label>
-                                            <select
-                                                value={editingAsset.agent || ''}
-                                                onChange={e => setEditingAsset({ ...editingAsset, agent: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors appearance-none text-xs"
-                                            >
-                                                <option value="">Seleccionar...</option>
-                                                <option value="Agua">Agua</option>
-                                                <option value="Agua Pulverizada">Agua Pulverizada</option>
-                                                <option value="Polvo Químico ABC">Polvo Químico ABC</option>
-                                                <option value="CO2">CO2 (Dióxido de Carbono)</option>
-                                                <option value="Espuma AFFF">Espuma AFFF</option>
-                                                <option value="Clase D">Agentes Especiales (Clase D)</option>
-                                                <option value="Acetato de Potasio">Acetato de Potasio (Clase F)</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clase de Fuego</label>
-                                            <input
-                                                type="text"
-                                                value={editingAsset.fireClass || ''}
-                                                onChange={e => setEditingAsset({ ...editingAsset, fireClass: e.target.value })}
-                                                placeholder="Ej. A, B, C"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                            />
-                                        </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de recarga</label>
+                                        <input
+                                            type="text"
+                                            value={editingAsset.matricula || ''}
+                                            onChange={e => setEditingAsset({ ...editingAsset, matricula: e.target.value })}
+                                            placeholder="Ej. 123456"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                        />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Capacidad</label>
-                                            <input
-                                                type="text"
-                                                value={editingAsset.capacity || ''}
-                                                onChange={e => setEditingAsset({ ...editingAsset, capacity: e.target.value })}
-                                                placeholder="Ej. 4KG, 8KG"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT de fábrica</label>
-                                            <input
-                                                type="text"
-                                                value={editingAsset.unit || ''}
-                                                onChange={e => setEditingAsset({ ...editingAsset, unit: e.target.value })}
-                                                placeholder="Ej. UNIT 507"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                            />
-                                        </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT de fábrica</label>
+                                        <input
+                                            type="text"
+                                            value={editingAsset.unit || ''}
+                                            onChange={e => setEditingAsset({ ...editingAsset, unit: e.target.value })}
+                                            placeholder="Ej. UNIT 507"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                        />
                                     </div>
-                                </>
+                                </div>
                             )}
 
                             <div className="grid grid-cols-2 gap-4">

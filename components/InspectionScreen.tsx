@@ -24,6 +24,14 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
     acceso: true,
     carteleria: true
   });
+  const [editedAsset, setEditedAsset] = useState<Partial<InspectionAsset>>({});
+
+  const addYears = (dateStr: string, years: number) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    date.setFullYear(date.getFullYear() + years);
+    return date.toISOString().split('T')[0];
+  };
 
   useEffect(() => {
     loadAsset();
@@ -34,6 +42,20 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
     // Try to get asset details
     const data = await db.getAsset(assetId);
     setAsset(data);
+    if (data) {
+      setEditedAsset({
+        name: data.name,
+        type: data.type,
+        unit: data.unit,
+        matricula: data.matricula,
+        lastRecharge: data.lastRecharge,
+        lastHydrotest: data.lastHydrotest,
+        expirationDate: data.expirationDate,
+        nextHydrotest: data.nextHydrotest,
+        description: data.description,
+        lifecycleStatus: data.lifecycleStatus
+      });
+    }
     setLoading(false);
   };
 
@@ -65,14 +87,43 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
     const allOk = Object.values(checklist).every(v => v);
     
     const record: InspectionRecord = {
-      id: `insp_${Date.now()}`,
-      assetId: assetId,
+      assetId,
+      status: allOk ? 'ok' : 'failed',
+      technicianId: 'current-user', // This should be the actual user ID
       date: new Date().toISOString(),
-      inspector: 'Técnico Actual', // In a real app, get from auth profile
-      status: allOk ? 'passed' : 'failed',
-      details: checklist,
+      notes: editedAsset.description || '',
       imageUrl: uploadedImageUrl
     };
+
+    // Compare and log changes if any
+    const changes: any[] = [];
+    const fieldsToCompare: (keyof InspectionAsset)[] = [
+      'name', 'type', 'unit', 'matricula', 'lastRecharge', 
+      'lastHydrotest', 'expirationDate', 'nextHydrotest', 
+      'description', 'lifecycleStatus'
+    ];
+
+    fieldsToCompare.forEach(field => {
+      const oldValue = asset ? asset[field] : undefined;
+      const newValue = editedAsset[field as keyof typeof editedAsset];
+      if (oldValue !== newValue) {
+        changes.push({
+          field,
+          old: oldValue || 'N/A',
+          new: newValue || 'N/A'
+        });
+      }
+    });
+
+    if (changes.length > 0) {
+      await db.saveAuditLog({
+        assetId: assetId,
+        changes,
+        context: 'Modificación durante inspección'
+      });
+      // Update the asset itself
+      await db.updateAsset(assetId, editedAsset);
+    }
 
     onSave(record);
     setIsSubmitting(false);
@@ -131,6 +182,155 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
           <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
             <span className="text-[9px] uppercase font-black text-slate-500 block mb-1 tracking-widest">Ubicación / Notas</span>
             <p className="text-xs text-slate-300">{asset?.description || 'Sin descripción de ubicación registrada.'}</p>
+          </div>
+        </section>
+
+        {/* Editable Fields Section */}
+        <section className="bg-white/5 rounded-3xl border border-white/10 p-6 space-y-6">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="material-symbols-outlined text-primary">edit_note</span>
+            <h3 className="text-sm font-black text-white uppercase tracking-wider">Modificar Datos del Equipo</h3>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Lugar / Referencia</label>
+              <input
+                type="text"
+                value={editedAsset.name || ''}
+                onChange={e => setEditedAsset({ ...editedAsset, name: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
+                placeholder="Ej. Planta Alta - Cocina"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Tipo / Cap</label>
+                <select
+                  value={editedAsset.type || ''}
+                  onChange={e => setEditedAsset({ ...editedAsset, type: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none"
+                >
+                  <option value="1 PABC">1 PABC</option>
+                  <option value="2 PABC">2 PABC</option>
+                  <option value="4 PABC">4 PABC</option>
+                  <option value="8 PABC">8 PABC</option>
+                  <option value="25 PABC">25 PABC</option>
+                  <option value="50 PABC">50 PABC</option>
+                  <option value="CO2 3.5 kg">CO2 3.5 kg</option>
+                  <option value="CO2 7.5kg">CO2 7.5kg</option>
+                  <option value="CO2 10kg">CO2 10kg</option>
+                  <option value="Espumigeno 10L">Espumigeno 10L</option>
+                  <option value="Hallotron ABC 2kg">Hallotron ABC 2kg</option>
+                  <option value="Hallotron ABC 4kg">Hallotron ABC 4kg</option>
+                  <option value="Hallotron ABC 8kg">Hallotron ABC 8kg</option>
+                  <option value="Clase K acetato de potasio 6L">Clase K acetato de potasio 6L</option>
+                  <option value="Clase k acetato de potasio 10L">Clase k acetato de potasio 10L</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Sello de Recarga</label>
+                <input
+                  type="text"
+                  value={editedAsset.matricula || ''}
+                  onChange={e => setEditedAsset({ ...editedAsset, matricula: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
+                  placeholder="Sello"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">UNIT Fábrica</label>
+                <input
+                  type="text"
+                  value={editedAsset.unit || ''}
+                  onChange={e => setEditedAsset({ ...editedAsset, unit: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
+                  placeholder="UNIT"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Retirado</label>
+                <select
+                  value={editedAsset.lifecycleStatus || 'active'}
+                  onChange={e => setEditedAsset({ ...editedAsset, lifecycleStatus: e.target.value as any })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none"
+                >
+                  <option value="active">NO</option>
+                  <option value="maintenance">SÍ (En Taller)</option>
+                  <option value="discarded">SÍ (Descarte)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Fecha Carga</label>
+                <input
+                  type="date"
+                  value={editedAsset.lastRecharge || ''}
+                  onChange={e => {
+                    const date = e.target.value;
+                    setEditedAsset({ 
+                      ...editedAsset, 
+                      lastRecharge: date,
+                      expirationDate: addYears(date, 1)
+                    });
+                  }}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Vto. Carga</label>
+                <input
+                  type="date"
+                  value={editedAsset.expirationDate || ''}
+                  onChange={e => setEditedAsset({ ...editedAsset, expirationDate: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Fecha Ensayo</label>
+                <input
+                  type="date"
+                  value={editedAsset.lastHydrotest || ''}
+                  onChange={e => {
+                    const date = e.target.value;
+                    setEditedAsset({ 
+                      ...editedAsset, 
+                      lastHydrotest: date,
+                      nextHydrotest: addYears(date, 5)
+                    });
+                  }}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Próxima PH</label>
+                <input
+                  type="date"
+                  value={editedAsset.nextHydrotest || ''}
+                  onChange={e => setEditedAsset({ ...editedAsset, nextHydrotest: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Observaciones</label>
+              <textarea
+                value={editedAsset.description || ''}
+                onChange={e => setEditedAsset({ ...editedAsset, description: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors h-20 resize-none"
+                placeholder="Notas adicionales..."
+              />
+            </div>
           </div>
         </section>
 

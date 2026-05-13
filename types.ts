@@ -22,15 +22,12 @@ export interface InspectionAsset {
   imageUrl?: string;
   clientId?: string;
   companyId?: string;
-  agent?: string;
-  fireClass?: string;
   expirationDate?: string;
   lifecycleStatus?: 'active' | 'maintenance' | 'discarded';
   nextInspection?: string;
   lastRecharge?: string;
   lastHydrotest?: string;
   nextHydrotest?: string;
-  capacity?: string;
   unit?: string;
   matricula?: string;
   assignedTechnicianId?: string;
