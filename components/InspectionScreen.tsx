@@ -100,8 +100,13 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
         .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value ? 'OK' : 'FALLA'}`)
         .join(', ');
       
-      // Clean existing description from previous checklist tags to avoid duplication
+      // Clean existing description and name from previous checklist tags to avoid duplication/leaks
       let baseDescription = (editedAsset.description || '')
+        .replace(/\[Checklist:.*?\]/g, '')
+        .replace(/ACEPTABLE CON OBSERVACIONES:/g, '')
+        .trim();
+
+      let cleanName = (editedAsset.name || '')
         .replace(/\[Checklist:.*?\]/g, '')
         .replace(/ACEPTABLE CON OBSERVACIONES:/g, '')
         .trim();
@@ -109,6 +114,7 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
       const checklistText = `[Checklist: ${checklistStatus}]`;
       const failedCount = Object.values(checklist).filter(v => !v).length;
       
+      // Generate the notes for the inspection record
       let finalNotes = baseDescription;
       if (failedCount > 0) {
         finalNotes = `ACEPTABLE CON OBSERVACIONES: ${baseDescription} ${checklistText}`.trim();
@@ -117,10 +123,6 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
       }
       
       let finalStatus: 'passed' | 'failed' = 'passed'; // Always pass as per user request ("Aceptable")
-      
-      if (failedCount > 0) {
-        finalNotes = `ACEPTABLE CON OBSERVACIONES: ${finalNotes}`;
-      }
 
       const record: InspectionRecord = {
         id: Math.random().toString(36).substr(2, 9), // Temporary ID for session
@@ -138,8 +140,10 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
       const changes: any[] = [];
       
       // Create a final version of the asset with the updated notes
+      // IMPORTANT: name (Location) should stay CLEAN, only description gets the checklist
       const finalAssetToUpdate = {
         ...editedAsset,
+        name: cleanName,
         description: finalNotes
       };
 
