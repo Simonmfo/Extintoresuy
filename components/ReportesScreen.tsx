@@ -7,9 +7,10 @@ const today = new Date().toISOString().split('T')[0];
 
 interface ReportesScreenProps {
     companyId?: string;
+    profile: UserProfile | null;
 }
 
-const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
+const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: currentUserProfile }) => {
     const [clients, setClients] = useState<Client[]>([]);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [assets, setAssets] = useState<InspectionAsset[]>([]);
@@ -212,32 +213,44 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId }) => {
 
     const addLogoToWorksheet = async (worksheet: any, logoUrl: string) => {
         try {
+            if (!logoUrl) return;
+            
+            // Standard fetch to get the image data
             const response = await fetch(logoUrl);
             const blob = await response.blob();
             const arrayBuffer = await blob.arrayBuffer();
             
-            const extension = blob.type.split('/')[1] === 'png' ? 'png' : 'jpeg';
+            // Detect format
+            const extension = blob.type.includes('png') ? 'png' : 'jpeg';
             
+            // Get dimensions
             const img = new Image();
-            img.src = URL.createObjectURL(blob);
-            await new Promise((resolve) => { img.onload = resolve; });
+            const objectUrl = URL.createObjectURL(blob);
+            
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = objectUrl;
+            });
 
             const imageId = worksheet.workbook.addImage({
                 buffer: arrayBuffer,
                 extension: extension,
             });
 
+            // Coverage for rows 1, 2, 3 (approx 120 pixels)
             const targetHeight = 120;
             const ratio = targetHeight / img.height;
+            const targetWidth = img.width * ratio;
 
             worksheet.addImage(imageId, {
-                tl: { col: 4, row: 0 }, 
-                ext: { width: img.width * ratio, height: targetHeight }
+                tl: { col: 4, row: 0 }, // COLUMN E, ROW 1
+                ext: { width: targetWidth, height: targetHeight }
             });
             
-            URL.revokeObjectURL(img.src);
+            URL.revokeObjectURL(objectUrl);
         } catch (e) {
-            console.error('Error adding logo:', e);
+            console.error('CRITICAL: Logo could not be added to Excel:', e);
         }
     };
 

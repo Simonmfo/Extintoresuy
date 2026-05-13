@@ -247,7 +247,7 @@ const App: FC = () => {
       case 'facturacion':
         return <FacturacionScreen companyId={companyId} profile={profile} />;
       case 'reportes':
-        return <ReportesScreen companyId={companyId} />;
+        return <ReportesScreen companyId={companyId} profile={profile} />;
       case 'equipos':
         return <EquiposScreen companyId={companyId} />;
       case 'tecnicos':
