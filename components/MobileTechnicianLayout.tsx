@@ -49,11 +49,18 @@ const MobileTechnicianLayout: React.FC<MobileTechnicianLayoutProps> = ({
         }
 
         const asset = await db.getAsset(assetId);
-        // SECURITY: Allow admins to scan everything, but restrict technicians to their company
-        const isOwner = asset && (asset.companyId === profile.company_id || profile.role === 'admin');
+        // SECURITY: 
+        // 1. Admins scan everything
+        // 2. Technicians without company_id (Global) scan everything
+        // 3. Technicians with company_id only scan their company's assets
+        const isOwner = asset && (
+            profile.role === 'admin' || 
+            !profile.company_id || 
+            asset.companyId === profile.company_id
+        );
 
         if (!asset || !isOwner) {
-            alert('Equipo no pertenece a tu empresa o no tienes permisos.');
+            alert(`Error: ${!asset ? 'El equipo no existe.' : 'Este equipo no pertenece a tu empresa.'}`);
             setIsScannerOpen(false);
             return;
         }
