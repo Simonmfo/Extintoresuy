@@ -77,77 +77,85 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
 
   const handleFinish = async () => {
     setIsSubmitting(true);
-    
-    let uploadedImageUrl = undefined;
-    if (imageFile) {
-      uploadedImageUrl = await db.uploadInspectionPhoto(imageFile) || undefined;
-    }
-
-    // Build detailed notes with all checklist items status
-    const checklistStatus = Object.entries(checklist)
-      .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value ? 'OK' : 'FALLA'}`)
-      .join(', ');
-    
-    let finalNotes = editedAsset.description || '';
-    const checklistText = `[Checklist: ${checklistStatus}]`;
-    finalNotes = finalNotes ? `${finalNotes}\n${checklistText}` : checklistText;
-    
-    const failedCount = Object.values(checklist).filter(v => !v).length;
-    const allOk = failedCount === 0;
-    let finalStatus: 'passed' | 'failed' = 'passed'; // Always pass as per user request ("Aceptable")
-    
-    if (failedCount > 0) {
-      finalNotes = `ACEPTABLE CON OBSERVACIONES: ${finalNotes}`;
-    }
-
-    const record: InspectionRecord = {
-      id: Math.random().toString(36).substr(2, 9), // Temporary ID for session
-      assetId,
-      status: finalStatus,
-      inspector: profile?.full_name || 'Técnico',
-      technicianId: profile?.id || 'current-user', 
-      date: new Date().toISOString(),
-      notes: finalNotes,
-      details: checklist,
-      imageUrl: uploadedImageUrl
-    };
-
-    // Compare and log changes if any
-    const changes: any[] = [];
-    
-    // Update asset description to include these observations so they show in reports
-    editedAsset.description = finalNotes;
-
-    const fieldsToCompare: (keyof InspectionAsset)[] = [
-      'name', 'type', 'unit', 'matricula', 'lastRecharge', 
-      'lastHydrotest', 'expirationDate', 'nextHydrotest', 
-      'description', 'lifecycleStatus'
-    ];
-
-    fieldsToCompare.forEach(field => {
-      const oldValue = asset ? asset[field] : undefined;
-      const newValue = editedAsset[field as keyof typeof editedAsset];
-      if (oldValue !== newValue) {
-        changes.push({
-          field,
-          old: oldValue || 'N/A',
-          new: newValue || 'N/A'
-        });
+    try {
+      console.log('Starting inspection save process...');
+      let uploadedImageUrl = undefined;
+      if (imageFile) {
+        console.log('Uploading photo...');
+        uploadedImageUrl = await db.uploadInspectionPhoto(imageFile) || undefined;
       }
-    });
 
-    if (changes.length > 0) {
-      await db.saveAuditLog({
-        assetId: assetId,
-        changes,
-        context: 'Modificación durante inspección'
+      // Build detailed notes with all checklist items status
+      const checklistStatus = Object.entries(checklist)
+        .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value ? 'OK' : 'FALLA'}`)
+        .join(', ');
+      
+      let finalNotes = editedAsset.description || '';
+      const checklistText = `[Checklist: ${checklistStatus}]`;
+      finalNotes = finalNotes ? `${finalNotes}\n${checklistText}` : checklistText;
+      
+      const failedCount = Object.values(checklist).filter(v => !v).length;
+      let finalStatus: 'passed' | 'failed' = 'passed'; // Always pass as per user request ("Aceptable")
+      
+      if (failedCount > 0) {
+        finalNotes = `ACEPTABLE CON OBSERVACIONES: ${finalNotes}`;
+      }
+
+      const record: InspectionRecord = {
+        id: Math.random().toString(36).substr(2, 9), // Temporary ID for session
+        assetId,
+        status: finalStatus,
+        inspector: profile?.full_name || 'Técnico',
+        technicianId: profile?.id || 'current-user', 
+        date: new Date().toISOString(),
+        notes: finalNotes,
+        details: checklist,
+        imageUrl: uploadedImageUrl
+      };
+
+      // Compare and log changes if any
+      const changes: any[] = [];
+      
+      // Update asset description to include these observations so they show in reports
+      editedAsset.description = finalNotes;
+
+      const fieldsToCompare: (keyof InspectionAsset)[] = [
+        'name', 'type', 'unit', 'matricula', 'lastRecharge', 
+        'lastHydrotest', 'expirationDate', 'nextHydrotest', 
+        'description', 'lifecycleStatus'
+      ];
+
+      fieldsToCompare.forEach(field => {
+        const oldValue = asset ? asset[field] : undefined;
+        const newValue = editedAsset[field as keyof typeof editedAsset];
+        if (oldValue !== newValue) {
+          changes.push({
+            field,
+            old: oldValue || 'N/A',
+            new: newValue || 'N/A'
+          });
+        }
       });
-      // Update the asset itself
-      await db.updateAsset(assetId, editedAsset);
-    }
 
-    onSave(record);
-    setIsSubmitting(false);
+      if (changes.length > 0) {
+        console.log('Saving audit log and updating asset...', changes);
+        await db.saveAuditLog({
+          assetId: assetId,
+          changes,
+          context: 'Modificación durante inspección'
+        });
+        // Update the asset itself
+        await db.updateAsset(assetId, editedAsset);
+      }
+
+      console.log('Inspection saved successfully, calling onSave...');
+      onSave(record);
+    } catch (error) {
+      console.error('Error saving inspection:', error);
+      alert('Error al guardar la inspección. Por favor intenta de nuevo.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (loading) {
