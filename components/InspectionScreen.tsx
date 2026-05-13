@@ -245,8 +245,6 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
               <p className="font-bold text-sm">{asset?.expirationDate || 'N/A'}</p>
             </div>
           </div>
-
-          </div>
         </section>
 
         {/* Editable Fields Section */}
@@ -385,8 +383,6 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
                 />
               </div>
             </div>
-
-            </div>
           </div>
         </section>
 
@@ -480,7 +476,6 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
           <p className="text-center text-[9px] text-slate-600 mt-3 uppercase font-black tracking-[0.2em]">Requerido por normativa UNIT 549</p>
         </div>
 
-        {/* Signature and Signer Info Section - REMOVED, now in ValidationScreen */}
       </div>
 
       {/* Action Footer */}
