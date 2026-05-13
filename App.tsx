@@ -48,9 +48,22 @@ const App: FC = () => {
     }
 
     // Check if asset belongs to technician's company
+    // Check if asset belongs to technician's company
     const asset = await db.getAsset(assetId);
-    if (!asset || asset.companyId !== profile?.company_id) {
-      alert('Este equipo no pertenece a tu empresa o no existe.');
+    
+    // SECURITY: Allow scanning if:
+    // 1. User is Admin
+    // 2. User is Fabrica and owner of the client
+    // 3. User is Tecnico and works for the owner of the client
+    const isOwner = asset && (
+      profile?.role === 'admin' || 
+      asset.companyId === profile?.id || // For Fabrica users
+      asset.companyId === profile?.company_id || // For Tecnicos
+      !profile?.company_id // Global access for system users
+    );
+
+    if (!asset || !isOwner) {
+      alert('Este equipo no pertenece a tu empresa o no tienes permisos.');
       setIsScannerOpen(false);
       return;
     }

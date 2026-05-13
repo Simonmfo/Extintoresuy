@@ -11,9 +11,10 @@ interface BottomNavProps {
 const BottomNav: FC<BottomNavProps> = ({ currentScreen, onNavigate, role }) => {
   const allItems = [
     { id: 'home', label: 'Inicio', icon: 'home', roles: ['admin', 'tecnico', 'empresa', 'fabrica'] },
+    { id: 'clientes', label: 'Clientes', icon: 'corporate_fare', roles: ['admin', 'fabrica'] },
     { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher', roles: ['admin', 'tecnico', 'empresa', 'fabrica'] },
-    { id: 'inspecciones', label: 'Sesión', icon: 'rule', roles: ['tecnico'] },
-    { id: 'mapa', label: 'Mapa', icon: 'map', roles: ['admin', 'tecnico', 'empresa'] },
+    { id: 'inspecciones', label: 'Sesión', icon: 'rule', roles: ['tecnico', 'fabrica', 'admin'] },
+    { id: 'reportes', label: 'Reportes', icon: 'analytics', roles: ['admin', 'fabrica'] },
     { id: 'ajustes', label: 'Perfil', icon: 'person', roles: ['admin', 'tecnico', 'empresa', 'fabrica'] },
   ];
 
