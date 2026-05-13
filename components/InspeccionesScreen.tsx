@@ -160,9 +160,9 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                                     <span className="material-symbols-outlined !text-2xl">verified</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${insp.status === 'passed' ? 'bg-primary/20 text-primary' : 'bg-status-red/20 text-status-red'}`}>
-                                        {insp.status === 'passed' ? 'aprobado' : 'rechazado'}
-                                    </span>
+                                     <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${['passed', 'pass', 'ok'].includes(insp.status) ? 'bg-primary/20 text-primary' : 'bg-status-red/20 text-status-red'}`}>
+                                         {['passed', 'pass', 'ok'].includes(insp.status) ? 'aprobado' : 'rechazado'}
+                                     </span>
                                     <button 
                                         onClick={() => onRemoveInspection?.(insp.assetId)}
                                         className="size-8 rounded-lg bg-status-red/10 text-status-red flex items-center justify-center hover:bg-status-red/20 transition-colors"
@@ -252,12 +252,12 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                                             <div className="text-[10px] text-slate-500 font-mono text-primary">{inspection.asset_id}</div>
                                         </td>
                                         <td className="p-4">
-                                            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${inspection.result === 'pass' ? 'bg-primary/20 text-primary' :
-                                                inspection.result === 'fail' ? 'bg-status-red/20 text-status-red' :
+                                            <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${['pass', 'passed', 'ok'].includes(inspection.result) ? 'bg-primary/20 text-primary' :
+                                                ['fail', 'failed'].includes(inspection.result) ? 'bg-status-red/20 text-status-red' :
                                                     'bg-status-yellow/20 text-status-yellow'
                                                 }`}>
-                                                {inspection.result === 'pass' ? 'Aprobado' :
-                                                    inspection.result === 'fail' ? 'Rechazado' : 'Observado'}
+                                                {['pass', 'passed', 'ok'].includes(inspection.result) ? 'Aprobado' :
+                                                    ['fail', 'failed'].includes(inspection.result) ? 'Rechazado' : 'Observado'}
                                             </span>
                                         </td>
                                         <td className="p-4 text-slate-400 text-xs italic">

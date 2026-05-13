@@ -101,11 +101,14 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
     }
 
     const record: InspectionRecord = {
+      id: Math.random().toString(36).substr(2, 9), // Temporary ID for session
       assetId,
       status: finalStatus,
-      technicianId: 'current-user', 
+      inspector: profile?.full_name || 'Técnico',
+      technicianId: profile?.id || 'current-user', 
       date: new Date().toISOString(),
       notes: finalNotes,
+      details: checklist,
       imageUrl: uploadedImageUrl
     };
 

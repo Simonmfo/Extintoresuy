@@ -63,6 +63,7 @@ export interface InspectionRecord {
   inspector: string;
   status: 'passed' | 'failed';
   notes?: string;
+  technicianId?: string;
   details: any;
   imageUrl?: string;
   signatureUrl?: string;
