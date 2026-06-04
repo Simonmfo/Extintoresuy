@@ -404,16 +404,6 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
                 />
               </div>
             </div>
-
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Observaciones</label>
-              <textarea
-                value={editedAsset.description || ''}
-                onChange={e => setEditedAsset({ ...editedAsset, description: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors h-24 resize-none"
-                placeholder="Observaciones de la inspección"
-              />
-            </div>
           </div>
         </section>
 
@@ -475,6 +465,18 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
           </div>
         </div>
 
+        {/* Observations Section */}
+        <div className="space-y-4 pt-2">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Observaciones</h3>
+          </div>
+          <textarea
+            value={editedAsset.description || ''}
+            onChange={e => setEditedAsset({ ...editedAsset, description: e.target.value })}
+            className="w-full bg-white/5 border border-white/10 rounded-3xl px-4 py-4 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors h-24 resize-none"
+            placeholder="Escriba aquí cualquier comentario u observación sobre la inspección del equipo..."
+          />
+        </div>
 
         <div className="pt-6">
           <input 
