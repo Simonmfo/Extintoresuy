@@ -141,6 +141,15 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
             const hasObservations = asset.description && asset.description.includes('ACEPTABLE CON OBSERVACIONES');
             const statusInsp = isExpired ? 'Vencido' : hasObservations ? 'ACEPTABLE C/ OBS' : asset.status === 'ok' ? 'OK' : 'ALERTA';
 
+            let wasInspectedRecently = 'NO';
+            if (asset.lastInspection) {
+                const diffTime = new Date().getTime() - new Date(asset.lastInspection).getTime();
+                const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                if (diffDays >= 0 && diffDays <= 30) {
+                    wasInspectedRecently = 'SI';
+                }
+            }
+
             worksheet.addRow({
                 lugar: asset.name || 'N/A',
                 tipoCap: `${asset.type || ''}`.trim() || 'N/A',
@@ -148,7 +157,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
                 sello: asset.matricula || 'N/A',
                 fechaCarga: asset.lastRecharge || 'N/A',
                 fechaEnsayo: asset.lastHydrotest || 'N/A',
-                inspeccion: asset.lastInspection ? 'SI' : 'NO',
+                inspeccion: wasInspectedRecently,
                 retirado: asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI',
                 observaciones: asset.description || '',
                 id: asset.id,
