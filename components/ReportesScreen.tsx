@@ -98,15 +98,20 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
 
         worksheet.columns = [
             { key: 'lugar', width: 25 },
+            { key: 'categoria', width: 20 },
             { key: 'tipoCap', width: 20 },
-            { key: 'unit', width: 15 },
-            { key: 'sello', width: 15 },
-            { key: 'fechaCarga', width: 15 },
-            { key: 'fechaEnsayo', width: 15 },
+            { key: 'matricula', width: 15 },
+            { key: 'selloFabrica', width: 18 },
+            { key: 'selloRecarga', width: 18 },
+            { key: 'unit', width: 18 },
             { key: 'inspeccion', width: 15 },
+            { key: 'proximaInspeccion', width: 18 },
+            { key: 'fechaCarga', width: 18 },
+            { key: 'vencimientoCarga', width: 18 },
+            { key: 'fechaEnsayo', width: 18 },
+            { key: 'proximaPH', width: 18 },
             { key: 'retirado', width: 15 },
-            { key: 'observaciones', width: 30 },
-            { key: 'id', width: 15 },
+            { key: 'observaciones', width: 35 },
         ];
 
         const b1 = worksheet.getCell('B1');
@@ -121,9 +126,9 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
 
         const headerRow = worksheet.getRow(4);
         headerRow.values = [
-            'Lugar', 'Tipo / Cap', 'UNIT de fábrica', 'Sello de recarga',
-            'Fecha de carga', 'Fecha de ensayo', 'Inspección', 'Retirado SI/NO',
-            'Observaciones', 'ID'
+            'Lugar', 'Categoría de equipo', 'Tipo/Cap', 'Matrícula', 'Sello de fábrica', 'Sello de recarga',
+            'Unit de fábrica', 'Inspección', 'Próxima inspección', 'Fecha de carga', 'Vencimiento de carga',
+            'Fecha de ensayo', 'Próxima PH', 'Retirado Si/No', 'Observaciones'
         ];
         headerRow.height = 25;
         headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
@@ -150,20 +155,25 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
 
             worksheet.addRow({
                 lugar: asset.name || 'N/A',
+                categoria: asset.equipmentCategory || 'Extintor',
                 tipoCap: `${asset.type || ''}`.trim() || 'N/A',
+                matricula: asset.id,
+                selloFabrica: asset.selloFabrica || 'N/A',
+                selloRecarga: asset.matricula || 'N/A',
                 unit: asset.unit || 'N/A',
-                sello: asset.matricula || 'N/A',
-                fechaCarga: asset.lastRecharge || 'N/A',
-                fechaEnsayo: asset.lastHydrotest || 'N/A',
                 inspeccion: wasInspectedRecently,
+                proximaInspeccion: asset.nextInspection || 'N/A',
+                fechaCarga: asset.lastRecharge || 'N/A',
+                vencimientoCarga: asset.expirationDate || 'N/A',
+                fechaEnsayo: asset.lastHydrotest || 'N/A',
+                proximaPH: asset.nextHydrotest || 'N/A',
                 retirado: asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI',
                 observaciones: cleanObservations,
-                id: asset.id,
             }).font = { size: 10 };
         });
 
         if (profile?.logo_url) {
-            await addLogoToWorksheet(worksheet, profile.logo_url);
+            await addLogoToWorksheet(worksheet, profile.logo_url, 12, 15);
         }
     };
 
@@ -215,7 +225,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
         }
     };
 
-    const addLogoToWorksheet = async (worksheet: any, logoUrl: string) => {
+    const addLogoToWorksheet = async (worksheet: any, logoUrl: string, colStart: number = 5, colEnd: number = 8) => {
         try {
             if (!logoUrl) return;
             
@@ -242,9 +252,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
                 extension: extension,
             });
 
-            // Target range: E1 to H3 (Column E is 5, H is 8. Row 1 is 1, Row 3 is 3)
-            const colStart = 5;
-            const colEnd = 8;
+            // Target range
             const rowStart = 1;
             const rowEnd = 3;
 

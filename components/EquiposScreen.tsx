@@ -18,7 +18,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
     const [assets, setAssets] = useState<InspectionAsset[]>([]);
     const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [newAsset, setNewAsset] = useState({ name: '', equipmentCategory: 'Extintor', type: '', description: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', unit: '', matricula: '' });
+    const [newAsset, setNewAsset] = useState({ name: '', equipmentCategory: 'Extintor', type: '', description: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', unit: '', matricula: '', selloFabrica: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<InspectionAsset | null>(null);
     const [editingAsset, setEditingAsset] = useState<InspectionAsset | null>(null);
@@ -86,30 +86,44 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
         // Create CSV content
         const headers = [
-            'Lugar', 'Tipo / Cap', 'UNIT de fábrica', 'Sello de recarga', 
-            'Fecha de carga', 'Fecha de ensayo', 'Inspección SI/NO', 'Retirado SI/NO', 
-            'Observaciones', 'ID', 'Establecimiento', 'Vto. Carga', 'Vto. Ensayo', 'Estado'
+            'Lugar', 'Categoría de equipo', 'Tipo/Cap', 'Matrícula', 'Sello de fábrica', 'Sello de recarga',
+            'Unit de fábrica', 'Inspección', 'Próxima inspección', 'Fecha de carga', 'Vencimiento de carga',
+            'Fecha de ensayo', 'Próxima PH', 'Retirado Si/No', 'Observaciones'
         ];
         const today = new Date().toISOString().split('T')[0];
         const rows = assets.map(asset => {
-            const isExpired = asset.expirationDate && asset.expirationDate < today;
-            const statusText = isExpired ? 'Vencido' : asset.status === 'ok' ? 'Al día' : asset.status === 'failed' ? 'Rechazado' : 'Pendiente';
+            let wasInspectedRecently = 'NO';
+            if (asset.lastInspection) {
+                const diffTime = new Date().getTime() - new Date(asset.lastInspection).getTime();
+                const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                if (diffDays >= 0 && diffDays <= 30) {
+                    wasInspectedRecently = 'SI';
+                }
+            }
+
+            const cleanObservations = (asset.description || '')
+                .replace(/\[Checklist:.*?\]/g, '')
+                .replace(/M:.*?, P:.*?, A:.*?, C:.*?/g, '')
+                .replace(/ACEPTABLE CON OBSERVACIONES:/g, '')
+                .replace(/\|/g, '')
+                .trim();
 
             return [
                 asset.name || 'N/A', // Lugar
-                `${asset.type || ''}`.trim() || 'N/A', // Tipo / Cap
-                asset.unit || 'N/A', // UNIT
-                asset.matricula || 'N/A', // Sello
+                asset.equipmentCategory || 'Extintor', // Categoria de equipo
+                asset.type || 'N/A', // Tipo/Cap
+                asset.id, // Matricula
+                asset.selloFabrica || 'N/A', // Sello de fabrica
+                asset.matricula || 'N/A', // sello de recarga
+                asset.unit || 'N/A', // Unit de fabrica
+                wasInspectedRecently, // Inspeccion
+                asset.nextInspection || 'N/A', // Proxima inspeccion
                 asset.lastRecharge || 'N/A', // Fecha de carga
+                asset.expirationDate || 'N/A', // Vencimiento de carga
                 asset.lastHydrotest || 'N/A', // Fecha de ensayo
-                asset.lastInspection ? 'SI' : 'NO', // Inspección SI/NO
-                asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI', // Retirado SI/NO
-                asset.description || '', // Observaciones
-                asset.id,
-                selectedClient.name,
-                asset.expirationDate || 'N/A',
-                asset.nextHydrotest || 'N/A',
-                statusText
+                asset.nextHydrotest || 'N/A', // proxima PH
+                asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI', // Retirado Si/No
+                cleanObservations // Observaciones
             ];
         });
 
@@ -374,6 +388,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             nextHydrotest: newAsset.nextHydrotest,
             unit: newAsset.unit,
             matricula: newAsset.matricula,
+            selloFabrica: newAsset.selloFabrica,
             lifecycleStatus: newAsset.lifecycleStatus as any
         });
 
@@ -382,7 +397,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             const updatedAssets = await db.getAssetsByClient(selectedClient.id);
             setAssets(updatedAssets);
             setIsAddModalOpen(false);
-            setNewAsset({ name: '', equipmentCategory: 'Extintor', type: '', description: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', unit: '', matricula: '' });
+            setNewAsset({ name: '', equipmentCategory: 'Extintor', type: '', description: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', unit: '', matricula: '', selloFabrica: '' });
         }
         setIsSubmitting(false);
     };
@@ -415,6 +430,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             nextHydrotest: editingAsset.nextHydrotest,
             unit: editingAsset.unit,
             matricula: editingAsset.matricula,
+            selloFabrica: editingAsset.selloFabrica,
             lifecycleStatus: editingAsset.lifecycleStatus
         });
 
@@ -1014,24 +1030,36 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             {newAsset.equipmentCategory === 'Extintor' && (
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de recarga</label>
-                                        <input
-                                            type="text"
-                                            value={newAsset.matricula}
-                                            onChange={e => setNewAsset({ ...newAsset, matricula: e.target.value })}
-                                            placeholder="Ej. 123456"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                        />
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de recarga</label>
+                                            <input
+                                                type="text"
+                                                value={newAsset.matricula}
+                                                onChange={e => setNewAsset({ ...newAsset, matricula: e.target.value })}
+                                                placeholder="Ej. 123456"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT de fábrica</label>
+                                            <input
+                                                type="text"
+                                                value={newAsset.unit}
+                                                onChange={e => setNewAsset({ ...newAsset, unit: e.target.value })}
+                                                placeholder="Ej. 507"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                            />
+                                        </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT de fábrica</label>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de fábrica</label>
                                         <input
                                             type="text"
-                                            value={newAsset.unit}
-                                            onChange={e => setNewAsset({ ...newAsset, unit: e.target.value })}
-                                            placeholder="Ej. 507"
+                                            value={newAsset.selloFabrica}
+                                            onChange={e => setNewAsset({ ...newAsset, selloFabrica: e.target.value })}
+                                            placeholder="Ej. Sello de Fábrica"
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
                                         />
                                     </div>
@@ -1236,24 +1264,36 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                             </div>
 
                             {editingAsset.equipmentCategory === 'Extintor' && (
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de recarga</label>
-                                        <input
-                                            type="text"
-                                            value={editingAsset.matricula || ''}
-                                            onChange={e => setEditingAsset({ ...editingAsset, matricula: e.target.value })}
-                                            placeholder="Ej. 123456"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                        />
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de recarga</label>
+                                            <input
+                                                type="text"
+                                                value={editingAsset.matricula || ''}
+                                                onChange={e => setEditingAsset({ ...editingAsset, matricula: e.target.value })}
+                                                placeholder="Ej. 123456"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT de fábrica</label>
+                                            <input
+                                                type="text"
+                                                value={editingAsset.unit || ''}
+                                                onChange={e => setEditingAsset({ ...editingAsset, unit: e.target.value })}
+                                                placeholder="Ej. UNIT 507"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                            />
+                                        </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">UNIT de fábrica</label>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de fábrica</label>
                                         <input
                                             type="text"
-                                            value={editingAsset.unit || ''}
-                                            onChange={e => setEditingAsset({ ...editingAsset, unit: e.target.value })}
-                                            placeholder="Ej. UNIT 507"
+                                            value={editingAsset.selloFabrica || ''}
+                                            onChange={e => setEditingAsset({ ...editingAsset, selloFabrica: e.target.value })}
+                                            placeholder="Ej. Sello de Fábrica"
                                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
                                         />
                                     </div>

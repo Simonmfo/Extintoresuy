@@ -30,6 +30,7 @@ export interface InspectionAsset {
   nextHydrotest?: string;
   unit?: string;
   matricula?: string;
+  selloFabrica?: string;
   assignedTechnicianId?: string;
 }
 

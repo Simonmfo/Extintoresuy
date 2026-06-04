@@ -24,6 +24,7 @@ const mapAsset = (asset: any): InspectionAsset => ({
   nextHydrotest: asset.next_hydrotest_date,
   unit: asset.unit,
   matricula: asset.matricula,
+  selloFabrica: asset.sello_fabrica,
   assignedTechnicianId: asset.assigned_technician_id
 });
 
@@ -641,6 +642,7 @@ export const db = {
     lifecycleStatus?: 'active' | 'maintenance' | 'discarded';
     unit?: string;
     matricula?: string;
+    selloFabrica?: string;
   }) => {
     try {
       const { data, error } = await supabase
@@ -660,6 +662,7 @@ export const db = {
           location_status: assetData.lifecycleStatus || 'active',
           unit: assetData.unit,
           matricula: assetData.matricula,
+          sello_fabrica: assetData.selloFabrica,
           status: 'pending',
           location_lat: -34.9011,
           location_lng: -56.1645,
@@ -697,7 +700,8 @@ export const db = {
           last_hydrotest_date: updates.lastHydrotest,
           next_hydrotest_date: updates.nextHydrotest,
           unit: updates.unit,
-          matricula: updates.matricula
+          matricula: updates.matricula,
+          sello_fabrica: updates.selloFabrica
         } as any)
         .eq('id', id);
 
