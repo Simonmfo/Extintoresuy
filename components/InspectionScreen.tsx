@@ -51,6 +51,13 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
     const data = await db.getAsset(assetId);
     setAsset(data);
     if (data) {
+      const cleanDesc = (data.description || '')
+        .replace(/\[Checklist:.*?\]/g, '')
+        .replace(/M:.*?, P:.*?, A:.*?, C:.*?/g, '')
+        .replace(/ACEPTABLE CON OBSERVACIONES:/g, '')
+        .replace(/\|/g, '')
+        .trim();
+
       setEditedAsset({
         name: data.name,
         type: data.type,
@@ -60,7 +67,7 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
         lastHydrotest: data.lastHydrotest,
         expirationDate: data.expirationDate,
         nextHydrotest: data.nextHydrotest,
-        description: data.description,
+        description: cleanDesc,
         lifecycleStatus: data.lifecycleStatus
       });
     }
@@ -396,6 +403,16 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Observaciones</label>
+              <textarea
+                value={editedAsset.description || ''}
+                onChange={e => setEditedAsset({ ...editedAsset, description: e.target.value })}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors h-24 resize-none"
+                placeholder="Observaciones de la inspección"
+              />
             </div>
           </div>
         </section>
