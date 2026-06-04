@@ -281,16 +281,14 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
             const offsetX = (totalWidthPx - targetWidth) / 2;
             const offsetY = (totalHeightPx - targetHeight) / 2;
 
-            // Find starting cell and offset in EMUs (1 pixel = 9525 EMUs)
+            // Find starting cell as a decimal (floating-point index)
             let currentX = offsetX;
-            let startCol = colStart - 1; // 0-indexed column
-            let startColOff = 0;
+            let startColFloat = colStart - 1; // 0-indexed column (starts at Column E, index 4)
             for (let col = colStart; col <= colEnd; col++) {
                 const colW = worksheet.getColumn(col).width !== undefined ? worksheet.getColumn(col).width : 8.43;
                 const colWPx = colW * 8;
                 if (currentX < colWPx) {
-                    startCol = col - 1;
-                    startColOff = Math.round(currentX * 9525);
+                    startColFloat = (col - 1) + (currentX / colWPx);
                     break;
                 } else {
                     currentX -= colWPx;
@@ -298,14 +296,12 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
             }
 
             let currentY = offsetY;
-            let startRow = rowStart - 1; // 0-indexed row
-            let startRowOff = 0;
+            let startRowFloat = rowStart - 1; // 0-indexed row (starts at Row 1, index 0)
             for (let row = rowStart; row <= rowEnd; row++) {
                 const rowH = worksheet.getRow(row).height !== undefined ? worksheet.getRow(row).height : 15;
                 const rowHPx = rowH * 1.333;
                 if (currentY < rowHPx) {
-                    startRow = row - 1;
-                    startRowOff = Math.round(currentY * 9525);
+                    startRowFloat = (row - 1) + (currentY / rowHPx);
                     break;
                 } else {
                     currentY -= rowHPx;
@@ -314,12 +310,8 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
 
             worksheet.addImage(imageId, {
                 tl: {
-                    col: startCol,
-                    row: startRow,
-                    nativeCol: startCol,
-                    nativeRow: startRow,
-                    nativeColOff: startColOff,
-                    nativeRowOff: startRowOff
+                    col: startColFloat,
+                    row: startRowFloat
                 },
                 ext: { width: targetWidth, height: targetHeight }
             });
