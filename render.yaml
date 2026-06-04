@@ -2,10 +2,7 @@ services:
   - type: web
     name: extintoresuy-whatsapp-bot
     env: docker
-    repo: https://github.com/Simonmfo/Extintoresuy
-    branch: main
     rootDir: whatsapp-bot
-    plan: free
     healthCheckPath: /health
     envVars:
       - key: SUPABASE_URL
