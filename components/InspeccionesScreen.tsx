@@ -238,6 +238,7 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                                     <th className="p-4 font-bold">Equipo</th>
                                     <th className="p-4 font-bold">Resultado</th>
                                     <th className="p-4 font-bold">Notas</th>
+                                    <th className="p-4 font-bold">Firmante / Firma</th>
                                 </tr>
                             </thead>
                             <tbody className="text-sm">
@@ -263,10 +264,31 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                                         <td className="p-4 text-slate-400 text-xs italic">
                                             {inspection.notes || 'Sin observaciones adicionales.'}
                                         </td>
+                                        <td className="p-4">
+                                            {inspection.signer_name ? (
+                                                <div className="space-y-1">
+                                                    <div className="text-white font-bold text-xs">{inspection.signer_name}</div>
+                                                    <div className="text-[10px] text-slate-500">C.I.: {inspection.signer_document || 'N/A'}</div>
+                                                    {inspection.signature_url && (
+                                                        <a 
+                                                            href={inspection.signature_url} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1 text-[10px] text-primary hover:text-green-400 hover:underline mt-1 font-bold uppercase tracking-wider"
+                                                        >
+                                                            <span className="material-symbols-outlined !text-xs">draw</span>
+                                                            Ver Firma
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className="text-slate-500 text-xs italic">N/A</span>
+                                            )}
+                                        </td>
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan={4} className="p-12 text-center text-slate-500 italic">
+                                        <td colSpan={5} className="p-12 text-center text-slate-500 italic">
                                             No se han registrado inspecciones aún.
                                         </td>
                                     </tr>
