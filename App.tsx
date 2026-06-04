@@ -28,6 +28,7 @@ import TermsScreen from './components/TermsScreen';
 import PrivacyScreen from './components/PrivacyScreen';
 import QRScannerModal from './components/QRScannerModal';
 import { offlineService } from './services/offline';
+import { hasPermission } from './utils/permissions';
 
 const App: FC = () => {
   const isNative = Capacitor.isNativePlatform();
@@ -81,6 +82,11 @@ const App: FC = () => {
   }, [pendingInspections]);
 
   const handleScan = async (decodedText: string) => {
+    if (!hasPermission(profile, 'inspecciones', 'write')) {
+      alert('Error: No tienes permisos para registrar o modificar inspecciones.');
+      setIsScannerOpen(false);
+      return;
+    }
     let assetId = decodedText;
     
     // Check if it's a JSON string (like {"id":"..."})
@@ -209,6 +215,10 @@ const App: FC = () => {
   };
 
   const handleStartInspection = (assetId: string) => {
+    if (!hasPermission(profile, 'inspecciones', 'write')) {
+      alert('Error: No tienes permisos para registrar o modificar inspecciones.');
+      return;
+    }
     setSelectedAssetId(assetId);
     setCurrentScreen('inspeccion');
   };
@@ -257,6 +267,23 @@ const App: FC = () => {
   };
 
   const renderScreen = () => {
+    const bypassScreens = ['home', 'ajustes', 'inspeccion', 'validacion'];
+    if (!bypassScreens.includes(currentScreen) && !hasPermission(profile, currentScreen, 'read')) {
+      return (
+        <div className="flex flex-col items-center justify-center h-[70vh] text-slate-500 p-4">
+          <span className="material-symbols-outlined text-6xl mb-4 text-red-500">gavel</span>
+          <h2 className="text-xl font-bold uppercase tracking-widest text-red-500">Acceso Denegado</h2>
+          <p className="text-slate-400 text-sm mt-2 text-center">No tienes los permisos requeridos para acceder a este módulo.</p>
+          <button
+            onClick={() => handleNavigate('home')}
+            className="mt-6 text-primary font-bold border border-primary/20 px-6 py-2.5 rounded-xl uppercase tracking-wider text-xs bg-white/5 hover:bg-white/10 active:scale-95 transition-all"
+          >
+            Volver al Inicio
+          </button>
+        </div>
+      );
+    }
+
     switch (currentScreen) {
       case 'home':
         return (
@@ -280,17 +307,17 @@ const App: FC = () => {
           </>
         );
       case 'usuarios':
-        return <UsuariosScreen />;
+        return <UsuariosScreen profile={profile} readOnly={!hasPermission(profile, 'usuarios', 'write')} />;
       case 'clientes':
-        return <ClientesScreen companyId={companyId} profile={profile} />;
+        return <ClientesScreen companyId={companyId} profile={profile} readOnly={!hasPermission(profile, 'clientes', 'write')} />;
       case 'facturacion':
         return <FacturacionScreen companyId={companyId} profile={profile} />;
       case 'reportes':
         return <ReportesScreen companyId={companyId} profile={profile} />;
       case 'equipos':
-        return <EquiposScreen companyId={companyId} />;
+        return <EquiposScreen companyId={companyId} readOnly={!hasPermission(profile, 'equipos', 'write')} />;
       case 'tecnicos':
-        return <TecnicosScreen companyId={companyId} />;
+        return <TecnicosScreen companyId={companyId} readOnly={!hasPermission(profile, 'tecnicos', 'write')} />;
       case 'ajustes':
         return <AjustesScreen profile={profile} onLogout={handleLogout} onRefreshProfile={() => {}} />;
       case 'fabricas':
@@ -387,6 +414,7 @@ const App: FC = () => {
           fullName={profile?.full_name || 'Administrador'}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
+          profile={profile}
         />
       )}
 
@@ -420,7 +448,7 @@ const App: FC = () => {
       {/* Mobile Bottom Nav */}
       {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
-          <BottomNav currentScreen={currentScreen} onNavigate={handleNavigate} role={profile?.role || 'admin'} />
+          <BottomNav currentScreen={currentScreen} onNavigate={handleNavigate} role={profile?.role || 'admin'} profile={profile} />
         </div>
       )}
     </div>

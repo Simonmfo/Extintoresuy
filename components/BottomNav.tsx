@@ -1,24 +1,26 @@
 
 import { type FC } from 'react';
 import { Screen } from '../types';
+import { hasPermission } from '../utils/permissions';
 
 interface BottomNavProps {
   currentScreen: Screen;
   onNavigate: (screen: Screen) => void;
   role: 'admin' | 'tecnico' | 'empresa' | 'fabrica';
+  profile: any;
 }
 
-const BottomNav: FC<BottomNavProps> = ({ currentScreen, onNavigate, role }) => {
+const BottomNav: FC<BottomNavProps> = ({ currentScreen, onNavigate, role, profile }) => {
   const allItems = [
-    { id: 'home', label: 'Inicio', icon: 'home', roles: ['admin', 'tecnico', 'empresa', 'fabrica'] },
-    { id: 'clientes', label: 'Clientes', icon: 'corporate_fare', roles: ['admin', 'fabrica'] },
-    { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher', roles: ['admin', 'tecnico', 'empresa', 'fabrica'] },
-    { id: 'inspecciones', label: 'Sesión', icon: 'rule', roles: ['tecnico', 'fabrica', 'admin'] },
-    { id: 'reportes', label: 'Reportes', icon: 'analytics', roles: ['admin', 'fabrica'] },
-    { id: 'ajustes', label: 'Perfil', icon: 'person', roles: ['admin', 'tecnico', 'empresa', 'fabrica'] },
+    { id: 'home', label: 'Inicio', icon: 'home' },
+    { id: 'clientes', label: 'Clientes', icon: 'corporate_fare' },
+    { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
+    { id: 'inspecciones', label: 'Sesión', icon: 'rule' },
+    { id: 'reportes', label: 'Reportes', icon: 'analytics' },
+    { id: 'ajustes', label: 'Perfil', icon: 'person' },
   ];
 
-  const navItems = allItems.filter(item => item.roles.includes(role));
+  const navItems = allItems.filter(item => hasPermission(profile, item.id, 'read'));
 
   return (
     <div className="fixed bottom-0 inset-x-0 p-4 z-[100] flex justify-center pointer-events-none">

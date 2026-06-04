@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Screen } from '../types';
+import { hasPermission } from '../utils/permissions';
 
 interface SidebarProps {
     currentScreen: Screen;
@@ -10,49 +11,25 @@ interface SidebarProps {
     fullName?: string;
     isOpen?: boolean;
     onClose?: () => void;
+    profile: any;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, role, fullName, isOpen, onClose }) => {
-    const navItems = role === 'admin'
-        ? [
-            { id: 'home', label: 'Admin Panel', icon: 'admin_panel_settings' },
-            { id: 'usuarios', label: 'Usuarios', icon: 'manage_accounts' },
-            { id: 'clientes', label: 'Clientes', icon: 'corporate_fare' },
-            { id: 'fabricas', label: 'Plantas Recarga', icon: 'factory' },
-            { id: 'facturacion', label: 'Facturación', icon: 'payments' },
-            { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
-            { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
-            { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
-            { id: 'inspecciones', label: 'Inspecciones', icon: 'assignment' },
-            { id: 'mapa', label: 'Mapa', icon: 'location_on' },
-            { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
-        ]
-        : role === 'tecnico'
-            ? [
-                { id: 'home', label: 'Inicio', icon: 'dashboard' },
-                { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
-                { id: 'inspecciones', label: 'Inspecciones', icon: 'assignment' },
-                { id: 'mapa', label: 'Mapa', icon: 'location_on' },
-                { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
-            ]
-            : role === 'fabrica'
-                ? [
-                    { id: 'home', label: 'Inicio', icon: 'dashboard' },
-                    { id: 'clientes', label: 'Clientes', icon: 'corporate_fare' },
-                    { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
-                    { id: 'equipos', label: 'Equipos', icon: 'fire_extinguisher' },
-                    { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
-                    { id: 'inspecciones', label: 'Inspecciones', icon: 'assignment' },
-                    { id: 'mapa', label: 'Mapa', icon: 'location_on' },
-                    { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
-                ]
-                : [
-                    { id: 'home', label: 'Inicio', icon: 'dashboard' },
-                    { id: 'equipos', label: 'Mis Equipos', icon: 'fire_extinguisher' },
-                    { id: 'inspecciones', label: 'Inspecciones', icon: 'assignment' },
-                    { id: 'mapa', label: 'Mapa', icon: 'location_on' },
-                    { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
-                ];
+const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, role, fullName, isOpen, onClose, profile }) => {
+    const allNavItems = [
+        { id: 'home', label: role === 'admin' ? 'Admin Panel' : 'Inicio', icon: role === 'admin' ? 'admin_panel_settings' : 'dashboard' },
+        { id: 'usuarios', label: 'Usuarios', icon: 'manage_accounts' },
+        { id: 'clientes', label: 'Clientes', icon: 'corporate_fare' },
+        { id: 'fabricas', label: 'Plantas Recarga', icon: 'factory' },
+        { id: 'facturacion', label: 'Facturación', icon: 'payments' },
+        { id: 'reportes', label: 'Reportes', icon: 'bar_chart' },
+        { id: 'equipos', label: role === 'empresa' ? 'Mis Equipos' : 'Equipos', icon: 'fire_extinguisher' },
+        { id: 'tecnicos', label: 'Técnicos', icon: 'engineering' },
+        { id: 'inspecciones', label: 'Inspecciones', icon: 'assignment' },
+        { id: 'mapa', label: 'Mapa', icon: 'location_on' },
+        { id: 'ajustes', label: 'Ajustes', icon: 'settings' },
+    ];
+
+    const navItems = allNavItems.filter(item => hasPermission(profile, item.id, 'read'));
 
     return (
         <>

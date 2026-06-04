@@ -56,6 +56,7 @@ export interface UserProfile {
   logo_url?: string;
   created_at?: string;
   creatorName?: string;
+  permissions?: any;
 }
 export interface InspectionRecord {
   id: string;
