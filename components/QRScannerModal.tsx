@@ -13,6 +13,7 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose, onScan
     const [error, setError] = useState<string | null>(null);
     const [cameras, setCameras] = useState<any[]>([]);
     const [activeCameraId, setActiveCameraId] = useState<string>("");
+    const [manualId, setManualId] = useState("");
 
     const stopScanner = async () => {
         if (html5QrCode.current && html5QrCode.current.isScanning) {
@@ -24,8 +25,17 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose, onScan
         }
     };
 
+    const handleManualSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const cleanId = manualId.trim();
+        if (cleanId) {
+            stopScanner().then(() => onScan(cleanId));
+        }
+    };
+
     useEffect(() => {
         if (isOpen) {
+            setManualId("");
             setError(null);
             
             // Check for secure context
@@ -102,7 +112,33 @@ const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose, onScan
                     </button>
                 </div>
 
-                <div className="p-6">
+                <div className="p-6 space-y-6">
+                    {/* Manual ID Input Form */}
+                    <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-3">
+                        <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Ingresar ID manualmente</label>
+                        <form onSubmit={handleManualSubmit} className="flex gap-2">
+                            <input 
+                                type="text"
+                                value={manualId}
+                                onChange={(e) => setManualId(e.target.value)}
+                                placeholder="Ej. EXT-001 o Nº de Sello"
+                                className="flex-1 bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors placeholder-slate-600 font-mono"
+                            />
+                            <button 
+                                type="submit"
+                                className="bg-primary text-background-dark font-black px-6 py-3 rounded-xl text-xs uppercase tracking-widest hover:bg-green-400 active:scale-95 transition-all shadow-lg shadow-primary/10"
+                            >
+                                Ingresar
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="relative border-t border-white/5 pt-4">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-background-dark px-3 text-[10px] uppercase tracking-widest text-slate-500 font-black">
+                            o escanear código
+                        </div>
+                    </div>
+
                     {error ? (
                         <div className="bg-status-red/10 border border-status-red/20 p-6 rounded-3xl text-center">
                             <span className="material-symbols-outlined text-status-red text-4xl mb-4 font-light">videocam_off</span>
