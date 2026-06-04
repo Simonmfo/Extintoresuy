@@ -1,5 +1,5 @@
 
-export type Screen = 'home' | 'equipos' | 'clientes' | 'mapa' | 'reportes' | 'ajustes' | 'inspeccion' | 'usuarios' | 'facturacion' | 'tecnicos' | 'inspecciones' | 'fabricas' | 'validacion';
+export type Screen = 'home' | 'equipos' | 'clientes' | 'mapa' | 'reportes' | 'ajustes' | 'inspeccion' | 'usuarios' | 'facturacion' | 'tecnicos' | 'inspecciones' | 'fabricas' | 'validacion' | 'bajas';
 
 export interface LocationItem {
   id: string;
@@ -32,6 +32,10 @@ export interface InspectionAsset {
   matricula?: string;
   selloFabrica?: string;
   assignedTechnicianId?: string;
+  retiredAt?: string;
+  retiredById?: string;
+  retiredByName?: string;
+  retirementReason?: string;
 }
 
 export interface Client {

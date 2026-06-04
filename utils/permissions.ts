@@ -9,7 +9,8 @@ export type PermissionModule =
   | 'tecnicos'
   | 'inspecciones'
   | 'mapa'
-  | 'ajustes';
+  | 'ajustes'
+  | 'bajas';
 
 export interface ModulePermission {
   read: boolean;
@@ -30,7 +31,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, UserPermissions> = {
     tecnicos: { read: true, write: true },
     inspecciones: { read: true, write: true },
     mapa: { read: true, write: true },
-    ajustes: { read: true, write: true }
+    ajustes: { read: true, write: true },
+    bajas: { read: true, write: true }
   },
   tecnico: {
     home: { read: true, write: false },
@@ -43,7 +45,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, UserPermissions> = {
     tecnicos: { read: false, write: false },
     inspecciones: { read: true, write: true },
     mapa: { read: true, write: false },
-    ajustes: { read: true, write: true }
+    ajustes: { read: true, write: true },
+    bajas: { read: false, write: false }
   },
   fabrica: {
     home: { read: true, write: false },
@@ -56,7 +59,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, UserPermissions> = {
     tecnicos: { read: true, write: true },
     inspecciones: { read: true, write: true },
     mapa: { read: true, write: false },
-    ajustes: { read: true, write: true }
+    ajustes: { read: true, write: true },
+    bajas: { read: true, write: true }
   },
   empresa: {
     home: { read: true, write: false },
@@ -69,7 +73,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, UserPermissions> = {
     tecnicos: { read: false, write: false },
     inspecciones: { read: true, write: false },
     mapa: { read: true, write: false },
-    ajustes: { read: true, write: true }
+    ajustes: { read: true, write: true },
+    bajas: { read: true, write: false }
   }
 };
 

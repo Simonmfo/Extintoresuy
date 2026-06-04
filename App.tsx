@@ -14,6 +14,7 @@ import TecnicosScreen from './components/TecnicosScreen';
 import AjustesScreen from './components/AjustesScreen';
 import InspeccionesScreen from './components/InspeccionesScreen';
 import FabricasScreen from './components/FabricasScreen';
+import BajasScreen from './components/BajasScreen';
 import MapScreen from './components/MapScreen';
 import InspectionScreen from './components/InspectionScreen';
 import ValidationScreen from './components/ValidationScreen';
@@ -322,6 +323,8 @@ const App: FC = () => {
         return <AjustesScreen profile={profile} onLogout={handleLogout} onRefreshProfile={() => {}} />;
       case 'fabricas':
         return <FabricasScreen />;
+      case 'bajas':
+        return <BajasScreen companyId={companyId} profile={profile} />;
       case 'inspecciones':
         return (
           <InspeccionesScreen 

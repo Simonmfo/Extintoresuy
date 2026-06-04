@@ -25,7 +25,11 @@ const mapAsset = (asset: any): InspectionAsset => ({
   unit: asset.unit,
   matricula: asset.matricula,
   selloFabrica: asset.sello_fabrica,
-  assignedTechnicianId: asset.assigned_technician_id
+  assignedTechnicianId: asset.assigned_technician_id,
+  retiredAt: asset.retired_at,
+  retiredById: asset.retired_by_id,
+  retiredByName: asset.retired_by_name,
+  retirementReason: asset.retirement_reason
 });
 
 export const db = {
@@ -533,6 +537,62 @@ export const db = {
     return allAssets.map(mapAsset);
   },
 
+  getRetiredAssets: async (companyId?: string): Promise<any[]> => {
+    if (!companyId) return [];
+
+    let allAssets: any[] = [];
+    let from = 0;
+    const limit = 1000;
+    let done = false;
+
+    let allowedClientIds: string[] | null = null;
+    if (companyId !== 'ALL') {
+      const { data: clients } = await (supabase
+        .from('clients')
+        .select('id') as any)
+        .eq('company_id', companyId);
+
+      allowedClientIds = clients?.map(c => c.id) || [];
+      if (allowedClientIds.length === 0) return [];
+    }
+
+    while (!done) {
+      let query = supabase
+        .from('assets')
+        .select('*, clients(name)')
+        .eq('location_status', 'discarded')
+        .order('retired_at', { ascending: false })
+        .range(from, from + limit - 1);
+
+      if (allowedClientIds) {
+        query = query.in('client_id', allowedClientIds);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching retired assets:', error);
+        return allAssets.map(asset => ({ ...mapAsset(asset), clientName: asset.clients?.name || 'N/A' }));
+      }
+
+      if (data && data.length > 0) {
+        allAssets = [...allAssets, ...data];
+        if (data.length < limit) {
+          done = true;
+        } else {
+          from += limit;
+        }
+      } else {
+        done = true;
+      }
+    }
+
+    return allAssets.map(asset => ({
+      ...mapAsset(asset),
+      clientName: asset.clients?.name || 'N/A'
+    }));
+  },
+
   addInspection: async (record: InspectionRecord): Promise<{ success: boolean; message?: string }> => {
     try {
       console.log('Adding inspection:', record);
@@ -701,7 +761,11 @@ export const db = {
           next_hydrotest_date: updates.nextHydrotest,
           unit: updates.unit,
           matricula: updates.matricula,
-          sello_fabrica: updates.selloFabrica
+          sello_fabrica: updates.selloFabrica,
+          retired_at: updates.retiredAt,
+          retired_by_id: updates.retiredById,
+          retired_by_name: updates.retiredByName,
+          retirement_reason: updates.retirementReason
         } as any)
         .eq('id', id);
 

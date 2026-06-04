@@ -23,6 +23,13 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
     const [viewingAsset, setViewingAsset] = useState<InspectionAsset | null>(null);
     const [editingAsset, setEditingAsset] = useState<InspectionAsset | null>(null);
 
+    // Decommission States
+    const [isRetireModalOpen, setIsRetireModalOpen] = useState(false);
+    const [assetToRetire, setAssetToRetire] = useState<InspectionAsset | null>(null);
+    const [retirementReason, setRetirementReason] = useState('Obsolescencia');
+    const [customRetirementReason, setCustomRetirementReason] = useState('');
+    const [isRetiring, setIsRetiring] = useState(false);
+
     useEffect(() => {
         if (initialAssetId && clients.length > 0) {
             const loadInitialAsset = async () => {
@@ -463,6 +470,53 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
         // setIsSubmitting(false);
     };
 
+    const handleOpenRetireModal = (asset: InspectionAsset) => {
+        setAssetToRetire(asset);
+        setRetirementReason('Obsolescencia');
+        setCustomRetirementReason('');
+        setIsRetireModalOpen(true);
+    };
+
+    const handleConfirmRetire = async () => {
+        if (!assetToRetire) return;
+        
+        const finalReason = retirementReason === 'Otro' ? customRetirementReason.trim() : retirementReason;
+        if (!finalReason) {
+            alert('Por favor especifica el motivo de la baja.');
+            return;
+        }
+
+        setIsRetiring(true);
+        try {
+            const profileData = await db.getCurrentProfile();
+            
+            const success = await db.updateAsset(assetToRetire.id, {
+                lifecycleStatus: 'discarded',
+                retiredAt: new Date().toISOString(),
+                retiredById: profileData?.id || null,
+                retiredByName: profileData?.full_name || 'Administrador',
+                retirementReason: finalReason
+            });
+
+            if (success) {
+                alert('El equipo ha sido dado de baja exitosamente');
+                setIsRetireModalOpen(false);
+                setAssetToRetire(null);
+                setViewingAsset(null);
+                if (selectedClient) {
+                    const updatedAssets = await db.getAssetsByClient(selectedClient.id);
+                    setAssets(updatedAssets);
+                }
+            } else {
+                alert('Error al dar de baja el equipo.');
+            }
+        } catch (e: any) {
+            alert('Error: ' + e.message);
+        } finally {
+            setIsRetiring(false);
+        }
+    };
+
     return (
         <div className="px-6 py-6 lg:p-8 space-y-6 max-w-5xl mx-auto h-full overflow-hidden flex flex-col relative">
             {/* Hidden QR for generating print preview */}
@@ -686,13 +740,22 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                                 <span className="material-symbols-outlined !text-lg">print</span>
                                                             </button>
                                                             {!readOnly && (
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); handleDeleteAsset(asset.id); }}
-                                                                    className="text-slate-400 hover:text-red-500 transition-colors p-2 hover:bg-red-500/10 rounded-full"
-                                                                    title="Eliminar"
-                                                                >
-                                                                    <span className="material-symbols-outlined !text-lg">delete</span>
-                                                                </button>
+                                                                <>
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); handleOpenRetireModal(asset); }}
+                                                                        className="text-slate-400 hover:text-orange-500 transition-colors p-2 hover:bg-orange-500/10 rounded-full"
+                                                                        title="Dar de Baja"
+                                                                    >
+                                                                        <span className="material-symbols-outlined !text-lg">archive</span>
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); handleDeleteAsset(asset.id); }}
+                                                                        className="text-slate-400 hover:text-red-500 transition-colors p-2 hover:bg-red-500/10 rounded-full"
+                                                                        title="Eliminar Permanente"
+                                                                    >
+                                                                        <span className="material-symbols-outlined !text-lg">delete</span>
+                                                                    </button>
+                                                                </>
                                                             )}
                                                         </td>
                                                     </tr>
@@ -937,13 +1000,22 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                 Imprimir Etiqueta
                             </button>
                             {!readOnly && (
-                                <button
-                                    onClick={() => handleEditAsset(viewingAsset)}
-                                    className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-primary text-background-dark rounded-xl shadow-lg shadow-primary/20 hover:bg-green-400 transition-all font-black text-sm uppercase tracking-tight"
-                                >
-                                    <span className="material-symbols-outlined !text-lg fill-1">edit</span>
-                                    Editar Datos
-                                </button>
+                                <>
+                                    <button
+                                        onClick={() => handleOpenRetireModal(viewingAsset)}
+                                        className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded-xl border border-orange-500/30 transition-all font-bold text-sm"
+                                    >
+                                        <span className="material-symbols-outlined !text-lg">archive</span>
+                                        Dar de Baja
+                                    </button>
+                                    <button
+                                        onClick={() => handleEditAsset(viewingAsset)}
+                                        className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-primary text-background-dark rounded-xl shadow-lg shadow-primary/20 hover:bg-green-400 transition-all font-black text-sm uppercase tracking-tight"
+                                    >
+                                        <span className="material-symbols-outlined !text-lg fill-1">edit</span>
+                                        Editar Datos
+                                    </button>
+                                </>
                             )}
                         </div>
                     </div>
@@ -1408,6 +1480,69 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                 {isSubmitting ? 'Guardando Cambios...' : 'Actualizar Equipo'}
                             </button>
                         </form>
+                    </div>
+                </div>
+            )}
+            {/* Modal para Dar de Baja */}
+            {isRetireModalOpen && assetToRetire && (
+                <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+                    <div className="bg-[#1a1c1e] border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl animate-scaleIn">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-2xl font-black text-white">Dar de Baja Equipo</h2>
+                                <p className="text-slate-500 text-sm">Matrícula: {assetToRetire.id}</p>
+                            </div>
+                            <button onClick={() => setIsRetireModalOpen(false)} className="size-10 rounded-full hover:bg-white/10 transition-colors flex items-center justify-center">
+                                <span className="material-symbols-outlined text-slate-400">close</span>
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="space-y-1.5">
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Motivo de la Baja</label>
+                                <select
+                                    value={retirementReason}
+                                    onChange={e => setRetirementReason(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-all appearance-none"
+                                >
+                                    <option value="Obsolescencia">Obsolescencia / Antigüedad</option>
+                                    <option value="Falla de Prueba Hidrostática">Falla de Prueba Hidrostática (PH)</option>
+                                    <option value="Daño Estructural / Corrosión">Daño Estructural / Corrosión</option>
+                                    <option value="Pérdida de Presión Crónica">Pérdida de Presión Crónica</option>
+                                    <option value="Robo / Pérdida">Robo / Pérdida</option>
+                                    <option value="Otro">Otro Motivo (Especificar)</option>
+                                </select>
+                            </div>
+
+                            {retirementReason === 'Otro' && (
+                                <div className="space-y-1.5">
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Especifique el Motivo</label>
+                                    <textarea
+                                        required
+                                        value={customRetirementReason}
+                                        onChange={e => setCustomRetirementReason(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors h-24 resize-none"
+                                        placeholder="Describa el motivo detalladamente..."
+                                    />
+                                </div>
+                            )}
+
+                            <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex gap-3 text-xs text-red-400 leading-normal">
+                                <span className="material-symbols-outlined shrink-0 text-lg">warning</span>
+                                <div>
+                                    <p className="font-bold">Advertencia de Cumplimiento</p>
+                                    <p className="mt-0.5 opacity-90">Esta acción removerá el equipo del listado activo de servicio y lo registrará en la bitácora de descartes de forma permanente.</p>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={handleConfirmRetire}
+                                disabled={isRetiring}
+                                className="w-full bg-red-500 text-white font-black py-4 rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 active:scale-[0.98] transition-all disabled:opacity-50 mt-4 uppercase tracking-widest text-sm"
+                            >
+                                {isRetiring ? 'PROCESANDO BAJA...' : 'CONFIRMAR BAJA'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
