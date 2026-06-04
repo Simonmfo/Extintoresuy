@@ -211,6 +211,13 @@ const App: FC = () => {
     await supabase.auth.signOut();
   };
 
+  const handleRefreshProfile = async () => {
+    if (profile?.id) {
+      const userProfile = await db.getProfile(profile.id);
+      setProfile(userProfile as UserProfile);
+    }
+  };
+
   const handleNavigate = (screen: Screen) => {
     setCurrentScreen(screen);
   };
@@ -320,7 +327,7 @@ const App: FC = () => {
       case 'tecnicos':
         return <TecnicosScreen companyId={companyId} readOnly={!hasPermission(profile, 'tecnicos', 'write')} />;
       case 'ajustes':
-        return <AjustesScreen profile={profile} onLogout={handleLogout} onRefreshProfile={() => {}} />;
+        return <AjustesScreen profile={profile} onLogout={handleLogout} onRefreshProfile={handleRefreshProfile} />;
       case 'fabricas':
         return <FabricasScreen />;
       case 'bajas':

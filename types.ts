@@ -56,6 +56,7 @@ export interface UserProfile {
   full_name: string;
   role: 'admin' | 'tecnico' | 'empresa' | 'fabrica';
   company_id: string | null;
+  phone?: string;
   avatar_url?: string;
   logo_url?: string;
   created_at?: string;

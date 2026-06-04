@@ -735,6 +735,45 @@ export const db = {
 
       await db.logActivity('create', 'asset', data.id, data.name || data.id, assetData);
 
+      // Bot notification on creation
+      try {
+        const { data: client } = await supabase
+          .from('clients')
+          .select('name, phone, company_id')
+          .eq('id', assetData.clientId)
+          .single();
+
+        if (client) {
+          const { data: factory } = await supabase
+            .from('profiles')
+            .select('full_name, phone')
+            .eq('id', client.company_id)
+            .single();
+
+          const factoryName = factory?.full_name || 'Fábrica de Recarga';
+          const factoryPhone = factory?.phone;
+          const matriculaVal = assetData.matricula || data.id || 'N/A';
+
+          if (client.phone) {
+            const clientMsg = `*NUEVO EQUIPO REGISTRADO*\n\nHola, te informamos que se ha registrado un nuevo extintor en el sistema.\n\n*Detalles del equipo:*\n- Número/Matrícula: ${matriculaVal}\n- Tipo: ${assetData.type || assetData.name || 'Extintor'}\n- Registrado por: ${factoryName}\n\nGracias por confiar en nosotros.`;
+            await supabase.from('bot_commands').insert({
+              command: 'send_message',
+              payload: { phone: client.phone, message: clientMsg }
+            });
+          }
+
+          if (factoryPhone) {
+            const factoryMsg = `*NUEVO EQUIPO REGISTRADO (CLIENTE)*\n\nSe ha registrado un nuevo extintor en el sistema.\n\n*Detalles del equipo:*\n- Número/Matrícula: ${matriculaVal}\n- Tipo: ${assetData.type || assetData.name || 'Extintor'}\n- Cliente: ${client.name}\n- Registrado por: ${factoryName}`;
+            await supabase.from('bot_commands').insert({
+              command: 'send_message',
+              payload: { phone: factoryPhone, message: factoryMsg }
+            });
+          }
+        }
+      } catch (botErr) {
+        console.error('Error queuing WhatsApp messages on creation:', botErr);
+      }
+
       return data;
     } catch (error) {
       console.error('Error adding asset:', error);

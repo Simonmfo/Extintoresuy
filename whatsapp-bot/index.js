@@ -171,7 +171,7 @@ cron.schedule('0 9 * * *', async () => {
                 const factoryName = factory?.full_name || 'tu fábrica de recarga';
                 const factoryPhone = factory?.phone || '';
 
-                const clientMsg = `*AVISO IMPORTANTE*\n\nHola, te informamos que hay equipos contra fuego próximo a vencer.\n\n*Detalles del equipo:*\n- Tipo: ${asset.name} (${asset.agent || ''})\n- Vencimiento: ${asset.expiration_date}\n\nPor favor contacta a *${factoryName}* para coordinar la recarga.\n${factoryPhone ? `Contacto: ${factoryPhone}` : ''}`;
+                const clientMsg = `*VENCIMIENTO DE CARGA DE EXTINTOR*\n\nHola, te informamos que la carga de tu extintor está por vencer.\n\n*Detalles del equipo:*\n- Número/Matrícula: ${asset.matricula || asset.id}\n- Tipo: ${asset.type || asset.name || 'Extintor'}\n- Fábrica de recarga: ${factoryName}\n- Vencimiento: ${asset.expiration_date}\n\nPara recargar su extintor llame al ${factoryPhone || 'la fábrica de recarga'}`;
 
                 // Send to Client
                 if (client.phone) {
@@ -181,7 +181,7 @@ cron.schedule('0 9 * * *', async () => {
 
                 // Send to Factory
                 if (factoryPhone) {
-                    const factoryMsg = `*NOTIFICACIÓN DE VENCIMIENTO (CLIENTE)*\n\nEl cliente *${client.name}* tiene un equipo que vence en ${days} días.\n\n*Equipo:* ${asset.name}\n*Vencimiento:* ${asset.expiration_date}\n*Teléfono Cliente:* ${client.phone || 'No registrado'}`;
+                    const factoryMsg = `*ALERTA DE VENCIMIENTO DE CARGA*\n\nHola, te informamos que la carga de un extintor de tu cliente *${client.name}* está por vencer.\n\n*Detalles del equipo:*\n- Número/Matrícula: ${asset.matricula || asset.id}\n- Tipo: ${asset.type || asset.name || 'Extintor'}\n- Fábrica de recarga: ${factoryName}\n- Vencimiento: ${asset.expiration_date}\n- Teléfono Cliente: ${client.phone || 'No registrado'}\n\nPara recargar su extintor llame al ${factoryPhone || 'la fábrica de recarga'}`;
                     await sendWhatsApp(factoryPhone, factoryMsg);
                     console.log(`Notification sent to factory: ${factoryName} (${factoryPhone})`);
                 }
