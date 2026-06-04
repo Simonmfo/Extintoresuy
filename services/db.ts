@@ -750,12 +750,13 @@ export const db = {
             .eq('id', client.company_id)
             .single();
 
-          const factoryName = factory?.full_name || 'Fábrica de Recarga';
+          const currentProfile = await db.getCurrentProfile();
+          const registradoPor = currentProfile?.full_name || factory?.full_name || 'Administrador Extintores uy';
           const factoryPhone = factory?.phone;
           const matriculaVal = assetData.matricula || data.id || 'N/A';
 
           if (client.phone) {
-            const clientMsg = `*NUEVO EQUIPO REGISTRADO*\n\nHola, te informamos que se ha registrado un nuevo extintor en el sistema.\n\n*Detalles del equipo:*\n- Número/Matrícula: ${matriculaVal}\n- Tipo: ${assetData.type || assetData.name || 'Extintor'}\n- Registrado por: ${factoryName}\n\nGracias por confiar en nosotros.`;
+            const clientMsg = `Hola, ${client.name} te informamos que se ha registrado un nuevo extintor en el sistema Extintor.uy\n\n*Detalles del equipo:*\n- Número/Matrícula: ${matriculaVal}\n- Tipo: ${assetData.type || assetData.name || 'Extintor'}\n- Registrado por: ${registradoPor}\n\nGracias por confiar en nosotros.\nExtintores uy`;
             await supabase.from('bot_commands').insert({
               command: 'send_message',
               payload: { phone: client.phone, message: clientMsg }
@@ -763,7 +764,7 @@ export const db = {
           }
 
           if (factoryPhone) {
-            const factoryMsg = `*NUEVO EQUIPO REGISTRADO (CLIENTE)*\n\nSe ha registrado un nuevo extintor en el sistema.\n\n*Detalles del equipo:*\n- Número/Matrícula: ${matriculaVal}\n- Tipo: ${assetData.type || assetData.name || 'Extintor'}\n- Cliente: ${client.name}\n- Registrado por: ${factoryName}`;
+            const factoryMsg = `*NUEVO EQUIPO REGISTRADO (CLIENTE)*\n\nSe ha registrado un nuevo extintor en el sistema Extintor.uy.\n\n*Detalles del equipo:*\n- Número/Matrícula: ${matriculaVal}\n- Tipo: ${assetData.type || assetData.name || 'Extintor'}\n- Cliente: ${client.name}\n- Registrado por: ${registradoPor}\n\nExtintores uy`;
             await supabase.from('bot_commands').insert({
               command: 'send_message',
               payload: { phone: factoryPhone, message: factoryMsg }
