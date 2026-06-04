@@ -231,7 +231,7 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
     <div className="flex flex-col h-screen bg-background-dark text-white overflow-y-auto pb-40">
 
       {/* Header */}
-      <header className="px-4 py-2 flex items-center justify-between sticky top-11 bg-background-dark/95 backdrop-blur-lg z-40 border-b border-white/10">
+      <header className="px-4 py-2 flex items-center justify-between sticky top-0 bg-background-dark/95 backdrop-blur-lg z-40 border-b border-white/10">
         <button onClick={onBack} className="p-2 -ml-2 rounded-full active:bg-white/10">
           <span className="material-symbols-outlined text-white">arrow_back_ios</span>
         </button>
@@ -268,144 +268,259 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
           </div>
         </section>
 
-        {/* Editable Fields Section */}
-        <section className="bg-white/5 rounded-3xl border border-white/10 p-6 space-y-6">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="material-symbols-outlined text-primary">edit_note</span>
-            <h3 className="text-sm font-black text-white uppercase tracking-wider">Modificar Datos del Equipo</h3>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Lugar / Referencia</label>
-              <input
-                type="text"
-                value={editedAsset.name || ''}
-                onChange={e => setEditedAsset({ ...editedAsset, name: e.target.value })}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
-                placeholder="Ej. Planta Alta - Cocina"
-              />
+        {/* EDITABLE FIELDS SECTION (REDESIGNED) */}
+        <div className="space-y-6">
+          {/* Card 1: Datos Técnicos del Extintor */}
+          <section className="bg-white/5 rounded-3xl border border-white/10 p-6 space-y-6 backdrop-blur-md shadow-lg">
+            <div className="flex items-center gap-2.5 pb-3 border-b border-white/5">
+              <span className="material-symbols-outlined text-primary text-xl">info</span>
+              <h3 className="text-sm font-black text-white uppercase tracking-wider">Datos Técnicos del Extintor</h3>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
+              {/* Lugar / Referencia */}
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Tipo / Cap</label>
-                <select
-                  value={editedAsset.type || ''}
-                  onChange={e => setEditedAsset({ ...editedAsset, type: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none"
-                >
-                  <option value="1 PABC">1 PABC</option>
-                  <option value="2 PABC">2 PABC</option>
-                  <option value="4 PABC">4 PABC</option>
-                  <option value="8 PABC">8 PABC</option>
-                  <option value="25 PABC">25 PABC</option>
-                  <option value="50 PABC">50 PABC</option>
-                  <option value="CO2 3.5 kg">CO2 3.5 kg</option>
-                  <option value="CO2 7.5kg">CO2 7.5kg</option>
-                  <option value="CO2 10kg">CO2 10kg</option>
-                  <option value="Espumigeno 10L">Espumigeno 10L</option>
-                  <option value="Hallotron ABC 2kg">Hallotron ABC 2kg</option>
-                  <option value="Hallotron ABC 4kg">Hallotron ABC 4kg</option>
-                  <option value="Hallotron ABC 8kg">Hallotron ABC 8kg</option>
-                  <option value="Clase K acetato de potasio 6L">Clase K acetato de potasio 6L</option>
-                  <option value="Clase k acetato de potasio 10L">Clase k acetato de potasio 10L</option>
-                </select>
+                <label className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
+                  <span className="material-symbols-outlined text-sm text-slate-500">location_on</span>
+                  Lugar / Referencia
+                </label>
+                <div className="relative group">
+                  <input
+                    type="text"
+                    value={editedAsset.name || ''}
+                    onChange={e => setEditedAsset({ ...editedAsset, name: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all"
+                    placeholder="Ej. Planta Alta - Cocina"
+                  />
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 select-none pointer-events-none group-focus-within:text-primary transition-colors text-lg">location_on</span>
+                </div>
               </div>
+
+              {/* Tipo / Capacidad */}
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Sello de Recarga</label>
-                <input
-                  type="text"
-                  value={editedAsset.matricula || ''}
-                  onChange={e => setEditedAsset({ ...editedAsset, matricula: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
-                  placeholder="Sello"
-                />
+                <label className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
+                  <span className="material-symbols-outlined text-sm text-slate-500">fire_extinguisher</span>
+                  Tipo / Capacidad
+                </label>
+                <div className="relative group">
+                  <select
+                    value={editedAsset.type || ''}
+                    onChange={e => setEditedAsset({ ...editedAsset, type: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-10 py-3.5 text-white text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="1 PABC" className="bg-background-dark">1 PABC</option>
+                    <option value="2 PABC" className="bg-background-dark">2 PABC</option>
+                    <option value="4 PABC" className="bg-background-dark">4 PABC</option>
+                    <option value="8 PABC" className="bg-background-dark">8 PABC</option>
+                    <option value="25 PABC" className="bg-background-dark">25 PABC</option>
+                    <option value="50 PABC" className="bg-background-dark">50 PABC</option>
+                    <option value="CO2 3.5 kg" className="bg-background-dark">CO2 3.5 kg</option>
+                    <option value="CO2 7.5kg" className="bg-background-dark">CO2 7.5kg</option>
+                    <option value="CO2 10kg" className="bg-background-dark">CO2 10kg</option>
+                    <option value="Espumigeno 10L" className="bg-background-dark">Espumigeno 10L</option>
+                    <option value="Hallotron ABC 2kg" className="bg-background-dark">Hallotron ABC 2kg</option>
+                    <option value="Hallotron ABC 4kg" className="bg-background-dark">Hallotron ABC 4kg</option>
+                    <option value="Hallotron ABC 8kg" className="bg-background-dark">Hallotron ABC 8kg</option>
+                    <option value="Clase K acetato de potasio 6L" className="bg-background-dark">Clase K acetato de potasio 6L</option>
+                    <option value="Clase k acetato de potasio 10L" className="bg-background-dark">Clase k acetato de potasio 10L</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 select-none pointer-events-none group-focus-within:text-primary transition-colors text-lg">fire_extinguisher</span>
+                  <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 select-none pointer-events-none text-xl">arrow_drop_down</span>
+                </div>
               </div>
+
+              {/* Sello de Recarga y UNIT Fábrica */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
+                    <span className="material-symbols-outlined text-sm text-slate-500">label</span>
+                    Sello Recarga
+                  </label>
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      value={editedAsset.matricula || ''}
+                      onChange={e => setEditedAsset({ ...editedAsset, matricula: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all"
+                      placeholder="Ej. Sello"
+                    />
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 select-none pointer-events-none group-focus-within:text-primary transition-colors text-lg">tag</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
+                    <span className="material-symbols-outlined text-sm text-slate-500">verified</span>
+                    UNIT Fábrica
+                  </label>
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      value={editedAsset.unit || ''}
+                      onChange={e => setEditedAsset({ ...editedAsset, unit: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3.5 text-white text-sm placeholder-white/30 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all"
+                      placeholder="Ej. UNIT"
+                    />
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 select-none pointer-events-none group-focus-within:text-primary transition-colors text-lg">verified</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Estado / Retirado (Segmented Control) */}
+              <div>
+                <label className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2.5 ml-1">
+                  <span className="material-symbols-outlined text-sm text-slate-500">swap_horizontal_circle</span>
+                  Estado / Ubicación
+                </label>
+                <div className="flex gap-2 w-full p-1 bg-white/5 rounded-2xl border border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setEditedAsset({ ...editedAsset, lifecycleStatus: 'active' })}
+                    className={`flex-1 py-3 rounded-xl border text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                      (editedAsset.lifecycleStatus || 'active') === 'active'
+                        ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] scale-100'
+                        : 'border-transparent text-slate-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-base">check_circle</span>
+                    Activo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditedAsset({ ...editedAsset, lifecycleStatus: 'maintenance' })}
+                    className={`flex-1 py-3 rounded-xl border text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                      editedAsset.lifecycleStatus === 'maintenance'
+                        ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)] scale-100'
+                        : 'border-transparent text-slate-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-base">build</span>
+                    Taller
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditedAsset({ ...editedAsset, lifecycleStatus: 'discarded' })}
+                    className={`flex-1 py-3 rounded-xl border text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                      editedAsset.lifecycleStatus === 'discarded'
+                        ? 'bg-rose-500/20 border-rose-500 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.15)] scale-100'
+                        : 'border-transparent text-slate-400 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-base">cancel</span>
+                    Descarte
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Card 2: Fechas y Vencimientos */}
+          <section className="bg-white/5 rounded-3xl border border-white/10 p-6 space-y-6 backdrop-blur-md shadow-lg">
+            <div className="flex items-center justify-between pb-3 border-b border-white/5">
+              <div className="flex items-center gap-2.5">
+                <span className="material-symbols-outlined text-primary text-xl">calendar_month</span>
+                <h3 className="text-sm font-black text-white uppercase tracking-wider">Fechas y Vencimientos</h3>
+              </div>
+              <span className="text-[9px] text-slate-500 font-bold bg-white/5 px-2 py-0.5 rounded-md border border-white/5 uppercase tracking-wide">
+                Cálculo Auto
+              </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">UNIT Fábrica</label>
-                <input
-                  type="text"
-                  value={editedAsset.unit || ''}
-                  onChange={e => setEditedAsset({ ...editedAsset, unit: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
-                  placeholder="UNIT"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Retirado</label>
-                <select
-                  value={editedAsset.lifecycleStatus || 'active'}
-                  onChange={e => setEditedAsset({ ...editedAsset, lifecycleStatus: e.target.value as any })}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none"
-                >
-                  <option value="active">NO</option>
-                  <option value="maintenance">SÍ (En Taller)</option>
-                  <option value="discarded">SÍ (Descarte)</option>
-                </select>
-              </div>
-            </div>
+            <div className="space-y-5">
+              {/* Sección Cargas */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
+                    <span className="material-symbols-outlined text-sm text-slate-500">event_available</span>
+                    Fecha Carga
+                  </label>
+                  <div className="relative group">
+                    <input
+                      type="date"
+                      value={editedAsset.lastRecharge || ''}
+                      onChange={e => {
+                        const date = e.target.value;
+                        setEditedAsset({ 
+                          ...editedAsset, 
+                          lastRecharge: date,
+                          expirationDate: addYears(date, 1)
+                        });
+                      }}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-3 py-3.5 text-white text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all cursor-pointer"
+                    />
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 select-none pointer-events-none group-focus-within:text-primary transition-colors text-lg">event_available</span>
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Fecha Carga</label>
-                <input
-                  type="date"
-                  value={editedAsset.lastRecharge || ''}
-                  onChange={e => {
-                    const date = e.target.value;
-                    setEditedAsset({ 
-                      ...editedAsset, 
-                      lastRecharge: date,
-                      expirationDate: addYears(date, 1)
-                    });
-                  }}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
-                />
+                <div>
+                  <label className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
+                    <span className="material-symbols-outlined text-sm text-slate-500">event_busy</span>
+                    Vto. Carga
+                  </label>
+                  <div className="relative group">
+                    <input
+                      type="date"
+                      value={editedAsset.expirationDate || ''}
+                      onChange={e => setEditedAsset({ ...editedAsset, expirationDate: e.target.value })}
+                      className={`w-full bg-white/5 border rounded-xl pl-10 pr-3 py-3.5 text-white text-sm focus:outline-none focus:ring-2 transition-all cursor-pointer ${
+                        editedAsset.expirationDate && new Date(editedAsset.expirationDate) < new Date()
+                          ? 'border-rose-500/50 focus:border-rose-500 focus:ring-rose-500/15'
+                          : 'border-white/10 focus:border-primary/50 focus:ring-primary/15'
+                      }`}
+                    />
+                    <span className={`material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 select-none pointer-events-none transition-colors text-lg ${
+                      editedAsset.expirationDate && new Date(editedAsset.expirationDate) < new Date()
+                        ? 'text-rose-400'
+                        : 'text-slate-500 group-focus-within:text-primary'
+                    }`}>event_busy</span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Vto. Carga</label>
-                <input
-                  type="date"
-                  value={editedAsset.expirationDate || ''}
-                  onChange={e => setEditedAsset({ ...editedAsset, expirationDate: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
-                />
-              </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Fecha Ensayo</label>
-                <input
-                  type="date"
-                  value={editedAsset.lastHydrotest || ''}
-                  onChange={e => {
-                    const date = e.target.value;
-                    setEditedAsset({ 
-                      ...editedAsset, 
-                      lastHydrotest: date,
-                      nextHydrotest: addYears(date, 5)
-                    });
-                  }}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Próxima PH</label>
-                <input
-                  type="date"
-                  value={editedAsset.nextHydrotest || ''}
-                  onChange={e => setEditedAsset({ ...editedAsset, nextHydrotest: e.target.value })}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50 transition-colors"
-                />
+              {/* Sección Ensayos Hidrostáticos */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
+                    <span className="material-symbols-outlined text-sm text-slate-500">history</span>
+                    Fecha Ensayo
+                  </label>
+                  <div className="relative group">
+                    <input
+                      type="date"
+                      value={editedAsset.lastHydrotest || ''}
+                      onChange={e => {
+                        const date = e.target.value;
+                        setEditedAsset({ 
+                          ...editedAsset, 
+                          lastHydrotest: date,
+                          nextHydrotest: addYears(date, 5)
+                        });
+                      }}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-3 py-3.5 text-white text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all cursor-pointer"
+                    />
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 select-none pointer-events-none group-focus-within:text-primary transition-colors text-lg">history</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">
+                    <span className="material-symbols-outlined text-sm text-slate-500">schedule</span>
+                    Próxima PH
+                  </label>
+                  <div className="relative group">
+                    <input
+                      type="date"
+                      value={editedAsset.nextHydrotest || ''}
+                      onChange={e => setEditedAsset({ ...editedAsset, nextHydrotest: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-3 py-3.5 text-white text-sm focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/15 transition-all cursor-pointer"
+                    />
+                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 select-none pointer-events-none group-focus-within:text-primary transition-colors text-lg">schedule</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
 
         {/* Warning Alert if expired */}
         {asset?.expirationDate && new Date(asset.expirationDate) < new Date() && (
