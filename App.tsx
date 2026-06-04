@@ -35,11 +35,50 @@ const App: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [publicScreen, setPublicScreen] = useState<'landing' | 'login' | 'soporte' | 'terminos' | 'privacidad'>(isNative ? 'login' : 'landing');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [currentScreen, setCurrentScreen] = useState<Screen>('home');
+  const [currentScreen, setCurrentScreen] = useState<Screen>(() => {
+    try {
+      const saved = localStorage.getItem('pending_inspections_session');
+      console.log('[DEBUG] App currentScreen init - Raw localStorage:', saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          console.log('[DEBUG] App currentScreen init - Session active, routing to inspecciones');
+          return 'inspecciones';
+        }
+      }
+    } catch (e) {
+      console.error('[DEBUG] App currentScreen init - Error reading localStorage:', e);
+    }
+    return 'home';
+  });
   const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [pendingInspections, setPendingInspections] = useState<InspectionRecord[]>([]);
+  const [pendingInspections, setPendingInspections] = useState<InspectionRecord[]>(() => {
+    try {
+      const saved = localStorage.getItem('pending_inspections_session');
+      console.log('[DEBUG] App pendingInspections init - Raw localStorage:', saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          console.log('[DEBUG] App pendingInspections init - Loaded records count:', parsed.length);
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.error('[DEBUG] App pendingInspections init - Error parsing localStorage:', e);
+    }
+    return [];
+  });
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      console.log('[DEBUG] App pendingInspections state changed. Saving to localStorage. Count:', pendingInspections.length);
+      localStorage.setItem('pending_inspections_session', JSON.stringify(pendingInspections));
+    } catch (e) {
+      console.error('[DEBUG] App pendingInspections useEffect - Error writing to localStorage:', e);
+    }
+  }, [pendingInspections]);
 
   const handleScan = async (decodedText: string) => {
     let assetId = decodedText;

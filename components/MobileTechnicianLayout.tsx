@@ -23,7 +23,22 @@ const MobileTechnicianLayout: React.FC<MobileTechnicianLayoutProps> = ({
     setPendingInspections,
     onFinalize
 }) => {
-    const [view, setView] = useState<'assigned' | 'session' | 'inspecting' | 'validating'>('assigned');
+    const [view, setView] = useState<'assigned' | 'session' | 'inspecting' | 'validating'>(() => {
+        try {
+            const saved = localStorage.getItem('pending_inspections_session');
+            console.log('[DEBUG] MobileTechnicianLayout view init - Raw localStorage:', saved);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    console.log('[DEBUG] MobileTechnicianLayout view init - Session active, routing to session tab');
+                    return 'session';
+                }
+            }
+        } catch (e) {
+            console.error('[DEBUG] MobileTechnicianLayout view init - Error reading localStorage:', e);
+        }
+        return 'assigned';
+    });
     const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
     const [isScannerOpen, setIsScannerOpen] = useState(false);
     const [assignedAssets, setAssignedAssets] = useState<InspectionAsset[]>([]);
