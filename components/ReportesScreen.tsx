@@ -107,7 +107,6 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
             { key: 'retirado', width: 15 },
             { key: 'observaciones', width: 30 },
             { key: 'id', width: 15 },
-            { key: 'fotoUrl', width: 30 },
         ];
 
         const b1 = worksheet.getCell('B1');
@@ -124,7 +123,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
         headerRow.values = [
             'Lugar', 'Tipo / Cap', 'UNIT de fábrica', 'Sello de recarga',
             'Fecha de carga', 'Fecha de ensayo', 'Inspección', 'Retirado SI/NO',
-            'Observaciones', 'ID', 'Foto URL'
+            'Observaciones', 'ID'
         ];
         headerRow.height = 25;
         headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
@@ -160,7 +159,6 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
                 retirado: asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI',
                 observaciones: cleanObservations,
                 id: asset.id,
-                fotoUrl: asset.imageUrl || ''
             }).font = { size: 10 };
         });
 
