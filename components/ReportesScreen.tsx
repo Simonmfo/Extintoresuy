@@ -45,10 +45,12 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
         setAssets(assetsData);
         setAuditLogs(logsData);
         
-        // If companyId was ALL (admin view), we should fetch the factory profile of the client
-        if (companyId === 'ALL' || !companyId) {
-            const profile = await db.getProfile(client.company_id || '');
+        // Fetch the factory profile of the client unconditionally
+        if (client.company_id) {
+            const profile = await db.getProfile(client.company_id);
             setFactoryProfile(profile);
+        } else {
+            setFactoryProfile(currentUserProfile);
         }
         setLoading(false);
     };
@@ -64,10 +66,10 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
                 const worksheet = workbook.addWorksheet('Inventario');
                 // ... (Existing inventory export logic remains same, just inside this if)
                 // Actually, I'll keep the existing logic and just add another worksheet for audit if activeTab is audit
-                setupInventoryWorksheet(worksheet, assets, selectedClient, factoryProfile);
+                await setupInventoryWorksheet(worksheet, assets, selectedClient, factoryProfile);
             } else {
                 const worksheet = workbook.addWorksheet('Bitácora de Cambios');
-                setupAuditWorksheet(worksheet, auditLogs, selectedClient, factoryProfile);
+                await setupAuditWorksheet(worksheet, auditLogs, selectedClient, factoryProfile);
             }
 
             // Export
