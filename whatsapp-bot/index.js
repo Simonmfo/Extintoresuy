@@ -1,4 +1,4 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, RemoteAuth } = require('whatsapp-web.js');
 const qrcodeTerminal = require('qrcode-terminal');
 const QRCode = require('qrcode');
 const { supabase } = require('./supabase');
@@ -20,11 +20,13 @@ app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
 });
 
-// Initialize WhatsApp Client with LOCAL Auth for testing
+// Initialize WhatsApp Client with Remote Auth to persist session in Supabase
 const store = new SupabaseStore(supabase);
 const client = new Client({
-    authStrategy: new LocalAuth({
-        clientId: 'extintoresuy-session'
+    authStrategy: new RemoteAuth({
+        clientId: 'extintoresuy-session',
+        store: store,
+        backupSyncIntervalMs: 60000 // Backup session every 60 seconds
     }),
     authTimeoutMs: 90000,
     puppeteer: {
