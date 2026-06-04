@@ -238,13 +238,89 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
                 extension: extension,
             });
 
-            // Coverage for rows 1, 2, 3 (approx 120 pixels)
-            const targetHeight = 120;
-            const ratio = targetHeight / img.height;
-            const targetWidth = img.width * ratio;
+            // Target range: E1 to H3 (Column E is 5, H is 8. Row 1 is 1, Row 3 is 3)
+            const colStart = 5;
+            const colEnd = 8;
+            const rowStart = 1;
+            const rowEnd = 3;
+
+            // Calculate total width of target columns in pixels (using 8px per column character width unit)
+            let totalWidthPx = 0;
+            for (let col = colStart; col <= colEnd; col++) {
+                const column = worksheet.getColumn(col);
+                const colWidth = column.width !== undefined ? column.width : 8.43;
+                totalWidthPx += colWidth * 8;
+            }
+
+            // Calculate total height of target rows in pixels (using 1.333px per point)
+            let totalHeightPx = 0;
+            for (let row = rowStart; row <= rowEnd; row++) {
+                const rowObj = worksheet.getRow(row);
+                const rowHeight = rowObj.height !== undefined ? rowObj.height : 15;
+                totalHeightPx += rowHeight * 1.333;
+            }
+
+            // Calculate target dimensions keeping aspect ratio
+            const imgRatio = img.width / img.height;
+            const targetBoxRatio = totalWidthPx / totalHeightPx;
+
+            let targetWidth = 0;
+            let targetHeight = 0;
+
+            if (imgRatio > targetBoxRatio) {
+                // Image is wider than the target box -> fit by width
+                targetWidth = totalWidthPx;
+                targetHeight = totalWidthPx / imgRatio;
+            } else {
+                // Image is taller than the target box -> fit by height
+                targetHeight = totalHeightPx;
+                targetWidth = totalHeightPx * imgRatio;
+            }
+
+            // Center image within the target box
+            const offsetX = (totalWidthPx - targetWidth) / 2;
+            const offsetY = (totalHeightPx - targetHeight) / 2;
+
+            // Find starting cell and offset in EMUs (1 pixel = 9525 EMUs)
+            let currentX = offsetX;
+            let startCol = colStart - 1; // 0-indexed column
+            let startColOff = 0;
+            for (let col = colStart; col <= colEnd; col++) {
+                const colW = worksheet.getColumn(col).width !== undefined ? worksheet.getColumn(col).width : 8.43;
+                const colWPx = colW * 8;
+                if (currentX < colWPx) {
+                    startCol = col - 1;
+                    startColOff = Math.round(currentX * 9525);
+                    break;
+                } else {
+                    currentX -= colWPx;
+                }
+            }
+
+            let currentY = offsetY;
+            let startRow = rowStart - 1; // 0-indexed row
+            let startRowOff = 0;
+            for (let row = rowStart; row <= rowEnd; row++) {
+                const rowH = worksheet.getRow(row).height !== undefined ? worksheet.getRow(row).height : 15;
+                const rowHPx = rowH * 1.333;
+                if (currentY < rowHPx) {
+                    startRow = row - 1;
+                    startRowOff = Math.round(currentY * 9525);
+                    break;
+                } else {
+                    currentY -= rowHPx;
+                }
+            }
 
             worksheet.addImage(imageId, {
-                tl: { col: 4, row: 0 }, // COLUMN E, ROW 1
+                tl: {
+                    col: startCol,
+                    row: startRow,
+                    nativeCol: startCol,
+                    nativeRow: startRow,
+                    nativeColOff: startColOff,
+                    nativeRowOff: startRowOff
+                },
                 ext: { width: targetWidth, height: targetHeight }
             });
             

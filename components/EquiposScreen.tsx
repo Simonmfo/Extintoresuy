@@ -1041,7 +1041,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Inspección SI/NO (Fecha)</label>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Inspección</label>
                                     <input
                                         type="date"
                                         value={newAsset.lastInspection || ''}
@@ -1262,7 +1262,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Inspección SI/NO (Fecha)</label>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Inspección</label>
                                     <input
                                         type="date"
                                         value={editingAsset.lastInspection || ''}
