@@ -18,7 +18,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
     const [assets, setAssets] = useState<InspectionAsset[]>([]);
     const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [newAsset, setNewAsset] = useState({ name: '', equipmentCategory: 'Extintor', type: '', description: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', unit: '', matricula: '', selloFabrica: '' });
+    const [newAsset, setNewAsset] = useState({ id: '', name: '', equipmentCategory: 'Extintor', type: '', description: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', unit: '', matricula: '', selloFabrica: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [viewingAsset, setViewingAsset] = useState<InspectionAsset | null>(null);
     const [editingAsset, setEditingAsset] = useState<InspectionAsset | null>(null);
@@ -383,6 +383,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
         setIsSubmitting(true);
         const result = await db.addAsset({
+            id: newAsset.id,
             name: newAsset.name,
             type: newAsset.type,
             description: newAsset.description,
@@ -404,7 +405,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
             const updatedAssets = await db.getAssetsByClient(selectedClient.id);
             setAssets(updatedAssets);
             setIsAddModalOpen(false);
-            setNewAsset({ name: '', equipmentCategory: 'Extintor', type: '', description: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', unit: '', matricula: '', selloFabrica: '' });
+            setNewAsset({ id: '', name: '', equipmentCategory: 'Extintor', type: '', description: '', expirationDate: '', nextInspection: '', lastRecharge: '', lastHydrotest: '', nextHydrotest: '', lastInspection: '', lifecycleStatus: 'active', unit: '', matricula: '', selloFabrica: '' });
         }
         setIsSubmitting(false);
     };
@@ -1103,6 +1104,26 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
                             {newAsset.equipmentCategory === 'Extintor' && (
                                 <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Matrícula (Dejar en blanco para autogenerar)</label>
+                                        <input
+                                            type="text"
+                                            value={newAsset.id}
+                                            onChange={e => setNewAsset({ ...newAsset, id: e.target.value })}
+                                            placeholder="Ej. EXT-ancap-00001 o manual"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de fábrica</label>
+                                        <input
+                                            type="text"
+                                            value={newAsset.selloFabrica}
+                                            onChange={e => setNewAsset({ ...newAsset, selloFabrica: e.target.value })}
+                                            placeholder="Ej. Sello de Fábrica"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                        />
+                                    </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de recarga</label>
@@ -1124,16 +1145,6 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
                                             />
                                         </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de fábrica</label>
-                                        <input
-                                            type="text"
-                                            value={newAsset.selloFabrica}
-                                            onChange={e => setNewAsset({ ...newAsset, selloFabrica: e.target.value })}
-                                            placeholder="Ej. Sello de Fábrica"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                        />
                                     </div>
                                 </div>
                             )}
@@ -1337,6 +1348,22 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
 
                             {editingAsset.equipmentCategory === 'Extintor' && (
                                 <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Matrícula (Solo Lectura)</label>
+                                        <div className="w-full bg-white/5 border border-white/5 rounded-xl px-4 py-3 text-slate-500 text-xs">
+                                            {editingAsset.id}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de fábrica</label>
+                                        <input
+                                            type="text"
+                                            value={editingAsset.selloFabrica || ''}
+                                            onChange={e => setEditingAsset({ ...editingAsset, selloFabrica: e.target.value })}
+                                            placeholder="Ej. Sello de Fábrica"
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
+                                        />
+                                    </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de recarga</label>
@@ -1358,16 +1385,6 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
                                             />
                                         </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Sello de fábrica</label>
-                                        <input
-                                            type="text"
-                                            value={editingAsset.selloFabrica || ''}
-                                            onChange={e => setEditingAsset({ ...editingAsset, selloFabrica: e.target.value })}
-                                            placeholder="Ej. Sello de Fábrica"
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:border-primary/50 transition-colors text-xs"
-                                        />
                                     </div>
                                 </div>
                             )}

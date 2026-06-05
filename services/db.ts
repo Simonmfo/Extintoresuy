@@ -688,6 +688,7 @@ export const db = {
   },
 
   addAsset: async (assetData: {
+    id?: string;
     name: string;
     equipmentCategory?: string;
     type: string;
@@ -726,7 +727,7 @@ export const db = {
           status: 'pending',
           location_lat: -34.9011,
           location_lng: -56.1645,
-          id: 'TEMP'
+          id: assetData.id && assetData.id.trim() !== '' ? assetData.id : 'TEMP'
         } as any)
         .select()
         .single();
