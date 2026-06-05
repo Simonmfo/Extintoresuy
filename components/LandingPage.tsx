@@ -49,7 +49,7 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onNavigateTo }) => {
               Software N°1 de Mantenimiento en Uruguay
             </div>
             <h1 className="text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight">
-              Gestión inteligente de <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-400">extintor.uy</span> y normativas.
+              Gestión inteligente de <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-400">extintores</span> y normativas.
             </h1>
             <p className="text-lg lg:text-xl text-slate-400 leading-relaxed max-w-xl">
               Digitalizá el control, mantenimiento e inspecciones de tus equipos contra incendios. Asegurá el cumplimiento ante la DNB y optimizá el trabajo de tus técnicos en terreno.
