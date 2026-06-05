@@ -96,7 +96,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete, isLoggedIn = fa
                         }}
                     >
                         <h1 className="text-3xl sm:text-6xl font-black text-white italic tracking-tighter leading-none whitespace-nowrap">
-                            Extintores<span className="text-primary not-italic">UY</span>
+                            Extintor<span className="text-primary not-italic">.uy</span>
                         </h1>
                         <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.4em] text-primary/80 mt-1 whitespace-nowrap">
                             Logística & Seguridad 4.0

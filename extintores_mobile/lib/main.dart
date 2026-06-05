@@ -24,7 +24,7 @@ class ExtintoresApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ExtintoresUY Técnico',
+      title: 'Extintor.uy Técnico',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               Image.asset('assets/icon.png', height: 120),
               const SizedBox(height: 24),
-              Text('ExtintoresUY', textAlign: TextAlign.center, style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white)),
+              Text('Extintor.uy', textAlign: TextAlign.center, style: GoogleFonts.outfit(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white)),
               Text('PLATAFORMA NATIVA', textAlign: TextAlign.center, style: GoogleFonts.outfit(fontSize: 12, fontWeight: FontWeight.bold, color: const Color(0xFF13EC5B), letterSpacing: 2)),
               const SizedBox(height: 48),
               TextField(

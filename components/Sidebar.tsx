@@ -56,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentScreen, onNavigate, onLogout, 
                             </span>
                         </div>
                         <div className={`transition-all duration-300 whitespace-nowrap ${isOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                            <h1 className="text-lg font-bold text-white tracking-tight">ExtintoresUY</h1>
+                            <h1 className="text-lg font-bold text-white tracking-tight">Extintor.uy</h1>
                             <p className="text-[10px] uppercase font-bold text-primary tracking-widest">
                                 {role === 'admin' ? 'Panel de Control' : role === 'tecnico' ? 'Portal Técnico' : role === 'fabrica' ? 'Portal Fábrica' : 'Portal Empresa'}
                             </p>

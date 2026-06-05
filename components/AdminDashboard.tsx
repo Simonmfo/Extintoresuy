@@ -55,7 +55,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate, onStartInsp
                         {isTecnico ? 'Panel Técnico' : 'Panel Administrativo'}
                     </h1>
                     <p className="text-slate-500 font-medium">
-                        {isTecnico ? 'Gestión y control de mantenimiento de campo' : 'Control total de la infraestructura ExtintoresUY'}
+                        {isTecnico ? 'Gestión y control de mantenimiento de campo' : 'Control total de la infraestructura Extintor.uy'}
                     </p>
                 </div>
                 <div className="flex gap-3">

@@ -14,7 +14,7 @@ export const generateInvoicePDF = (invoice: any) => {
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.text('EXTINTORES UY', 15, 25);
+    doc.text('EXTINTOR.UY', 15, 25);
     
     doc.setFontSize(10);
     doc.text('Seguridad y Mantenimiento', 15, 32);
@@ -76,7 +76,7 @@ export const generateInvoicePDF = (invoice: any) => {
     // Footer Info
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
-    doc.text('Documento oficial generado por ExtintoresUY - Sistema de Gestión de Seguridad.', 15, 280);
+    doc.text('Documento oficial generado por Extintor.uy - Sistema de Gestión de Seguridad.', 15, 280);
     doc.text('Este documento sirve como comprobante de servicio y orden de pago.', 15, 285);
 
     // Save File

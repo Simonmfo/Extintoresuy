@@ -40,7 +40,7 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                 // Send welcome message if phone exists
                 if (formData.phone) {
                     const factoryName = profile?.full_name || 'tu fábrica de confianza';
-                    const welcomeMsg = `Bienvenido a *ExtintoresUY*. A partir de ahora recibirás avisos automáticos sobre el estado de tus equipos de seguridad. Servicio de *${factoryName}*.`;
+                    const welcomeMsg = `Bienvenido a *Extintor.uy*. A partir de ahora recibirás avisos automáticos sobre el estado de tus equipos de seguridad. Servicio de *${factoryName}*.`;
                     
                     await supabase.from('bot_commands').insert({
                         command: 'send_message',

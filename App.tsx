@@ -440,7 +440,7 @@ const App: FC = () => {
         {currentScreen !== 'inspeccion' && currentScreen !== 'mapa' && (
           <header className="hidden lg:flex items-center justify-between p-6 bg-background-dark/80 backdrop-blur-md sticky top-0 z-40 border-b border-white/5">
             <div>
-              <h1 className="text-2xl font-black text-white tracking-tight">ExtintoresUY</h1>
+              <h1 className="text-2xl font-black text-white tracking-tight">Extintor.uy</h1>
               <p className="text-sm font-medium text-slate-400">Plataforma de Mantenimiento</p>
             </div>
             <div className="flex gap-3">

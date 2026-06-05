@@ -19,7 +19,7 @@ const Header: FC<HeaderProps> = ({ onMenuClick }) => {
           <span className="material-symbols-outlined !text-[24px]">shield_with_heart</span>
         </div>
         <div>
-          <h1 className="text-base font-bold leading-tight tracking-tight">Extintoruy</h1>
+          <h1 className="text-base font-bold leading-tight tracking-tight">Extintor.uy</h1>
           <p className="text-[9px] uppercase tracking-widest text-primary font-bold">Compliance</p>
         </div>
       </div>

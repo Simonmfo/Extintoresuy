@@ -20,7 +20,7 @@ const TermsScreen: FC<TermsScreenProps> = ({ onBack }) => {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">1. Aceptación de los Términos</h2>
             <p className="text-slate-400 leading-relaxed">
-              Al acceder y utilizar Extintores.uy, usted acepta estar sujeto a estos términos y condiciones. Si no está de acuerdo con alguna parte de estos términos, no podrá acceder al servicio. Nuestra plataforma proporciona herramientas de gestión y trazabilidad, pero la responsabilidad legal sobre el estado físico de los equipos recae enteramente en la empresa contratante.
+              Al acceder y utilizar Extintor.uy, usted acepta estar sujeto a estos términos y condiciones. Si no está de acuerdo con alguna parte de estos términos, no podrá acceder al servicio. Nuestra plataforma proporciona herramientas de gestión y trazabilidad, pero la responsabilidad legal sobre el estado físico de los equipos recae enteramente en la empresa contratante.
             </p>
           </section>
 
@@ -39,7 +39,7 @@ const TermsScreen: FC<TermsScreenProps> = ({ onBack }) => {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">3. Responsabilidad Legal</h2>
             <p className="text-slate-400 leading-relaxed">
-              Extintores.uy provee el software para facilitar la gestión documental exigida por la Dirección Nacional de Bomberos (DNB). No obstante, no somos responsables por multas, siniestros o clausuras derivadas de negligencia, falta de mantenimiento físico o carga incorrecta de datos por parte de los usuarios en la plataforma.
+              Extintor.uy provee el software para facilitar la gestión documental exigida por la Dirección Nacional de Bomberos (DNB). No obstante, no somos responsables por multas, siniestros o clausuras derivadas de negligencia, falta de mantenimiento físico o carga incorrecta de datos por parte de los usuarios en la plataforma.
             </p>
           </section>
 

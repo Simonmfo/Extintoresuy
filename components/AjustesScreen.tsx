@@ -428,9 +428,9 @@ const AjustesScreen: React.FC<AjustesScreenProps> = ({ profile, onLogout, onRefr
                                         }
 
                                         let message = '';
-                                        if (type === 'test') message = '¡Hola! Este es un mensaje de prueba desde el sistema ExtintoresUY. El bot está funcionando correctamente. ✅';
+                                        if (type === 'test') message = '¡Hola! Este es un mensaje de prueba desde el sistema Extintor.uy. El bot está funcionando correctamente. ✅';
                                         if (type === 'vencimiento') message = '*AVISO DE PRUEBA*\n\nHola, te informamos que tu Extintor ABC de 5kg está próximo a vencer. Por favor contactanos para coordinar la recarga.';
-                                        if (type === 'bienvenida') message = 'Bienvenido a *ExtintoresUY*. A partir de ahora recibirás avisos automáticos sobre el estado de tus equipos de seguridad.';
+                                        if (type === 'bienvenida') message = 'Bienvenido a *Extintor.uy*. A partir de ahora recibirás avisos automáticos sobre el estado de tus equipos de seguridad.';
 
                                         const { error } = await supabase.from('bot_commands').insert({
                                             command: 'send_message',

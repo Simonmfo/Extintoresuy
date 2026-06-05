@@ -15,7 +15,7 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onNavigateTo }) => {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-green-600 flex items-center justify-center shadow-lg shadow-primary/20">
               <span className="material-symbols-outlined text-background-dark font-bold">fire_extinguisher</span>
             </div>
-            <span className="text-2xl font-black tracking-tight">extintores<span className="text-primary">.uy</span></span>
+            <span className="text-2xl font-black tracking-tight">extintor<span className="text-primary">.uy</span></span>
           </div>
           <div className="flex items-center gap-6">
             <a href="#solucion" className="hidden md:block text-sm font-medium text-slate-300 hover:text-white transition-colors">Solución</a>
@@ -49,7 +49,7 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onNavigateTo }) => {
               Software N°1 de Mantenimiento en Uruguay
             </div>
             <h1 className="text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight">
-              Gestión inteligente de <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-400">extintores</span> y normativas.
+              Gestión inteligente de <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-green-400">extintor.uy</span> y normativas.
             </h1>
             <p className="text-lg lg:text-xl text-slate-400 leading-relaxed max-w-xl">
               Digitalizá el control, mantenimiento e inspecciones de tus equipos contra incendios. Asegurá el cumplimiento ante la DNB y optimizá el trabajo de tus técnicos en terreno.
@@ -160,7 +160,7 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onNavigateTo }) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <span className="text-primary font-bold tracking-widest uppercase text-sm mb-4 block">Proceso Simple</span>
-            <h2 className="text-4xl lg:text-5xl font-black mb-6">¿Cómo funciona Extintores.uy?</h2>
+            <h2 className="text-4xl lg:text-5xl font-black mb-6">¿Cómo funciona Extintor.uy?</h2>
             <p className="text-slate-400 text-lg">Hemos diseñado un flujo de trabajo que no interrumpe tus operaciones diarias, sino que las agiliza por completo.</p>
           </div>
 
@@ -290,7 +290,7 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onNavigateTo }) => {
           <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent"></div>
           
           <h2 className="text-4xl lg:text-6xl font-black mb-6 relative z-10">¿Listo para modernizar tu gestión?</h2>
-          <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto relative z-10">Unite a las empresas líderes que ya confían en extintores.uy para mantener sus instalaciones seguras y en regla.</p>
+          <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto relative z-10">Unite a las empresas líderes que ya confían en extintor.uy para mantener sus instalaciones seguras y en regla.</p>
           
           <button onClick={onLogin} className="relative z-10 px-10 py-5 rounded-full bg-primary text-background-dark font-black text-lg transition-all duration-300 hover:scale-105 shadow-[0_0_30px_rgba(19,236,91,0.4)] flex items-center justify-center gap-3 mx-auto group">
             Ingresar a la Plataforma
@@ -304,9 +304,9 @@ const LandingPage: FC<LandingPageProps> = ({ onLogin, onNavigateTo }) => {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">fire_extinguisher</span>
-            <span className="font-bold text-lg">extintores<span className="text-primary">.uy</span></span>
+            <span className="font-bold text-lg">extintor<span className="text-primary">.uy</span></span>
           </div>
-          <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Extintores.uy. Todos los derechos reservados.</p>
+          <p className="text-slate-500 text-sm">© {new Date().getFullYear()} Extintor.uy. Todos los derechos reservados.</p>
           <div className="flex gap-4">
             <button onClick={() => onNavigateTo('soporte')} className="text-slate-500 hover:text-white transition-colors text-sm">Soporte</button>
             <button onClick={() => onNavigateTo('terminos')} className="text-slate-500 hover:text-white transition-colors text-sm">Términos</button>

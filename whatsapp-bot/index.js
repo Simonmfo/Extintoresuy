@@ -13,7 +13,7 @@ const port = process.env.PORT || 8080;
 // Express setup to keep the service alive
 let latestQR = null;
 
-app.get('/', (req, res) => res.send('ExtintoresUY WhatsApp Bot Service is running.'));
+app.get('/', (req, res) => res.send('Extintor.uy WhatsApp Bot Service is running.'));
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
 app.listen(port, '0.0.0.0', () => {

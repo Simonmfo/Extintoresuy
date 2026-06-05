@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">ExtintoresUY</string>
-    <string name="title_activity_main">ExtintoresUY</string>
+    <string name="app_name">Extintor.uy</string>
+    <string name="title_activity_main">Extintor.uy</string>
     <string name="package_name">com.extintoresuy.app</string>
     <string name="custom_url_scheme">com.extintoresuy.app</string>
 </resources>

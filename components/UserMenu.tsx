@@ -102,7 +102,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onNavigate, onLogout, role }) => {
                                     <span className="material-symbols-outlined !text-5xl">verified_user</span>
                                 </div>
                                 <div className="space-y-1">
-                                    <h3 className="text-3xl font-black text-white tracking-tight">Extintores<span className="text-primary">UY</span></h3>
+                                    <h3 className="text-3xl font-black text-white tracking-tight">Extintor<span className="text-primary">.uy</span></h3>
                                     <p className="text-primary/60 text-[10px] font-black uppercase tracking-[0.3em]">Compliance Edition 1.2.0</p>
                                 </div>
                             </div>

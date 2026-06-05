@@ -171,7 +171,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                         <div class="qr-id">${asset.id}</div>
                                         <div class="qr-client">${selectedClient.name.substring(0, 15)}</div>
                                         <div class="qr-type">${asset.type}</div>
-                                        <div class="qr-footer">EXTINTORESUY</div>
+                                        <div class="qr-footer">EXTINTOR.UY</div>
                                     </div>
                                 </div>
                             `;
@@ -356,7 +356,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                             <div class="qr-id">${qrAssetToPrint.id}</div>
                                             <div class="qr-client">${selectedClient.name.substring(0, 15)}</div>
                                             <div class="qr-type">${qrAssetToPrint.type}</div>
-                                            <div class="qr-footer">EXTINTORESUY</div>
+                                            <div class="qr-footer">EXTINTOR.UY</div>
                                         </div>
                                     </div>
                                     <script>
@@ -796,7 +796,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                                                     <div class="qr-id">${asset.id}</div>
                                                                                     <div class="qr-client">${selectedClient.name.substring(0, 15)}</div>
                                                                                     <div class="qr-type">${asset.type}</div>
-                                                                                    <div class="qr-footer">EXTINTORESUY</div>
+                                                                                    <div class="qr-footer">EXTINTOR.UY</div>
                                                                                 </div>
                                                                             </div>
                                                                         `;

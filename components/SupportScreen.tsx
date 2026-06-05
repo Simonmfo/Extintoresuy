@@ -16,7 +16,7 @@ const SupportScreen: FC<SupportScreenProps> = ({ onBack }) => {
         </button>
 
         <h1 className="text-4xl md:text-5xl font-black mb-4">Centro de Soporte</h1>
-        <p className="text-xl text-slate-400 mb-12">Estamos aquí para ayudarte a sacar el máximo provecho a Extintores.uy</p>
+        <p className="text-xl text-slate-400 mb-12">Estamos aquí para ayudarte a sacar el máximo provecho a Extintor.uy</p>
 
         <div className="grid md:grid-cols-2 gap-6 mb-12">
           <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
@@ -32,8 +32,8 @@ const SupportScreen: FC<SupportScreenProps> = ({ onBack }) => {
             <span className="material-symbols-outlined text-blue-400 !text-4xl mb-4">mail</span>
             <h3 className="text-xl font-bold mb-2">Correo Electrónico</h3>
             <p className="text-slate-400 mb-6">Envíanos un detalle de tu problema y te responderemos en menos de 24 horas.</p>
-            <a href="mailto:soporte@extintores.uy" className="flex items-center justify-center bg-white/10 text-white border border-white/10 px-6 py-2 rounded-full font-bold w-full hover:bg-white/20 transition-colors">
-              soporte@extintores.uy
+            <a href="mailto:soporte@extintor.uy" className="flex items-center justify-center bg-white/10 text-white border border-white/10 px-6 py-2 rounded-full font-bold w-full hover:bg-white/20 transition-colors">
+              soporte@extintor.uy
             </a>
           </div>
         </div>
