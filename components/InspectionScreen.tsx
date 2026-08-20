@@ -103,10 +103,16 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
     setIsSubmitting(true);
     try {
       console.log('Starting inspection save process...');
+      const online = await offlineService.isOnline();
       let uploadedImageUrl = undefined;
       if (imageFile) {
-        console.log('Uploading photo...');
-        uploadedImageUrl = await db.uploadInspectionPhoto(imageFile) || undefined;
+        if (online) {
+          console.log('Uploading photo...');
+          uploadedImageUrl = await db.uploadInspectionPhoto(imageFile) || undefined;
+        } else {
+          console.log('Saving photo locally as Base64...');
+          uploadedImageUrl = imagePreview || undefined;
+        }
       }
 
       // Build compact checklist status (M, P, A, C)
@@ -141,18 +147,6 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
       
       let finalStatus: 'passed' | 'failed' = 'passed'; // Always pass as per user request ("Aceptable")
 
-      const record: InspectionRecord = {
-        id: Math.random().toString(36).substr(2, 9), // Temporary ID for session
-        assetId: asset.id,
-        status: finalStatus,
-        inspector: profile?.full_name || 'Técnico',
-        technicianId: profile?.id || 'current-user', 
-        date: new Date().toISOString(),
-        notes: finalNotes,
-        details: checklist,
-        imageUrl: uploadedImageUrl
-      };
-
       const todayStr = new Date().toISOString().split('T')[0];
       
       // Create a final version of the asset with the updated notes and dates
@@ -173,38 +167,75 @@ const InspectionScreen: FC<InspectionScreenProps> = ({ onBack, onSave, assetId }
         'description', 'lifecycleStatus', 'lastInspection', 'nextInspection'
       ];
 
-      fieldsToCompare.forEach(field => {
-        const oldValue = asset ? asset[field] : undefined;
-        const newValue = (finalAssetToUpdate as any)[field];
-        
-        if (oldValue !== newValue) {
-          changes.push({
-            field,
-            old: oldValue || 'N/A',
-            new: newValue || 'N/A'
-          });
-        }
-      });
-
-      // ALWAYS update the asset to ensure lastInspection and description are saved
       if (asset) {
-        console.log('Saving audit log and updating asset...', changes);
-        if (changes.length > 0) {
-          const logSuccess = await db.saveAuditLog({
-            assetId: asset.id,
-            changes,
-            context: 'Modificación durante inspección'
-          });
+        fieldsToCompare.forEach(field => {
+          const oldValue = asset ? asset[field] : undefined;
+          const newValue = (finalAssetToUpdate as any)[field];
           
-          if (!logSuccess) {
-            console.warn('Audit log could not be saved, but continuing...');
+          if (oldValue !== newValue) {
+            changes.push({
+              field,
+              old: oldValue || 'N/A',
+              new: newValue || 'N/A'
+            });
           }
-        }
+        });
+      }
 
-        // Update the asset itself
-        const updateSuccess = await db.updateAsset(asset.id, finalAssetToUpdate);
-        if (!updateSuccess) {
-          throw new Error('No se pudo actualizar la información del equipo en la base de datos.');
+      const record: InspectionRecord = {
+        id: Math.random().toString(36).substr(2, 9), // Temporary ID for session
+        assetId: asset?.id || assetId,
+        status: finalStatus,
+        inspector: profile?.full_name || 'Técnico',
+        technicianId: profile?.id || 'current-user', 
+        date: new Date().toISOString(),
+        notes: finalNotes,
+        details: checklist,
+        imageUrl: uploadedImageUrl,
+        assetUpdate: finalAssetToUpdate,
+        auditLog: changes.length > 0 ? {
+          assetId: asset?.id || assetId,
+          changes,
+          context: 'Modificación durante inspección'
+        } : undefined
+      };
+
+      if (asset) {
+        if (online) {
+          console.log('Saving audit log and updating asset online...', changes);
+          if (changes.length > 0) {
+            const logSuccess = await db.saveAuditLog({
+              assetId: asset.id,
+              changes,
+              context: 'Modificación durante inspección'
+            });
+            if (!logSuccess) {
+              console.warn('Audit log could not be saved, but continuing...');
+            }
+          }
+
+          // Update the asset itself
+          const updateSuccess = await db.updateAsset(asset.id, finalAssetToUpdate);
+          if (!updateSuccess) {
+            throw new Error('No se pudo actualizar la información del equipo en la base de datos.');
+          }
+        } else {
+          console.log('Saving updates to offline asset cache...');
+          const offlineAssets = offlineService.getOfflineAssets();
+          const updatedOfflineAssets = offlineAssets.map(a => {
+            if (a.id === asset.id) {
+              return {
+                ...a,
+                ...finalAssetToUpdate,
+                status: 'completed', // Mark as completed locally so it filters out of pending Tareas
+                lastInspection: todayStr,
+                nextInspection: addMonths(todayStr, 1),
+                description: finalNotes
+              };
+            }
+            return a;
+          });
+          localStorage.setItem('offline_assets', JSON.stringify(updatedOfflineAssets));
         }
       }
 

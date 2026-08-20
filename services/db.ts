@@ -1,6 +1,7 @@
 
 import { supabase } from './supabase';
 import { InspectionAsset, InspectionRecord } from '../types';
+import { Network } from '@capacitor/network';
 
 
 
@@ -29,7 +30,9 @@ const mapAsset = (asset: any): InspectionAsset => ({
   retiredAt: asset.retired_at,
   retiredById: asset.retired_by_id,
   retiredByName: asset.retired_by_name,
-  retirementReason: asset.retirement_reason
+  retirementReason: asset.retirement_reason,
+  createdAt: asset.created_at,
+  createdByName: asset.created_by_name
 });
 
 export const db = {
@@ -67,9 +70,30 @@ export const db = {
   },
 
   getCurrentProfile: async (): Promise<any> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-    return db.getProfile(user.id);
+    let statusConnected = true;
+    try {
+      const status = await Network.getStatus();
+      statusConnected = status.connected;
+    } catch (e) {}
+
+    if (!statusConnected) {
+      const cached = localStorage.getItem('cached_profile');
+      return cached ? JSON.parse(cached) : null;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      const profile = await db.getProfile(user.id);
+      if (profile) {
+        localStorage.setItem('cached_profile', JSON.stringify(profile));
+      }
+      return profile;
+    } catch (e) {
+      console.warn('Error fetching profile online, falling back to cache:', e);
+      const cached = localStorage.getItem('cached_profile');
+      return cached ? JSON.parse(cached) : null;
+    }
   },
 
   updateProfile: async (id: string, updates: any): Promise<boolean> => {
@@ -324,7 +348,7 @@ export const db = {
 
     let query = supabase
       .from('clients')
-      .select('*')
+      .select('*, assigned_technician:profiles!clients_assigned_technician_id_fkey(full_name)')
       .order('name');
 
     if (companyId !== 'ALL') {
@@ -340,7 +364,8 @@ export const db = {
     const profiles = await db.getProfilesMap();
     return data.map((client: any) => ({
       ...client,
-      creatorName: profiles[client.company_id] || 'Administrador'
+      creatorName: profiles[client.company_id] || 'Administrador',
+      assignedTechnicianName: client.assigned_technician?.full_name || 'Sin Asignar'
     }));
   },
 
@@ -448,38 +473,61 @@ export const db = {
   },
 
   getAsset: async (id: string): Promise<InspectionAsset | null> => {
-    // Try searching by ID first (case-insensitive)
-    let { data, error } = await supabase
-      .from('assets')
-      .select('*, clients(company_id)')
-      .ilike('id', id)
-      .maybeSingle();
+    let statusConnected = true;
+    try {
+      const status = await Network.getStatus();
+      statusConnected = status.connected;
+    } catch (e) {}
 
-    // If not found, try searching by matricula (Sello)
-    if (!data && !error) {
-      const { data: dataByMatricula, error: errorByMatricula } = await supabase
+    if (!statusConnected) {
+      const saved = localStorage.getItem('offline_assets');
+      const offlineAssets = saved ? JSON.parse(saved) : [];
+      const asset = offlineAssets.find((a: any) => 
+        (a.id && a.id.toLowerCase() === id.toLowerCase()) || 
+        (a.matricula && a.matricula.toLowerCase() === id.toLowerCase())
+      );
+      return asset || null;
+    }
+
+    try {
+      // Try searching by ID first (case-insensitive)
+      let { data, error } = await supabase
         .from('assets')
         .select('*, clients(company_id)')
-        .eq('matricula', id)
+        .ilike('id', id)
         .maybeSingle();
-      
-      data = dataByMatricula;
-      error = errorByMatricula;
-    }
 
-    if (error) {
-      console.error('Error fetching asset:', error);
-      return null;
-    }
+      // If not found, try searching by matricula (Sello)
+      if (!data && !error) {
+        const { data: dataByMatricula, error: errorByMatricula } = await supabase
+          .from('assets')
+          .select('*, clients(company_id)')
+          .eq('matricula', id)
+          .maybeSingle();
+        
+        data = dataByMatricula;
+        error = errorByMatricula;
+      }
 
-    if (!data) return null;
+      if (error) throw error;
+      if (!data) return null;
 
-    const asset = mapAsset(data);
-    const clientsData = (data as any).clients;
-    if (clientsData) {
-      asset.companyId = Array.isArray(clientsData) ? clientsData[0]?.company_id : clientsData.company_id;
+      const asset = mapAsset(data);
+      const clientsData = (data as any).clients;
+      if (clientsData) {
+        asset.companyId = Array.isArray(clientsData) ? clientsData[0]?.company_id : clientsData.company_id;
+      }
+      return asset;
+    } catch (onlineError) {
+      console.warn('Error fetching asset online, falling back to local cache:', onlineError);
+      const saved = localStorage.getItem('offline_assets');
+      const offlineAssets = saved ? JSON.parse(saved) : [];
+      const asset = offlineAssets.find((a: any) => 
+        (a.id && a.id.toLowerCase() === id.toLowerCase()) || 
+        (a.matricula && a.matricula.toLowerCase() === id.toLowerCase())
+      );
+      return asset || null;
     }
-    return asset;
   },
 
   getAssets: async (companyId?: string): Promise<InspectionAsset[]> => {
@@ -706,6 +754,27 @@ export const db = {
     selloFabrica?: string;
   }) => {
     try {
+      const currentProfile = await db.getCurrentProfile();
+      let registradoPor = currentProfile?.full_name;
+
+      if (!registradoPor) {
+        const { data: client } = await supabase
+          .from('clients')
+          .select('company_id')
+          .eq('id', assetData.clientId)
+          .single();
+        if (client?.company_id) {
+          const { data: factory } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', client.company_id)
+            .single();
+          registradoPor = factory?.full_name;
+        }
+      }
+      
+      registradoPor = registradoPor || 'Administrador Extintor.uy';
+
       const { data, error } = await supabase
         .from('assets')
         .insert({
@@ -727,7 +796,8 @@ export const db = {
           status: 'pending',
           location_lat: -34.9011,
           location_lng: -56.1645,
-          id: assetData.id && assetData.id.trim() !== '' ? assetData.id : 'TEMP'
+          id: assetData.id && assetData.id.trim() !== '' ? assetData.id : 'TEMP',
+          created_by_name: registradoPor
         } as any)
         .select()
         .single();
@@ -735,6 +805,16 @@ export const db = {
       if (error) throw error;
 
       await db.logActivity('create', 'asset', data.id, data.name || data.id, assetData);
+
+      // Save to audit log (bitacora)
+      await db.saveAuditLog({
+        assetId: data.id,
+        changes: [
+          { field: 'Creación', old: 'N/A', new: `${assetData.name || 'Equipo'} (${assetData.type})` }
+        ],
+        context: 'Registro de equipo',
+        userName: registradoPor
+      });
 
       // Bot notification on creation
       try {
@@ -751,8 +831,6 @@ export const db = {
             .eq('id', client.company_id)
             .single();
 
-          const currentProfile = await db.getCurrentProfile();
-          const registradoPor = currentProfile?.full_name || factory?.full_name || 'Administrador Extintor.uy';
           const factoryPhone = factory?.phone;
           const matriculaVal = assetData.matricula || data.id || 'N/A';
 
@@ -951,15 +1029,20 @@ export const db = {
     return db.uploadFile(blob, 'inspection-photos', 'signatures');
   },
 
-  saveAuditLog: async (logData: { assetId: string; changes: any[]; context?: string }) => {
+  saveAuditLog: async (logData: { assetId: string; changes: any[]; context?: string; userName?: string }) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user?.id).single();
+      let name = logData.userName;
+      
+      if (!name && user) {
+        const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+        name = profile?.full_name;
+      }
 
       const { error } = await supabase.from('asset_audit_logs').insert({
         asset_id: logData.assetId,
         user_id: user?.id,
-        user_name: profile?.full_name || 'Técnico',
+        user_name: name || 'Técnico',
         changes: logData.changes,
         context: logData.context
       });

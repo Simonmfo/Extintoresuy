@@ -15,7 +15,8 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editClient, setEditClient] = useState<Client | null>(null);
-    const [formData, setFormData] = useState({ name: '', address: '', contact_email: '', phone: '', rut: '' });
+    const [formData, setFormData] = useState({ name: '', address: '', contact_email: '', phone: '', rut: '', assigned_technician_id: '' });
+    const [technicians, setTechnicians] = useState<UserProfile[]>([]);
 
     useEffect(() => {
         loadClients();
@@ -25,6 +26,11 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
         setLoading(true);
         const data = await db.getClients(companyId);
         setClients(data);
+        
+        // Fetch technicians of this company
+        const techs = await db.getTechniciansWithStats(companyId);
+        setTechnicians(techs);
+        
         setLoading(false);
     };
 
@@ -59,8 +65,9 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
             address: client.address || '',
             contact_email: client.contact_email || '',
             phone: client.phone || '',
-            rut: client.rut || ''
-        } : { name: '', address: '', contact_email: '', phone: '', rut: '' });
+            rut: client.rut || '',
+            assigned_technician_id: client.assigned_technician_id || ''
+        } : { name: '', address: '', contact_email: '', phone: '', rut: '', assigned_technician_id: '' });
         setIsModalOpen(true);
     };
 
@@ -98,6 +105,7 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                                     <th className="p-4 sm:p-6">Razón Social / RUT</th>
                                     <th className="p-4 sm:p-6 hidden sm:table-cell">Dirección Principal</th>
                                     <th className="p-4 sm:p-6">Contacto / Correo</th>
+                                    <th className="p-4 sm:p-6">Técnico Asignado</th>
                                     {!readOnly && <th className="p-4 sm:p-6 text-right">Acciones</th>}
                                 </tr>
                             </thead>
@@ -139,6 +147,12 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                                                     {client.phone}
                                                 </p>
                                             )}
+                                        </td>
+                                        <td className="p-4 sm:p-6">
+                                            <p className="text-sm text-slate-400 font-medium flex items-center gap-1">
+                                                <span className="material-symbols-outlined !text-sm text-primary">engineering</span>
+                                                {(client as any).assignedTechnicianName || 'Sin Asignar'}
+                                            </p>
                                         </td>
 
                                         {!readOnly && (
@@ -238,6 +252,21 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                                             className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none transition-colors"
                                             placeholder="Ej: 099123456"
                                         />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Técnico Asignado</label>
+                                        <select
+                                            value={formData.assigned_technician_id}
+                                            onChange={(e) => setFormData({ ...formData, assigned_technician_id: e.target.value })}
+                                            className="w-full bg-[#1e2022] border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none transition-colors appearance-none cursor-pointer"
+                                        >
+                                            <option value="">Sin Asignar</option>
+                                            {technicians.map((tech) => (
+                                                <option key={tech.id} value={tech.id}>
+                                                    {tech.full_name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
                             </div>

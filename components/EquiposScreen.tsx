@@ -703,6 +703,7 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                     <th className="pb-3">Prox. Insp.</th>
                                                     <th className="pb-3 hidden lg:table-cell">Ult. Recarga</th>
                                                     <th className="pb-3 hidden xl:table-cell">Prox. PH</th>
+                                                    <th className="pb-3 hidden lg:table-cell">Agregado</th>
                                                     <th className="pb-3 text-right pr-2">Acciones</th>
                                                 </tr>
                                             </thead>
@@ -732,6 +733,10 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                                         <td className="py-3 text-white font-mono text-xs font-bold">{asset.nextInspection ? new Date(asset.nextInspection).toLocaleDateString() : '-'}</td>
                                                         <td className="py-3 text-slate-400 font-mono text-[10px] hidden lg:table-cell">{asset.lastRecharge ? new Date(asset.lastRecharge).toLocaleDateString() : '-'}</td>
                                                         <td className="py-3 text-slate-400 font-mono text-[10px] hidden xl:table-cell">{asset.nextHydrotest ? new Date(asset.nextHydrotest).toLocaleDateString() : '-'}</td>
+                                                        <td className="py-3 hidden lg:table-cell">
+                                                            <div className="text-white text-xs font-bold">{asset.createdByName || 'Administrador'}</div>
+                                                            <div className="text-[9px] text-slate-500 font-mono mt-0.5">{asset.createdAt ? new Date(asset.createdAt).toLocaleDateString('es-UY', {day: 'numeric', month: 'short', year: 'numeric'}) : 'N/A'}</div>
+                                                        </td>
                                                         <td className="py-3 text-right pr-2 flex items-center justify-end gap-2">
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); setQrAssetToPrint(asset); }}
@@ -987,6 +992,18 @@ const EquiposScreen: React.FC<EquiposScreenProps> = ({ initialAssetId, onClearIn
                                         <span className="text-[9px] text-slate-500 font-bold uppercase mb-1">Próxima Hidrostática</span>
                                         <span className="text-slate-300 font-mono text-sm">{viewingAsset.nextHydrotest ? new Date(viewingAsset.nextHydrotest).toLocaleDateString() : '-'}</span>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Registro / Creación Info */}
+                            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 flex justify-between items-center text-xs text-slate-400">
+                                <div className="flex items-center gap-2">
+                                    <span className="material-symbols-outlined text-slate-500 !text-base">person</span>
+                                    <span>Agregado por: <strong className="text-white">{viewingAsset.createdByName || 'Administrador'}</strong></span>
+                                </div>
+                                <div className="flex items-center gap-2 font-mono text-[11px]">
+                                    <span className="material-symbols-outlined text-slate-500 !text-base">calendar_today</span>
+                                    <span>{viewingAsset.createdAt ? new Date(viewingAsset.createdAt).toLocaleString('es-UY') : 'N/A'}</span>
                                 </div>
                             </div>
                         </div>

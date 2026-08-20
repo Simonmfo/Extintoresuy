@@ -7,6 +7,8 @@ import InspeccionesScreen from './InspeccionesScreen';
 import InspectionScreen from './InspectionScreen';
 import ValidationScreen from './ValidationScreen';
 import QRScannerModal from './QRScannerModal';
+import { offlineService } from '../services/offline';
+import { Network } from '@capacitor/network';
 
 interface MobileTechnicianLayoutProps {
     profile: UserProfile;
@@ -43,18 +45,71 @@ const MobileTechnicianLayout: React.FC<MobileTechnicianLayoutProps> = ({
     const [isScannerOpen, setIsScannerOpen] = useState(false);
     const [assignedAssets, setAssignedAssets] = useState<InspectionAsset[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isOnline, setIsOnline] = useState(true);
+    const [syncing, setSyncing] = useState(false);
+    const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
+    const [queueLength, setQueueLength] = useState(0);
 
     useEffect(() => {
+        offlineService.isOnline().then(setIsOnline);
+        setLastSyncTime(offlineService.getLastDownloadTime());
+        setQueueLength(offlineService.getQueue().length);
+
         loadAssigned();
+
+        const listener = Network.addListener('networkStatusChange', (status) => {
+            setIsOnline(status.connected);
+            setQueueLength(offlineService.getQueue().length);
+            if (status.connected) {
+                loadAssigned();
+            }
+        });
+
+        return () => {
+            listener.then(l => l.remove());
+        };
     }, []);
 
     const loadAssigned = async () => {
         setLoading(true);
-        const assets = await db.getAssets(profile.company_id || 'ALL');
-        // Filter assets assigned to this technician and pending
-        const myAssets = assets.filter(a => a.assignedTechnicianId === profile.id && a.status === 'pending');
+        const online = await offlineService.isOnline();
+        setIsOnline(online);
+
+        if (online) {
+            await offlineService.downloadClientData(profile.id, profile.company_id || 'ALL');
+            setLastSyncTime(offlineService.getLastDownloadTime());
+        }
+
+        const localAssets = offlineService.getOfflineAssets();
+        const myAssets = localAssets.filter(a => a.status === 'pending');
         setAssignedAssets(myAssets);
+        setQueueLength(offlineService.getQueue().length);
         setLoading(false);
+    };
+
+    const handleManualSync = async () => {
+        const online = await offlineService.isOnline();
+        if (!online) {
+            alert('No hay conexión a internet para sincronizar.');
+            return;
+        }
+        setSyncing(true);
+        
+        const syncRes = await offlineService.syncQueue();
+        if (syncRes.syncedCount > 0) {
+            alert(`Se sincronizaron ${syncRes.syncedCount} inspecciones pendientes.`);
+        }
+        
+        const dlRes = await offlineService.downloadClientData(profile.id, profile.company_id || 'ALL');
+        if (dlRes.success) {
+            setLastSyncTime(offlineService.getLastDownloadTime());
+        }
+        
+        const localAssets = offlineService.getOfflineAssets();
+        setAssignedAssets(localAssets.filter(a => a.status === 'pending'));
+        setQueueLength(offlineService.getQueue().length);
+        setSyncing(false);
+        alert('Sincronización completada exitosamente.');
     };
 
     const handleScan = async (decodedText: string) => {
@@ -137,10 +192,15 @@ const MobileTechnicianLayout: React.FC<MobileTechnicianLayoutProps> = ({
     return (
         <div className="flex flex-col h-screen bg-background-dark text-white">
             {/* Minimal Header */}
-            <header className="p-6 pb-2 flex justify-between items-center">
+            <header className="p-6 pb-2 flex justify-between items-start">
                 <div>
                     <h1 className="text-2xl font-black">Hola, {profile.full_name.split(' ')[0]}</h1>
-                    <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">Técnico de Campo</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className={`inline-block w-2 h-2 rounded-full ${isOnline ? 'bg-primary animate-pulse' : 'bg-orange-500'}`}></span>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                            {isOnline ? 'Técnico de Campo (Online)' : 'Técnico de Campo (Offline)'}
+                        </span>
+                    </div>
                 </div>
                 <button onClick={onLogout} className="size-10 rounded-2xl bg-white/5 flex items-center justify-center text-slate-400">
                     <span className="material-symbols-outlined">logout</span>
@@ -150,7 +210,52 @@ const MobileTechnicianLayout: React.FC<MobileTechnicianLayoutProps> = ({
             <main className="flex-1 overflow-y-auto p-4 space-y-6">
                 {view === 'assigned' ? (
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between">
+                        {/* Caching & Sync Panel */}
+                        <div className="bg-white/5 rounded-3xl p-5 border border-white/10 space-y-4 animate-fadeIn">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Sincronización de Equipos</p>
+                                    <p className="text-xs text-slate-400 mt-0.5">Última descarga: {lastSyncTime ? new Date(lastSyncTime).toLocaleString('es-UY') : 'Nunca'}</p>
+                                </div>
+                                <button 
+                                    onClick={handleManualSync}
+                                    disabled={syncing}
+                                    className="bg-primary hover:bg-primary/95 text-black font-black text-xs px-4 py-2.5 rounded-xl uppercase tracking-wider flex items-center gap-1.5 transition-all disabled:opacity-50"
+                                >
+                                    <span className={`material-symbols-outlined !text-sm ${syncing ? 'animate-spin' : ''}`}>sync</span>
+                                    Sync
+                                </button>
+                            </div>
+                            {queueLength > 0 && (
+                                <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-2xl flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-orange-500 !text-lg">cloud_sync</span>
+                                        <span className="text-[11px] font-bold text-orange-500">Hay {queueLength} reportes pendientes offline</span>
+                                    </div>
+                                    {isOnline && (
+                                        <button 
+                                            onClick={async () => {
+                                                setSyncing(true);
+                                                const res = await offlineService.syncQueue();
+                                                setQueueLength(offlineService.getQueue().length);
+                                                setSyncing(false);
+                                                if (res.success) {
+                                                    alert('Inspecciones sincronizadas correctamente.');
+                                                    loadAssigned();
+                                                } else {
+                                                    alert('Error al sincronizar: ' + res.errors.join('\n'));
+                                                }
+                                            }}
+                                            className="bg-orange-500 text-white font-black text-[9px] px-2.5 py-1.5 rounded-lg uppercase tracking-widest hover:bg-orange-600 transition-colors"
+                                        >
+                                            Subir
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex items-center justify-between mt-6">
                             <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">Inspecciones Asignadas</h2>
                             <span className="bg-primary/20 text-primary px-2 py-1 rounded-lg text-[10px] font-black">{assignedAssets.length} Pendientes</span>
                         </div>

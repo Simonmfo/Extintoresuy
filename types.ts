@@ -36,6 +36,8 @@ export interface InspectionAsset {
   retiredById?: string;
   retiredByName?: string;
   retirementReason?: string;
+  createdAt?: string;
+  createdByName?: string;
 }
 
 export interface Client {
@@ -48,6 +50,7 @@ export interface Client {
   created_at: string;
   company_id?: string;
   creatorName?: string;
+  assigned_technician_id?: string;
 }
 
 export interface UserProfile {
@@ -76,4 +79,6 @@ export interface InspectionRecord {
   signatureUrl?: string;
   signerName?: string;
   signerDocument?: string;
+  assetUpdate?: any;
+  auditLog?: any;
 }

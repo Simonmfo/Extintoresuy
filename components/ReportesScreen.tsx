@@ -112,6 +112,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
             { key: 'proximaPH', width: 18 },
             { key: 'retirado', width: 15 },
             { key: 'observaciones', width: 35 },
+            { key: 'creadoPor', width: 25 },
         ];
 
         const b1 = worksheet.getCell('B1');
@@ -128,7 +129,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
         headerRow.values = [
             'Lugar', 'Categoría de equipo', 'Tipo/Cap', 'Matrícula', 'Sello de fábrica', 'Sello de recarga',
             'Unit de fábrica', 'Inspección', 'Próxima inspección', 'Fecha de carga', 'Vencimiento de carga',
-            'Fecha de ensayo', 'Próxima PH', 'Retirado Si/No', 'Observaciones'
+            'Fecha de ensayo', 'Próxima PH', 'Retirado Si/No', 'Observaciones', 'Creado Por'
         ];
         headerRow.height = 25;
         headerRow.font = { bold: true, color: { argb: 'FFFFFF' } };
@@ -169,6 +170,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
                 proximaPH: asset.nextHydrotest || 'N/A',
                 retirado: asset.lifecycleStatus === 'active' || !asset.lifecycleStatus ? 'NO' : 'SI',
                 observaciones: cleanObservations,
+                creadoPor: asset.createdByName || 'Administrador',
             }).font = { size: 10 };
         });
 
@@ -497,6 +499,7 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
                                                     <th className="pb-3">Tipo / Cap</th>
                                                     <th className="pb-3">Norma</th>
                                                     <th className="pb-3 text-center">Estado</th>
+                                                    <th className="pb-3">Agregado</th>
                                                     <th className="pb-3 text-right pr-2">Próx. Insp.</th>
                                                 </tr>
                                             </thead>
@@ -515,6 +518,10 @@ const ReportesScreen: React.FC<ReportesScreenProps> = ({ companyId, profile: cur
                                                                 }`}>
                                                                 {(asset.expirationDate && asset.expirationDate < today) ? 'Vencido' : asset.status === 'ok' ? 'OK' : 'ALERTA'}
                                                             </span>
+                                                        </td>
+                                                        <td className="py-4">
+                                                            <div className="text-white text-xs font-bold">{asset.createdByName || 'Administrador'}</div>
+                                                            <div className="text-[9px] text-slate-500 font-mono mt-0.5">{asset.createdAt ? new Date(asset.createdAt).toLocaleDateString('es-UY') : 'N/A'}</div>
                                                         </td>
                                                         <td className="py-4 text-right pr-2 font-mono text-[10px] text-slate-300">
                                                             {asset.nextInspection || '-'}

@@ -258,14 +258,23 @@ const App: FC = () => {
         signatureUrl: signerData.signatureUrl
       }));
 
-      // Send all to DB
-      for (const record of finalInspections) {
-        await db.addInspection(record);
+      const online = await offlineService.isOnline();
+      if (online) {
+        // Send all to DB
+        for (const record of finalInspections) {
+          await db.addInspection(record);
+        }
+        alert('Todas las inspecciones han sido guardadas y firmadas.');
+      } else {
+        // Save to offline queue
+        for (const record of finalInspections) {
+          await offlineService.saveToQueue(record);
+        }
+        alert('Sin conexión: Las inspecciones se guardaron localmente y se sincronizarán al recuperar conexión.');
       }
 
       setPendingInspections([]);
       setCurrentScreen('home');
-      alert('Todas las inspecciones han sido guardadas y firmadas.');
     } catch (error) {
       console.error('Error finalizando sesión:', error);
       alert('Error al guardar la sesión.');

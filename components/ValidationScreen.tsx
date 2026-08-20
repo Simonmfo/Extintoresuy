@@ -2,6 +2,7 @@
 import { useState, useRef, type FC } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { db } from '../services/db';
+import { offlineService } from '../services/offline';
 
 interface ValidationScreenProps {
   onBack: () => void;
@@ -29,18 +30,29 @@ const ValidationScreen: FC<ValidationScreenProps> = ({ onBack, onFinalize, inspe
     setIsSubmitting(true);
     try {
       const dataUrl = sigPadRef.current.getTrimmedCanvas().toDataURL('image/png');
-      const blob = await (await fetch(dataUrl)).blob();
-      const signatureUrl = await db.uploadSignature(blob);
+      const online = await offlineService.isOnline();
+      let signatureUrl = '';
 
-      if (signatureUrl) {
-        onFinalize({
-          name: signerName,
-          document: signerDocument,
-          signatureUrl: signatureUrl
-        });
+      if (online) {
+        const blob = await (await fetch(dataUrl)).blob();
+        const uploadedUrl = await db.uploadSignature(blob);
+        if (uploadedUrl) {
+          signatureUrl = uploadedUrl;
+        } else {
+          alert('Error al subir la firma. Reintenta.');
+          setIsSubmitting(false);
+          return;
+        }
       } else {
-        alert('Error al subir la firma. Reintenta.');
+        // If offline, use Base64 string directly
+        signatureUrl = dataUrl;
       }
+
+      onFinalize({
+        name: signerName,
+        document: signerDocument,
+        signatureUrl: signatureUrl
+      });
     } catch (error) {
       console.error('Error in validation:', error);
       alert('Error al procesar la validación.');
