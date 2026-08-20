@@ -15,5 +15,6 @@ services:
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
       - PORT=8080
       - PUPPETEER_HEADLESS=true
+      - WHATSAPP_AUTH_STRATEGY=${WHATSAPP_AUTH_STRATEGY:-local}
     volumes:
       - ./session_data:/usr/src/app/.wwebjs_auth

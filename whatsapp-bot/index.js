@@ -1,4 +1,4 @@
-const { Client, RemoteAuth } = require('whatsapp-web.js');
+const { Client, RemoteAuth, LocalAuth } = require('whatsapp-web.js');
 const qrcodeTerminal = require('qrcode-terminal');
 const QRCode = require('qrcode');
 const { supabase } = require('./supabase');
@@ -20,14 +20,28 @@ app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
 });
 
-// Initialize WhatsApp Client with Remote Auth to persist session in Supabase
-const store = new SupabaseStore(supabase);
-const client = new Client({
-    authStrategy: new RemoteAuth({
+// Determine Auth Strategy (default to 'remote', but 'local' is highly recommended for persistent Linux servers/Docker)
+const authStrategyType = process.env.WHATSAPP_AUTH_STRATEGY || 'remote';
+let authStrategy;
+
+if (authStrategyType === 'local') {
+    console.log('🔒 Using LocalAuth strategy (highly stable local folder session storage).');
+    authStrategy = new LocalAuth({
+        clientId: 'extintoresuy-session',
+        dataPath: './.wwebjs_auth'
+    });
+} else {
+    console.log('🌐 Using RemoteAuth strategy (storing session remotely in Supabase).');
+    const store = new SupabaseStore(supabase);
+    authStrategy = new RemoteAuth({
         clientId: 'extintoresuy-session',
         store: store,
         backupSyncIntervalMs: 60000 // Backup session every 60 seconds
-    }),
+    });
+}
+
+const client = new Client({
+    authStrategy: authStrategy,
     authTimeoutMs: 90000,
     puppeteer: {
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
