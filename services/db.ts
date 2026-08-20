@@ -168,7 +168,7 @@ export const db = {
   getAllProfiles: async (): Promise<any[]> => {
     const { data, error } = await supabase
       .from('profiles')
-      .select('*, clients(name)');
+      .select('*, clients:clients!clients_company_id_fkey(name)');
 
     if (error) {
       console.error('Error fetching all profiles:', error);
