@@ -17,12 +17,6 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
     const [editClient, setEditClient] = useState<Client | null>(null);
     const [formData, setFormData] = useState({ name: '', address: '', contact_email: '', phone: '', rut: '' });
     const [technicians, setTechnicians] = useState<UserProfile[]>([]);
-    
-    // States for the separate technician assignment modal
-    const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-    const [assigningClient, setAssigningClient] = useState<Client | null>(null);
-    const [selectedTechId, setSelectedTechId] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         loadClients();
@@ -76,30 +70,6 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
         setIsModalOpen(true);
     };
 
-    const openAssignModal = (client: Client) => {
-        setAssigningClient(client);
-        setSelectedTechId(client.assigned_technician_id || '');
-        setIsAssignModalOpen(true);
-    };
-
-    const handleAssignTechnician = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!assigningClient) return;
-
-        setIsSubmitting(true);
-        const ok = await db.updateClient(assigningClient.id, {
-            assigned_technician_id: selectedTechId || null
-        });
-        setIsSubmitting(false);
-
-        if (ok) {
-            setIsAssignModalOpen(false);
-            loadClients();
-        } else {
-            alert('Error al asignar el técnico de campo.');
-        }
-    };
-
     return (
         <div className={`space-y-6 px-6 max-w-7xl mx-auto h-full flex flex-col animate-fadeIn ${readOnly ? '' : 'py-6 lg:py-8'}`}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -134,7 +104,6 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                                     <th className="p-4 sm:p-6">Razón Social / RUT</th>
                                     <th className="p-4 sm:p-6 hidden sm:table-cell">Dirección Principal</th>
                                     <th className="p-4 sm:p-6">Contacto / Correo</th>
-                                    <th className="p-4 sm:p-6">Técnico Asignado</th>
                                     {!readOnly && <th className="p-4 sm:p-6 text-right">Acciones</th>}
                                 </tr>
                             </thead>
@@ -177,23 +146,10 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                                                 </p>
                                             )}
                                         </td>
-                                        <td className="p-4 sm:p-6">
-                                            <p className="text-sm text-slate-400 font-medium flex items-center gap-1">
-                                                <span className="material-symbols-outlined !text-sm text-primary">engineering</span>
-                                                {(client as any).assignedTechnicianName || 'Sin Asignar'}
-                                            </p>
-                                        </td>
 
                                         {!readOnly && (
                                             <td className="p-4 sm:p-6 text-right">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <button
-                                                        onClick={() => openAssignModal(client)}
-                                                        className="size-10 rounded-xl bg-white/5 text-slate-400 border border-white/10 hover:bg-indigo-500/20 hover:text-indigo-400 hover:border-indigo-500/20 transition-all flex items-center justify-center shadow-lg"
-                                                        title="Asignar Técnico"
-                                                    >
-                                                        <span className="material-symbols-outlined !text-lg">engineering</span>
-                                                    </button>
                                                     <button
                                                         onClick={() => openModal(client)}
                                                         className="size-10 rounded-xl bg-white/5 text-slate-400 border border-white/10 hover:bg-primary/20 hover:text-primary hover:border-primary/20 transition-all flex items-center justify-center shadow-lg"
@@ -304,63 +260,6 @@ const ClientesScreen: React.FC<ClientesScreenProps> = ({ companyId, readOnly = f
                                     className="flex-1 bg-primary text-background-dark font-black py-4 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] transition-all"
                                 >
                                     {editClient ? 'Guardar Cambios' : 'Registrar Cliente'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Modal de Asignación de Técnico */}
-            {isAssignModalOpen && assigningClient && (
-                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-                    <div className="bg-[#1a1c1e] border border-white/10 rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl">
-                        <form onSubmit={handleAssignTechnician}>
-                            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                                <h3 className="text-xl font-black text-white flex items-center gap-3">
-                                    <span className="material-symbols-outlined text-primary">engineering</span>
-                                    Asignar Técnico
-                                </h3>
-                                <button type="button" onClick={() => setIsAssignModalOpen(false)} className="text-slate-500 hover:text-white">
-                                    <span className="material-symbols-outlined">close</span>
-                                </button>
-                            </div>
-                            <div className="p-8 space-y-6">
-                                <p className="text-slate-400 text-sm leading-relaxed">
-                                    Asigna un técnico de campo para que realice las inspecciones del cliente <strong className="text-white">{assigningClient.name}</strong>.
-                                </p>
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Técnico de Campo</label>
-                                        <select
-                                            value={selectedTechId}
-                                            onChange={(e) => setSelectedTechId(e.target.value)}
-                                            className="w-full bg-[#1e2022] border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none transition-colors appearance-none cursor-pointer"
-                                        >
-                                            <option value="">Sin Asignar / Quitar Asignación</option>
-                                            {technicians.map((tech) => (
-                                                <option key={tech.id} value={tech.id}>
-                                                    {tech.full_name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="p-6 bg-white/[0.02] flex gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsAssignModalOpen(false)}
-                                    className="flex-1 bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-2xl transition-all"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="flex-1 bg-primary text-background-dark font-black py-4 rounded-2xl transition-all disabled:opacity-50"
-                                >
-                                    {isSubmitting ? 'Guardando...' : 'Asignar Técnico'}
                                 </button>
                             </div>
                         </form>

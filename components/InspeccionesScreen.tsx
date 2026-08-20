@@ -23,6 +23,84 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
         pendingInspections.length > 0 ? 'session' : (profile?.role === 'tecnico' ? 'assigned' : 'history')
     );
 
+    // States for the Generate Inspection modal
+    const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+    const [clients, setClients] = useState<any[]>([]);
+    const [technicians, setTechnicians] = useState<UserProfile[]>([]);
+    const [selectedClientId, setSelectedClientId] = useState('');
+    const [selectedTechId, setSelectedTechId] = useState('');
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    useEffect(() => {
+        if (isGenerateModalOpen && (profile?.role === 'admin' || profile?.role === 'fabrica')) {
+            const loadModalData = async () => {
+                const compId = profile.role === 'admin' ? 'ALL' : profile.company_id;
+                const clientsData = await db.getClients(compId);
+                const techsData = await db.getTechniciansWithStats(compId);
+                setClients(clientsData);
+                setTechnicians(techsData);
+            };
+            loadModalData();
+        }
+    }, [isGenerateModalOpen, profile]);
+
+    const handleGenerateInspection = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedClientId || !selectedTechId) {
+            alert('Por favor selecciona un cliente y un técnico.');
+            return;
+        }
+
+        setIsGenerating(true);
+        try {
+            // 1. Assign client to the technician
+            const clientOk = await db.updateClient(selectedClientId, {
+                assigned_technician_id: selectedTechId
+            });
+
+            if (!clientOk) {
+                throw new Error('Error al asignar el técnico al cliente.');
+            }
+
+            // 2. Set all assets of this client to 'pending'
+            const { data: clientAssets, error: fetchErr } = await supabase
+                .from('assets')
+                .select('id')
+                .eq('client_id', selectedClientId);
+
+            if (fetchErr) throw fetchErr;
+
+            if (clientAssets && clientAssets.length > 0) {
+                const assetIds = clientAssets.map(a => a.id);
+                const { error: updateErr } = await supabase
+                    .from('assets')
+                    .update({ status: 'pending' })
+                    .in('id', assetIds);
+
+                if (updateErr) throw updateErr;
+            }
+
+            // 3. Log activity
+            const clientName = clients.find(c => c.id === selectedClientId)?.name || selectedClientId;
+            const techName = technicians.find(t => t.id === selectedTechId)?.full_name || selectedTechId;
+            await db.logActivity('update', 'client', selectedClientId, `Nueva inspección generada para ${clientName} asignada a ${techName}`, {
+                assigned_technician_id: selectedTechId,
+                status: 'pending'
+            });
+
+            alert('Inspección generada exitosamente. El técnico verá los equipos listos para inspeccionar.');
+            setIsGenerateModalOpen(false);
+            setSelectedClientId('');
+            setSelectedTechId('');
+            loadData();
+        } catch (error: any) {
+            console.error('Error generating inspection:', error);
+            alert('Error al generar la inspección: ' + error.message);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     const loadData = async () => {
         setLoading(true);
         try {
@@ -93,6 +171,16 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                         >
                             <span className="material-symbols-outlined !text-lg">draw</span>
                             Finalizar ({pendingInspections.length})
+                        </button>
+                    )}
+
+                    {(profile?.role === 'admin' || profile?.role === 'fabrica') && (
+                        <button
+                            onClick={() => setIsGenerateModalOpen(true)}
+                            className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-indigo-600/25 hover:scale-105 active:scale-95 transition-all"
+                        >
+                            <span className="material-symbols-outlined !text-lg">playlist_add</span>
+                            Generar Inspección
                         </button>
                     )}
 
@@ -295,6 +383,80 @@ const InspeccionesScreen: React.FC<InspeccionesScreenProps> = ({ onBack, profile
                                 )}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Generar Inspección */}
+            {isGenerateModalOpen && (
+                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+                    <div className="bg-[#1a1c1e] border border-white/10 rounded-[32px] w-full max-w-lg overflow-hidden shadow-2xl">
+                        <form onSubmit={handleGenerateInspection}>
+                            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                                <h3 className="text-xl font-black text-white flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-primary">playlist_add</span>
+                                    Generar Nueva Inspección
+                                </h3>
+                                <button type="button" onClick={() => setIsGenerateModalOpen(false)} className="text-slate-500 hover:text-white">
+                                    <span className="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                <p className="text-slate-400 text-sm leading-relaxed">
+                                    Selecciona un cliente y el técnico asignado para realizar la inspección. Todos los equipos del cliente volverán a estado <strong className="text-primary uppercase">pendiente</strong> en la app móvil.
+                                </p>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Cliente</label>
+                                        <select
+                                            value={selectedClientId}
+                                            onChange={(e) => setSelectedClientId(e.target.value)}
+                                            className="w-full bg-[#1e2022] border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none transition-colors appearance-none cursor-pointer"
+                                            required
+                                        >
+                                            <option value="">Seleccionar Cliente...</option>
+                                            {clients.map((c) => (
+                                                <option key={c.id} value={c.id}>
+                                                    {c.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Técnico Asignado</label>
+                                        <select
+                                            value={selectedTechId}
+                                            onChange={(e) => setSelectedTechId(e.target.value)}
+                                            className="w-full bg-[#1e2022] border border-white/10 rounded-2xl p-4 text-white focus:border-primary outline-none transition-colors appearance-none cursor-pointer"
+                                            required
+                                        >
+                                            <option value="">Seleccionar Técnico...</option>
+                                            {technicians.map((t) => (
+                                                <option key={t.id} value={t.id}>
+                                                    {t.full_name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-6 bg-white/[0.02] flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsGenerateModalOpen(false)}
+                                    className="flex-1 bg-white/5 hover:bg-white/10 text-white font-bold py-4 rounded-2xl transition-all"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isGenerating}
+                                    className="flex-1 bg-primary text-background-dark font-black py-4 rounded-2xl transition-all disabled:opacity-50"
+                                >
+                                    {isGenerating ? 'Generando...' : 'Generar Inspección'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
