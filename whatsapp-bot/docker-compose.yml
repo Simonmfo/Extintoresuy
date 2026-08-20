@@ -12,6 +12,8 @@ services:
     environment:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
       - PORT=8080
+      - PUPPETEER_HEADLESS=true
     volumes:
       - ./session_data:/usr/src/app/.wwebjs_auth

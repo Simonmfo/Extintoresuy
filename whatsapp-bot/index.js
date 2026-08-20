@@ -31,7 +31,7 @@ const client = new Client({
     authTimeoutMs: 90000,
     puppeteer: {
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
-        headless: false, // Set to false to see what's happening
+        headless: process.env.PUPPETEER_HEADLESS === 'false' ? false : true,
         handleSIGINT: false,
         args: [
             '--no-sandbox',
